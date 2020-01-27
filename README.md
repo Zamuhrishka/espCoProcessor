@@ -44,7 +44,7 @@ In projects use next third party libs:
 ## Install
 
 Choose your platform in port folder. If your platform not support then you may
-add it support according to [instruction](https://github.com/Zamuhrishka/espCoProcessor/tree/master/src/port/stm4f/README.md).
+add it support according to [instruction](https://github.com/Zamuhrishka/espCoProcessor/tree/develop/src/port/README.md).
 
 ## Running unit tests
 
