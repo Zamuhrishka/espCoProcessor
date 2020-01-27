@@ -192,6 +192,7 @@ bool ESP_DisableEcho(uint32_t timeout);
 */
 bool ESP_Restore(uint32_t timeout);
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * @brief 	This function sets the UART configuration and writes the new configuration
 * 			to the flash. It is stored as the default parameter and will also be used
@@ -206,6 +207,7 @@ bool ESP_Restore(uint32_t timeout);
 * @return 	true/false.
 */
 bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout);
+#else
 
 /**
 * @brief 	This function sets the current UART configuration; it does not write to
@@ -216,26 +218,13 @@ bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout);
 * @note  	Flow control needs hardware support: MTCK is UART0 CTS and MTDO is UART0 RTS
 *
 * @param[in] cfg UART param structure.
+* @param[in] save flag save or not configuration in ESP8266 flash memory.
 * @param[in] timeout timeout in msec for waiting answer from chip.
 *
 * @return 	true/false.
 */
-bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout);
-
-/**
-* @brief 	This function sets the UART configuration and save it to flash.
-* 			It is stored as the default parameter and will also be used as
-* 			the default baudrate henceforth.
-*
-* @note		This configuration will be stored in the flash user parameter area.
-* @note  	Flow control needs hardware support: MTCK is UART0 CTS and MTDO is UART0 RTS
-*
-* @param[in] cfg UART param structure.
-* @param[in] timeout timeout in msec for waiting answer from chip.
-*
-* @return 	true/false.
-*/
-bool ESP_SetupUartParamDef(const ESP_UartParam_t *cfg, uint32_t timeout);
+bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, bool save, uint32_t timeout);
+#endif
 
 /**
 * @brief 	This function sets ESP8266 sleep mode.

@@ -205,12 +205,12 @@ int main(void)
 
 
   debug_info("Setup WiFi station mode...");
-  if(ESP_SetupWifiModeCur(WIFI_CLIENT, 5000u))
+  if(ESP_SetupWifiMode(WIFI_CLIENT, false, 5000u))
   {
 	  debug_info(" PASS\r\n");
 
 	  debug_info("Check connection to AP status: \r\n");
-	  if(ESP_RequestNameConnectedApCur(ssid_cur, 5000u) == ESP_PASS)
+	  if(ESP_RequestNameConnectedAp(ssid_cur, false, 5000u) == ESP_PASS)
 	  {
 		  if(strlen(ssid_cur) != 0)
 		  {
@@ -229,7 +229,7 @@ int main(void)
 	  debug_info("Join to SSID: %s...", ssid);
 	  while(res != ESP_PASS && count > 0)
 	  {
-		  res = ESP_JoinToWifiApCur(ssid, password, 5000u);
+		  res = ESP_JoinToWifiAp(ssid, password, false, 5000u);
 		  count--;
 	  }
 
@@ -242,7 +242,7 @@ int main(void)
 		  count = 1;
 		  while(res != ESP_PASS && count != 0)
 		  {
-			  res = ESP_RequestWifiStationIpAddrCur(&ip, &gw, &mask, 5000u);
+			  res = ESP_RequestWifiStationIpAddr(&ip, &gw, &mask, false, 5000u);
 			  count++;
 		  }
 		  if(res == ESP_PASS)

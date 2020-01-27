@@ -79,8 +79,11 @@ static inline ESP_JoinApStatus_t ESP_JoinToWifiApAnswerHandle(const char answer[
 	return res;
 }
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function setup wifi work mode.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -134,12 +137,13 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, uint32_t timeout)
     return true;
 }
 
+#else
 /**
 * This function setup wifi work mode.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiModeCur(ESP_WifiMode_t mode, uint32_t timeout)
+bool ESP_SetupWifiMode(ESP_WifiMode_t mode, bool save, uint32_t timeout)
 {
 	char* answer = ESP_AllocAnswerBuffer();
 
@@ -147,7 +151,7 @@ bool ESP_SetupWifiModeCur(ESP_WifiMode_t mode, uint32_t timeout)
 		return false;
 	}
 
-	if(ESP_SendAtCmd(MODE_CUR, (char*)&mode, 1ul) == false) {
+	if(ESP_SendAtCmd((save ? MODE_DEF : MODE_CUR), (char*)&mode, 1ul) == false) {
 		return false;
 	}
 
@@ -163,7 +167,7 @@ bool ESP_SetupWifiModeCur(ESP_WifiMode_t mode, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiModeCur(ESP_WifiMode_t *mode, uint32_t timeout)
+bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -172,7 +176,7 @@ bool ESP_RequestWifiModeCur(ESP_WifiMode_t *mode, uint32_t timeout)
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQMODE_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQMODE_DEF : REQMODE_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -188,64 +192,13 @@ bool ESP_RequestWifiModeCur(ESP_WifiMode_t *mode, uint32_t timeout)
 
 	return true;
 }
+#endif
 
-/**
-* This function setup wifi work mode.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_SetupWifiModeDef(ESP_WifiMode_t mode, uint32_t timeout)
-{
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(MODE_DEF, (char*)&mode, 1ul) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-	   return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
-/**
-* This function request wifi work mode.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_RequestWifiModeDef(ESP_WifiMode_t *mode, uint32_t timeout)
-{
-	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(REQMODE_DEF, NULL, 0) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-	   return false;
-	}
-
-	if (slre_match((const char *)"\\S+:(\\d)\\r\\n\\r\\nOK\\r\\n", answer, strlen(answer), caps, 1, 0) <= 0) {
-	   return false;
-	}
-
-	*mode = (ESP_WifiMode_t)*caps[0].ptr;
-
-	return true;
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function join to the selected WiFi AP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -322,13 +275,10 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t time
 
 	return result;
 }
+#else
 
-/**
-* This function join to the selected WiFi AP.
-*
-* Public function defined in esp_wifi.h
-*/
-ESPStatus_t ESP_JoinToWifiApCur(const char ssid[], const char pass[], uint32_t timeout)
+
+ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, uint32_t timeout)
 {
 	size_t len = 0;
 	uint8_t tryCount = MAX_TRY_COUNT;
@@ -367,7 +317,7 @@ ESPStatus_t ESP_JoinToWifiApCur(const char ssid[], const char pass[], uint32_t t
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(JOIN_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? JOIN_DEF : JOIN_CUR), param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -401,88 +351,13 @@ ESPStatus_t ESP_JoinToWifiApCur(const char ssid[], const char pass[], uint32_t t
 
 	return result;
 }
+#endif
 
-/**
-* This function join to the selected WiFi AP.
-*
-* Public function defined in esp_wifi.h
-*/
-ESPStatus_t ESP_JoinToWifiApDef(const char ssid[], const char pass[], uint32_t timeout)
-{
-	size_t len = 0;
-	uint8_t tryCount = MAX_TRY_COUNT;
-	ESP_JoinApStatus_t status;
-	ESPStatus_t result = ESP_INNER_ERR;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if((ssid == NULL) || (pass == NULL)) {
-		return ESP_PARAM_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)ssid) == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)pass) == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(JOIN_DEF, param, len) == false) {
-		return ESP_TRANSMIT_ERR;
-	}
-
-	do
-	{
-		if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-			return ESP_RECEIVE_ERR;
-		}
-
-		status = ESP_JoinToWifiApAnswerHandle(answer);
-		switch(status)
-		{
-			case AP_DISCONECT:
-				result = ESP_CONNECTION_ERR;
-				break;
-			case AP_ERROR:
-			case AP_BUSY:
-				result = ESP_PASS;
-				break;
-			case AP_CONNECT:
-			case AP_GOT_IP:
-				result = ESP_PASS;
-				break;
-			case AP_PASS:
-				return ESP_PASS;
-				break;
-		}
-		tryCount--;
-	}
-	while(tryCount > 0 && result != ESP_PASS);
-
-	return result;
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function request SSID of AP to which we are now connected.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -521,13 +396,14 @@ ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], uint32_t timeout)
 
 	return ESP_PASS;
 }
+#else
 
 /**
 * This function request SSID of AP to which we are now connected.
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_RequestNameConnectedApCur(char ssid[], uint32_t timeout)
+ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -536,7 +412,7 @@ ESPStatus_t ESP_RequestNameConnectedApCur(char ssid[], uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(REQSSID_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -562,47 +438,7 @@ ESPStatus_t ESP_RequestNameConnectedApCur(char ssid[], uint32_t timeout)
 
 	return ESP_PASS;
 }
-
-/**
-* This function request SSID of AP to which we are now connected.
-*
-* Public function defined in esp_wifi.h
-*/
-ESPStatus_t ESP_RequestNameConnectedApDef(char ssid[], uint32_t timeout)
-{
-	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(ESP_SendAtCmd(REQSSID_DEF, NULL, 0) == false) {
-		return ESP_TRANSMIT_ERR;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return ESP_RECEIVE_ERR;
-	}
-
-	if(slre_match((const char *)"\\S+:\"(\\S+)\",\\S+,\\d+,\\S+", answer, strlen(answer), caps, 1, 0) <= 0)
-	{
-		if(ESP_PatternCheck(answer, pattern_NO_AP))
-		{
-			memset(ssid, '0', 32);
-			return ESP_PASS;
-		}
-		return ESP_INNER_ERR;
-	}
-
-	if((caps[0].ptr == NULL || caps[0].len == 0)) {
-		return ESP_INNER_ERR;
-	}
-
-	memcpy((void*)ssid, (void*)caps[0].ptr, caps[0].len);
-
-	return ESP_PASS;
-}
+#endif
 
 /**
 * This function unjoin from the current WiFi AP.
@@ -628,8 +464,11 @@ bool ESP_UnJoinFromWifiAp(uint32_t timeout)
 	return ESP_PatternCheck(answer, pattern_OK);
 }
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function create software WiFi AP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -685,13 +524,14 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 
 	return (ESP_PatternCheck(answer, pattern_OK)) ? ESP_PASS : ESP_INNER_ERR;
 }
+#else
 
 /**
 * This function create software WiFi AP.
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_CreateWifiApCur(const char ssid[], const char pass[], char channel, char enc, uint32_t timeout)
+ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel, char enc, bool save, uint32_t timeout)
 {
 	size_t len = 0;
 	char* answer = ESP_AllocAnswerBuffer();
@@ -733,7 +573,7 @@ ESPStatus_t ESP_CreateWifiApCur(const char ssid[], const char pass[], char chann
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(AP_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? AP_DEF : AP_CUR), param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -743,71 +583,14 @@ ESPStatus_t ESP_CreateWifiApCur(const char ssid[], const char pass[], char chann
 
 	return (ESP_PatternCheck(answer, pattern_OK)) ? ESP_PASS : ESP_INNER_ERR;
 }
-
-/**
-* This function create software WiFi AP.
-*
-* Public function defined in esp_wifi.h
-*/
-ESPStatus_t ESP_CreateWifiApDef(const char* ssid[], const char* pass[], char channel, char enc, uint32_t timeout)
-{
-	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if((ssid == NULL) || (pass == NULL)) {
-		return ESP_PARAM_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)ssid) == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)pass) == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	len = strlen((char*)param);
-	param[len++] = ',';
-	param[len++] = channel;
-	param[len++] = ',';
-	param[len++] = enc;
-	param[len] = 0;
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(AP_DEF, param, len) == false) {
-		return ESP_TRANSMIT_ERR;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return ESP_RECEIVE_ERR;
-	}
-
-	return (ESP_PatternCheck(answer, pattern_OK)) ? ESP_PASS : ESP_INNER_ERR;
-}
+#endif
 
 /**
 * This function request he configuration parameters of the SoftAP.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestSoftApParamCur(char ssid[], char pass[], ESP_ApParam_t *param, uint32_t timeout)
+bool ESP_RequestSoftApParam(char ssid[], char pass[], ESP_ApParam_t *param, uint32_t timeout)
 {
 	struct slre_cap caps[6];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -888,8 +671,11 @@ bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t time
 	return true;
 }
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function enable/disable of DHCP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -919,13 +705,14 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t time
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#else
 
 /**
 * This function enable/disable of DHCP.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_ConfigDhcpModeCur(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout)
+bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save, uint32_t timeout)
 {
 	size_t len = 0;
 
@@ -942,7 +729,7 @@ bool ESP_ConfigDhcpModeCur(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t t
 
 	len = strlen(param);
 
-	if(ESP_SendAtCmd(CWDHCP_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? CWDHCP_DEF : CWDHCP_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -952,39 +739,7 @@ bool ESP_ConfigDhcpModeCur(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t t
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
-
-/**
-* This function enable/disable of DHCP.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_ConfigDhcpModeDef(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout)
-{
-	size_t len = 0;
-
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return false;
-	}
-
-	param[0] = mode;
-	param[1] = ',';
-	param[2] = dhcp;
-
-	len = strlen(param);
-
-	if(ESP_SendAtCmd(CWDHCP_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
+#endif
 
 /**
 * This function enable connect to AP automatically when power on.
@@ -1034,8 +789,11 @@ bool ESP_AutoconnectDisable(uint32_t timeout)
 	return ESP_PatternCheck(answer, pattern_OK);
 }
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function setup MAC address of station.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1078,13 +836,14 @@ bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#else
 
 /**
 * This function setup MAC address of station.
 *
 * Public function defined in esp_wifi.h
 */
-bool SetupStationMacAddrCur(MacAddr_t mac, uint32_t timeout)
+bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
@@ -1113,7 +872,7 @@ bool SetupStationMacAddrCur(MacAddr_t mac, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTAMAC_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? CIPSTAMAC_DEF : CIPSTAMAC_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -1123,54 +882,13 @@ bool SetupStationMacAddrCur(MacAddr_t mac, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#endif
 
-/**
-* This function setup MAC address of station.
-*
-* Public function defined in esp_wifi.h
-*/
-bool SetupStationMacAddrDef(MacAddr_t mac, uint32_t timeout)
-{
-	char _mac[30] = {0};
-	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return false;
-	}
-
-	if(!Convert_MacAddrToString(&mac, _mac)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)_mac) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(CIPSTAMAC_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function request MAC address of station.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1206,13 +924,14 @@ bool ESP_RequestStationMacAddr(MacAddr_t *mac, uint32_t timeout)
 
 	return true;
 }
+#else
 
 /**
 * This function request MAC address of station.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestStationMacAddrCur(MacAddr_t *mac, uint32_t timeout)
+bool ESP_RequestStationMacAddr(MacAddr_t *mac, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -1221,7 +940,7 @@ bool ESP_RequestStationMacAddrCur(MacAddr_t *mac, uint32_t timeout)
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTAMAC_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -1244,47 +963,13 @@ bool ESP_RequestStationMacAddrCur(MacAddr_t *mac, uint32_t timeout)
 
 	return true;
 }
+#endif
 
-/**
-* This function request MAC address of station.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_RequestStationMacAddrDef(MacAddr_t *mac, uint32_t timeout)
-{
-	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(REQSTAMAC_DEF, NULL, 0) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	if (slre_match((const char *)"\\S+\"(\\S+)\"\r\n\r\nOK\r\n\\S*", answer, strlen(answer), caps, 1, 0) <= 0) {
-	   return false;
-	}
-
-	if((caps[0].ptr == NULL || caps[0].len == 0)) {
-		return false;
-	}
-
-	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
-		return false;
-	}
-
-	return true;
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function setup MAC address of softAP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1327,13 +1012,14 @@ bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#else
 
 /**
 * This function setup MAC address of softAP.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, uint32_t timeout)
+bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, bool save, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
@@ -1362,7 +1048,7 @@ bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPAPMAC_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? CIPAPMAC_DEF : CIPAPMAC_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -1372,54 +1058,13 @@ bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#endif
 
-/**
-* This function setup MAC address of softAP.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_SetupSoftApMacAddrDef(MacAddr_t mac, uint32_t timeout)
-{
-	char _mac[30] = {0};
-	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return false;
-	}
-
-	if(!Convert_MacAddrToString(&mac, _mac)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)_mac) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(CIPAPMAC_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function request MAC address of softAP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1455,13 +1100,14 @@ bool ESP_RequestSoftApMacAddr(MacAddr_t *mac, uint32_t timeout)
 
 	return true;
 }
+#else
 
 /**
 * This function request MAC address of softAP.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, uint32_t timeout)
+bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -1470,7 +1116,7 @@ bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, uint32_t timeout)
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTAMAC_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -1493,47 +1139,13 @@ bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, uint32_t timeout)
 
 	return true;
 }
+#endif
 
-/**
-* This function request MAC address of softAP.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_RequestSoftApMacAddrDef(MacAddr_t *mac, uint32_t timeout)
-{
-	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(REQSTAMAC_DEF, NULL, 0) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	if (slre_match((const char *)"\\S+\"(\\S+)\"\r\n\r\nOK\r\n\\S*", answer, strlen(answer), caps, 1, 0) <= 0) {
-	   return false;
-	}
-
-	if((caps[0].ptr == NULL || caps[0].len == 0)) {
-		return false;
-	}
-
-	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
-		return false;
-	}
-
-	return true;
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function setup IP address of station.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1604,6 +1216,8 @@ bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask,
 /**
 * This function request IP address of station.
 *
+* @warning	This API is deprecated!
+*
 * Public function defined in esp_wifi.h
 */
 bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
@@ -1651,13 +1265,14 @@ bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* 
 
 	return true;
 }
+#else
 
 /**
 * This function setup IP address of station.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
+bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
@@ -1710,7 +1325,7 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTA_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? CIPSTA_DEF : CIPSTA_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -1726,7 +1341,7 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_RequestWifiStationIpAddrCur(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, uint32_t timeout)
+ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[3];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -1735,7 +1350,7 @@ ESPStatus_t ESP_RequestWifiStationIpAddrCur(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ip
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTA_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQSTA_DEF : REQSTA_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -1771,129 +1386,15 @@ ESPStatus_t ESP_RequestWifiStationIpAddrCur(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ip
 
 	return ESP_PASS;
 }
+#endif
 
-/**
-* This function setup IP address of station.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_SetupWifiStationIpAddrDef(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
-{
-	char ip[20] = {0};
-	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
 
-	if(answer == NULL || param == NULL) {
-		return false;
-	}
 
-	if(!Convert_Ipv4addrToString(ipv4, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return false;
-	}
-
-	if(!Convert_Ipv4addrToString(gw, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return false;
-	}
-
-	if(!Convert_Ipv4addrToString(mask, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(CIPSTA_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
-/**
-* This function request IP address of station.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_RequestWifiStationIpAddrDef(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
-{
-	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(REQSTA_DEF, NULL, 0) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return false;
-	}
-
-	if (slre_match((const char *)"\\S+\"(\\S+)\"\r\n\\S+\"(\\S+)\"\r\n\\S+\"(\\S+)\"\r\n\r\nOK\r\n\\S*", answer, strlen(answer), caps, 3, 0) <= 0) {
-	   return false;
-	}
-
-	if((caps[0].ptr == NULL || caps[0].len == 0) ||
-	   (caps[1].ptr == NULL || caps[1].len == 0) ||
-	   (caps[2].ptr == NULL || caps[2].len == 0))
-	{
-		return false;
-	}
-
-	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
-		return false;
-	}
-
-	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
-		return false;
-	}
-
-	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
-		return false;
-	}
-
-	return true;
-}
-
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function setup IP address of softAP.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_wifi.h
 */
@@ -1964,6 +1465,8 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint
 /**
 * This function request IP address of softAP.
 *
+* @warning	This API is deprecated!
+*
 * Public function defined in esp_wifi.h
 */
 bool ESP_RequestWifiApIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, uint32_t timeout)
@@ -2012,12 +1515,14 @@ bool ESP_RequestWifiApIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask,
 	return true;
 }
 
+#else
+
 /**
 * This function setup IP address of softAP.
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiApIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
+bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
@@ -2070,7 +1575,7 @@ bool ESP_SetupWifiApIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, u
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPAP_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? CIPAP_DEF : CIPAP_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -2086,7 +1591,7 @@ bool ESP_SetupWifiApIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, u
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiApIpAddrCur(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
+bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[3];
 	char* answer = ESP_AllocAnswerBuffer();
@@ -2095,7 +1600,7 @@ bool ESP_RequestWifiApIpAddrCur(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* ma
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQCIPAP_CUR, NULL, 0) == false) {
+	if(ESP_SendAtCmd((save ? REQCIPAP_DEF : REQCIPAP_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -2131,123 +1636,4 @@ bool ESP_RequestWifiApIpAddrCur(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* ma
 
 	return true;
 }
-
-/**
-* This function setup IP address of softAP.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_SetupWifiApIpAddrDef(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
-{
-	char ip[20] = {0};
-	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
-
-	if(answer == NULL || param == NULL) {
-		return false;
-	}
-
-	if(!Convert_Ipv4addrToString(ipv4, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return false;
-	}
-
-	if(!Convert_Ipv4addrToString(gw, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\",\"\0") == NULL) {
-		return false;
-	}
-
-	if(!Convert_Ipv4addrToString(mask, ip)) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)ip) == NULL) {
-		return false;
-	}
-
-	if(strcat ((char*)param, (char*)"\"\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(CIPAP_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
-/**
-* This function request IP address of softAP.
-*
-* Public function defined in esp_wifi.h
-*/
-bool ESP_RequestWifiApIpAddrDef(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
-{
-	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL) {
-		return false;
-	}
-
-	if(ESP_SendAtCmd(REQCIPAP_DEF, NULL, 0) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return false;
-	}
-
-	if (slre_match((const char *)"\\S+\"(\\S+)\"\r\n\\S+\"(\\S+)\"\r\n\\S+\"(\\S+)\"\r\n\r\nOK\r\n\\S*", answer, strlen(answer), caps, 3, 0) <= 0) {
-	   return false;
-	}
-
-	if((caps[0].ptr == NULL || caps[0].len == 0) ||
-	   (caps[1].ptr == NULL || caps[1].len == 0) ||
-	   (caps[2].ptr == NULL || caps[2].len == 0))
-	{
-		return false;
-	}
-
-	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
-		return false;
-	}
-
-	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
-		return false;
-	}
-
-	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
-		return false;
-	}
-
-	return true;
-}
+#endif

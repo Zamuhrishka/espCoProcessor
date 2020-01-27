@@ -219,8 +219,11 @@ bool ESP_Restore(uint32_t timeout)
 	return ESP_PatternCheck(answer, pattern_OK);
 }
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function sets the UART configuration.
+*
+* @warning	This API is deprecated!
 *
 * Public function defined in esp_basic.h
 */
@@ -262,13 +265,14 @@ bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
+#else
 
 /**
 * This function sets the UART configuration.
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout)
+bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, bool save, uint32_t timeout)
 {
 	size_t len = 0;
 	char* param = ESP_AllocParamBuffer();
@@ -296,7 +300,7 @@ bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout)
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(UART_CUR, param, len) == false) {
+	if(ESP_SendAtCmd((save ? UART_DEF : UART_CUR), param, len) == false) {
 		return false;
 	}
 
@@ -306,50 +310,7 @@ bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout)
 
 	return ESP_PatternCheck(answer, pattern_OK);
 }
-
-/**
-* This function sets the UART configuration.
-*
-* Public function defined in esp_basic.h
-*/
-bool ESP_SetupUartParamDef(const ESP_UartParam_t *cfg, uint32_t timeout)
-{
-	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL || param == NULL || cfg == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	Conver_DigToStringUint32(param, cfg->baudRate);
-	len = strlen((char*)param);
-
-	if(strcat ((char*)param, (char*)",\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-	param[len++] = cfg->dataBits;
-	param[len++] = ',';
-	param[len++] = cfg->stopBits;
-	param[len++] = ',';
-	param[len++] = cfg->parity;
-	param[len++] = ',';
-	param[len++] = cfg->flowControl;
-	param[len] = 0;
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(UART_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
+#endif
 
 /**
 * This function sets ESP8266 sleep mode.
