@@ -160,7 +160,7 @@ static char param[ESP_PARAM_BUFF_SIZE] = {0};
 *
 * Public function defined in esp_utils.h
 */
-bool ESP_GetAtPayload(uint8_t cmd, char* src, uint8_t* payload)
+bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t* payload)
 {
 	char cmdStr[24] = {0};
 	char* ptr = AT_CMD[cmd];
@@ -177,7 +177,7 @@ bool ESP_GetAtPayload(uint8_t cmd, char* src, uint8_t* payload)
 		cmdStr[i++] = *ptr++;
 	}
 
-	eposP = strstr(src, ESP_Patterns[pattern_OK]);
+	eposP = strstr(src, ESP_Patterns[PATTERN_OK]);
 	if(eposP == 0) {
 		return false;
 	}
@@ -203,7 +203,7 @@ bool ESP_GetAtPayload(uint8_t cmd, char* src, uint8_t* payload)
 *
 * Public function defined in esp_utils.h
 */
-bool ESP_SendAtCmd(uint8_t cmd, const char data[], size_t size)
+bool esp_at_cmd_send(uint8_t cmd, const char data[], size_t size)
 {
 	uint8_t i = 2;
 	char* ptr = AT_CMD[cmd];
@@ -225,7 +225,7 @@ bool ESP_SendAtCmd(uint8_t cmd, const char data[], size_t size)
 	}
 	transmitAT[i++] = '\r';
 	transmitAT[i++] = '\n';
-	ESP_HardWareTransmitUartBlock(transmitAT, i);
+	esp_hardware_transmit_block(transmitAT, i);
 	return true;
 }
 
@@ -234,7 +234,7 @@ bool ESP_SendAtCmd(uint8_t cmd, const char data[], size_t size)
 *
 * Public function defined in esp_utils.h
 */
-bool ESP_SendAtRawCmd(const char cmd[], const char data[], size_t size)
+bool esp_at_raw_cmd_send(const char cmd[], const char data[], size_t size)
 {
 	uint8_t i = 2;
 
@@ -256,7 +256,7 @@ bool ESP_SendAtRawCmd(const char cmd[], const char data[], size_t size)
 		}
 	}
 	transmitAT[i++] = 0x0D;
-	ESP_HardWareTransmitUartBlock(transmitAT, i);
+	esp_hardware_transmit_block(transmitAT, i);
 	return true;
 }
 
@@ -265,9 +265,9 @@ bool ESP_SendAtRawCmd(const char cmd[], const char data[], size_t size)
 *
 * Public function defined in esp_utils.h
 */
-bool ESP_SendAtRawData(const char data[], size_t size)
+bool esp_data_send(const char data[], size_t size)
 {
-	ESP_HardWareTransmitUartBlock(data, size);
+	esp_hardware_transmit_block(data, size);
 	return true;
 }
 
@@ -277,7 +277,7 @@ bool ESP_SendAtRawData(const char data[], size_t size)
 *
 * Public function defined in esp_utils.h
 */
-bool ESP_PatternCheck(const char msg[], ESP_PatternsList_t pattern)
+bool esp_pattern_check(const char msg[], esp_pattern_list_t pattern)
 {
 	return (strstr(msg, ESP_Patterns[pattern]) != NULL) ? true : false;
 }
@@ -287,7 +287,7 @@ bool ESP_PatternCheck(const char msg[], ESP_PatternsList_t pattern)
 *
 * Public function defined in esp_utils.h
 */
-char* ESP_AllocAnswerBuffer(void)
+char* esp_alloc_answer_buffer(void)
 {
 	memset(answer,0,sizeof(answer));
 	return answer;
@@ -298,7 +298,7 @@ char* ESP_AllocAnswerBuffer(void)
 *
 * Public function defined in esp_utils.h
 */
-char* ESP_AllocParamBuffer(void)
+char* esp_alloc_param_buffer(void)
 {
 	memset(param,0,sizeof(param));
 	return param;
@@ -309,7 +309,7 @@ char* ESP_AllocParamBuffer(void)
 *
 * Public function defined in esp_utils.h
 */
-int8_t ESP_CompareAtVersions(const ESP_AtVersion *at1, const ESP_AtVersion *at2)
+int8_t esp_at_version_compare(const esp_at_version_t *at1, const esp_at_version_t *at2)
 {
 	uint32_t at1Ver = 0;
 	uint32_t at2Ver = 0;
@@ -338,7 +338,7 @@ int8_t ESP_CompareAtVersions(const ESP_AtVersion *at1, const ESP_AtVersion *at2)
 *
 * Public function defined in esp_utils.h
 */
-int8_t ESP_CompareSdkVersions(const ESP_SdkVersion *sdk1, const ESP_SdkVersion *sdk2)
+int8_t esp_sdk_version_compare(const esp_sdk_version_t *sdk1, const esp_sdk_version_t *sdk2)
 {
 	uint32_t sdk1Ver = 0;
 	uint32_t sdk2Ver = 0;

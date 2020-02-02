@@ -13,16 +13,14 @@
 
 #include <string.h>
 #include "slre.h"
+#include "convert.h"
 #include "esp_drv.h"
 #include "esp_utils.h"
 #include "esp_port.h"
 #include "esp_queue.h"
-#include "convert.h"
 //_____ D E F I N I T I O N ___________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
-static const char ESP_ENABLE = '1';
-static const char ESP_DISABLE = '0';
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
@@ -31,24 +29,24 @@ static const char ESP_DISABLE = '0';
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_Test(uint32_t timeout)
+bool esp_test(uint32_t timeout)
 {
 	char cmd[] = "AT\r\n";
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtRawData(cmd, sizeof(cmd)) == false) {
+	if(esp_data_send(cmd, sizeof(cmd)) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -56,23 +54,23 @@ bool ESP_Test(uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_Reset(uint32_t timeout)
+bool esp_reset(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(RST, NULL, 0) == false) {
+	if(esp_at_cmd_send(RST, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -80,21 +78,21 @@ bool ESP_Reset(uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_GetVersion(ESP_AtVersion *at, ESP_SdkVersion *sdk, uint32_t timeout)
+bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout)
 {
 	struct slre_cap capsAt[4];
 	struct slre_cap capsSDK[3];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || at == NULL || sdk == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(GMR, NULL, 0) == false) {
+	if(esp_at_cmd_send(GMR, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -106,14 +104,14 @@ bool ESP_GetVersion(ESP_AtVersion *at, ESP_SdkVersion *sdk, uint32_t timeout)
 	   return false;
 	}
 
-	at->major = Conver_StringToUint8(capsAt[0].ptr);
-	at->minor = Conver_StringToUint8(capsAt[1].ptr);
-	at->patch[0] = Conver_StringToUint8(capsAt[2].ptr);
-	at->patch[1] = Conver_StringToUint8(capsAt[3].ptr);
+	at->major = convert_string_to_uint8(capsAt[0].ptr);
+	at->minor = convert_string_to_uint8(capsAt[1].ptr);
+	at->patch[0] = convert_string_to_uint8(capsAt[2].ptr);
+	at->patch[1] = convert_string_to_uint8(capsAt[3].ptr);
 
-	sdk->major = Conver_StringToUint8(capsSDK[0].ptr);
-	sdk->minor = Conver_StringToUint8(capsSDK[1].ptr);
-	sdk->patch = Conver_StringToUint8(capsSDK[2].ptr);
+	sdk->major = convert_string_to_uint8(capsSDK[0].ptr);
+	sdk->minor = convert_string_to_uint8(capsSDK[1].ptr);
+	sdk->patch = convert_string_to_uint8(capsSDK[2].ptr);
 
 	return true;
 }
@@ -123,11 +121,11 @@ bool ESP_GetVersion(ESP_AtVersion *at, ESP_SdkVersion *sdk, uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_EnterToDeepSleep(uint32_t time, uint32_t timeout)
+bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 {
 	size_t param_size = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -136,15 +134,15 @@ bool ESP_EnterToDeepSleep(uint32_t time, uint32_t timeout)
 	Conver_DigToStringUint32(param, time);
 	param_size = strlen((char*)param);
 
-	if(ESP_SendAtCmd(GSLP, param, param_size) == false) {
+	if(esp_at_cmd_send(GSLP, param, param_size) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -152,19 +150,20 @@ bool ESP_EnterToDeepSleep(uint32_t time, uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_EnableEcho(uint32_t timeout)
+bool esp_enable_echo(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char esp_enable = '1';
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(ATE, &ESP_ENABLE, 1) == false) {
+	if(esp_at_cmd_send(ATE, &esp_enable, 1) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -176,19 +175,20 @@ bool ESP_EnableEcho(uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_DisableEcho(uint32_t timeout)
+bool esp_disable_echo(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char esp_disable = '0';
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(ATE, &ESP_DISABLE, 1) == false) {
+	if(esp_at_cmd_send(ATE, &esp_disable, 1) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -200,35 +200,38 @@ bool ESP_DisableEcho(uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_Restore(uint32_t timeout)
+bool esp_restore(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(RESTORE, NULL, 0) == false) {
+	if(esp_at_cmd_send(RESTORE, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
+#ifdef ESP_DEPRECATED_API_SUPPORT
 /**
 * This function sets the UART configuration.
 *
+* @warning	This API is deprecated!
+*
 * Public function defined in esp_basic.h
 */
-bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout)
+bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL || cfg == NULL) {
 		return ESP_INNER_ERR;
@@ -252,33 +255,34 @@ bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout)
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(UART, param, len) == false) {
+	if(esp_at_cmd_send(UART, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
+#else
 
 /**
 * This function sets the UART configuration.
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout)
+bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL || cfg == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint32(param, cfg->baudRate);
+	Conver_DigToStringUint32(param, cfg->baud_rate);
 	len = strlen((char*)param);
 
 	if(strcat ((char*)param, (char*)",\0") == NULL) {
@@ -286,105 +290,62 @@ bool ESP_SetupUartParamCur(const ESP_UartParam_t *cfg, uint32_t timeout)
 	}
 
 	len = strlen((char*)param);
-	param[len++] = cfg->dataBits;
+	param[len++] = cfg->data_bits;
 	param[len++] = ',';
-	param[len++] = cfg->stopBits;
-	param[len++] = ',';
-	param[len++] = cfg->parity;
-	param[len++] = ',';
-	param[len++] = cfg->flowControl;
-	param[len] = 0;
-	len = strlen((char*)param);
-
-	if(ESP_SendAtCmd(UART_CUR, param, len) == false) {
-		return false;
-	}
-
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	return ESP_PatternCheck(answer, pattern_OK);
-}
-
-/**
-* This function sets the UART configuration.
-*
-* Public function defined in esp_basic.h
-*/
-bool ESP_SetupUartParamDef(const ESP_UartParam_t *cfg, uint32_t timeout)
-{
-	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
-
-	if(answer == NULL || param == NULL || cfg == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	Conver_DigToStringUint32(param, cfg->baudRate);
-	len = strlen((char*)param);
-
-	if(strcat ((char*)param, (char*)",\0") == NULL) {
-		return false;
-	}
-
-	len = strlen((char*)param);
-	param[len++] = cfg->dataBits;
-	param[len++] = ',';
-	param[len++] = cfg->stopBits;
+	param[len++] = cfg->stop_bits;
 	param[len++] = ',';
 	param[len++] = cfg->parity;
 	param[len++] = ',';
-	param[len++] = cfg->flowControl;
+	param[len++] = cfg->flow_control;
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(UART_DEF, param, len) == false) {
+	if(esp_at_cmd_send((save ? UART_DEF : UART_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
+#endif
 
 /**
 * This function sets ESP8266 sleep mode.
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_Sleep(ESP_SleepModes_t mode, uint32_t timeout)
+bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-    if(ESP_SendAtCmd(SLEEP, (char*)&mode, 1ul) == false) {
+    if(esp_at_cmd_send(SLEEP, (char*)&mode, 1ul) == false) {
     	return false;
     }
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
-* This function configures a GPIO to wake ESP8266 up from Light-sleep mode.
+* This function configures a GPIO to wake up from Light-sleep mode.
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout)
+bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL || gpio == NULL) {
 		return ESP_INNER_ERR;
@@ -393,7 +354,7 @@ bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout)
 	param[len++] = gpio->enable;
 	param[len++] = ',';
 
-	Conver_DigToStringUint8(&param[len], gpio->trigger_GPIO);
+	Conver_DigToStringUint8(&param[len], gpio->trigger_gpio);
 
 	len += strlen((char*)param);
 	param[len++] = ',';
@@ -401,9 +362,9 @@ bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout)
 	param[len++] = gpio->trigger_level;
 	param[len++] = ',';
 
-	if(gpio->awake_GPIO != 0)
+	if(gpio->awake_gpio != 0)
 	{
-		Conver_DigToStringUint8(&param[len], gpio->awake_GPIO);
+		Conver_DigToStringUint8(&param[len], gpio->awake_gpio);
 
 		len += strlen((char*)param);
 		param[len++] = ',';
@@ -411,15 +372,15 @@ bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout)
 
 	param[len++] = gpio->awake_level;
 
-	if(ESP_SendAtCmd(WAKEUPGPIO, param, len) == false) {
+	if(esp_at_cmd_send(WAKEUPGPIO, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -427,11 +388,11 @@ bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_SetupRfPower(uint8_t power, uint32_t timeout)
+bool esp_rf_power(uint8_t power, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -441,15 +402,15 @@ bool ESP_SetupRfPower(uint8_t power, uint32_t timeout)
 
 	len += strlen((char*)param);
 
-	if(ESP_SendAtCmd(RFPOWER, param, len) == false) {
+	if(esp_at_cmd_send(RFPOWER, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -460,8 +421,8 @@ bool ESP_SetupRfPower(uint8_t power, uint32_t timeout)
 bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -471,15 +432,15 @@ bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout)
 
 	len += strlen((char*)param);
 
-	if(ESP_SendAtCmd(SYSMSG_CUR, param, len) == false) {
+	if(esp_at_cmd_send(SYSMSG_CUR, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -490,8 +451,8 @@ bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout)
 bool ESP_SetupSystemMessageDef(uint8_t msg, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -501,13 +462,13 @@ bool ESP_SetupSystemMessageDef(uint8_t msg, uint32_t timeout)
 
 	len += strlen((char*)param);
 
-	if(ESP_SendAtCmd(SYSMSG_DEF, param, len) == false) {
+	if(esp_at_cmd_send(SYSMSG_DEF, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }

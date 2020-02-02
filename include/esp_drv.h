@@ -16,7 +16,7 @@ typedef enum
 {
 	BLOCK,
 	UNBLOCK
-} 	Blocking_t;
+} 	esp_blocking_t;
 
 //!@brief List of available status codes
 //! 	  which return from functions
@@ -34,7 +34,7 @@ typedef enum
 	ESP_INNER_ERR		=		(-5),																///< Some inner error
 	ESP_SIZE_ERR		=		(-6),																///< Size error
 	ESP_CONNECTION_ERR 	= 		(-7),																///< Connection error
-} 	ESPStatus_t;
+} 	esp_status_t;
 //! @}
 
 //!@brief List of available events
@@ -52,7 +52,7 @@ typedef enum
 	ESP_STA_DISCONN_EVT,
 	ESP_STA_IP_EVT,
 	ESP_UNDEFINE_EVT
-} 	ESP_Events_t;
+} 	esp_event_t;
 //! @}
 //_____ V A R I A B L E   D E C L A R A T I O N S ____________________________________________________
 //_____ F U N C T I O N   D E C L A R A T I O N S ____________________________________________________
@@ -63,7 +63,7 @@ typedef enum
 *
 * @return 	true/false.
 */
-bool ESP_Init(void);
+bool esp_init(void);
 
 /**
 * @brief 	This function handle of receive data.
@@ -72,4 +72,4 @@ bool ESP_Init(void);
 *
 * @return 	true/false.
 */
-bool ESP_MsgHandlCallBack(void);
+bool esp_message_handle(void);
