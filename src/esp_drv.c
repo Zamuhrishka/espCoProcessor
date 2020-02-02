@@ -28,12 +28,12 @@
 *
 * Public function defined in esp_drv.h
 */
-bool ESP_Init(void)
+bool esp_init(void)
 {
-  ESP_HardWareInit();
-  ESP_HardWarePowerOn();
-  ESP_DisableEcho(1000);
-  return true;    
+	esp_harware_init();
+	esp_hardware_power_on();
+	esp_disable_echo(1000);
+	return true;
 }
 
 /**
@@ -41,14 +41,14 @@ bool ESP_Init(void)
 *
 * Public function defined in esp_drv.h
 */
-bool ESP_MsgHandlCallBack(void)
+bool esp_message_handle(void)
 {
 	size_t size = 0;
 	char* buffer = NULL;
 
-	if(ESP_RxQueueDenqueue(&buffer, &size))
+	if(esp_rbuffer_denqueue(&buffer, &size))
 	{
-		ESP_TcpMsgHandleCallBack(buffer, size);
+		esp_tcp_receive_handle(buffer, size);
 	}
 
 	return true;

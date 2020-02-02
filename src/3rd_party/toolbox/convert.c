@@ -37,14 +37,7 @@ enum Constants
 //_____ V A R I A B L E _______________________________________________________
 //_____ I N L I N E   F U N C T I O N _________________________________________
 //_____ S T A T I C  F U N C T I O N  _________________________________________
-/**
- * @brief		This function check char for digit.
- *
- * @param 		c[in] - char.
- *
- * @return 		true/false.
-**/
-static inline bool TestCharDigit(const unsigned char c)
+static inline bool test_char_digit(const unsigned char c)
 {
 	return ((c & '0') == '0') && (((c & 0x0F) >= 0) && ((c & 0x0F) <= 9));
 }
@@ -104,35 +97,27 @@ static inline uint8_t count_num(uint32_t dig, uint8_t f_n_bit)
 	return(num);
 }
 
-/**
- * @brief		This function calculate count of digit number in string.
- *
- * @param 		dig[in] - digit string.
- *
- * @return 		count of digit number in string.
-**/
-static inline uint8_t StringDigitNumCount(const char* dig)
+static inline uint8_t string_digit_num_count(const char* dig)
 {
 	uint8_t num = 0;
 	bool digit = 0;
 
-	digit = TestCharDigit(dig[num]);
+	digit = test_char_digit(dig[num]);
 	while(digit && num < MAX_DECIMAL_COUNT)
 	{
 		num++;
-		digit = TestCharDigit(dig[num]);
+		digit = test_char_digit(dig[num]);
 	}
 
 	return num;
 }
-
 //_____ F U N C T I O N   D E C L A R A T I O N S _____________________________
 /**
 * This function used to convert hex char to digit.
 *
 * Public function defined in convert.h
 */
-int8_t Conver_HexCharToNum(char c)
+int8_t convert_hex_char_to_num(char c)
 {
 	if(c >= '0' && c <= '9')
 		return (c - '0');
@@ -151,7 +136,7 @@ int8_t Conver_HexCharToNum(char c)
 *
 * Public function defined in convert.h
 */
-char Conver_HexNumToChar(uint8_t num)
+char convert_hex_num_to_char(uint8_t num)
 {
 	if(num >= 0 && num <= 9)
 		return (num + '0');
@@ -167,7 +152,7 @@ char Conver_HexNumToChar(uint8_t num)
 *
 * Public function defined in convert.h
 */
-bool Convert_StringToMacAddr(const char *str, MacAddr_t *macAddr)
+bool convert_string_to_mac_addr(const char *str, mac_t *macAddr)
 {
 	int8_t numLowPart = -1;
 	int8_t numHighPart = -1;
@@ -187,8 +172,8 @@ bool Convert_StringToMacAddr(const char *str, MacAddr_t *macAddr)
 
 	for(size_t i = 0; i < sizeof(macAddr->value); i++)
 	{
-		numHighPart = Conver_HexCharToNum(str[offsetHighPart]);
-		numLowPart = Conver_HexCharToNum(str[offsetLowPart]);
+		numHighPart = convert_hex_char_to_num(str[offsetHighPart]);
+		numLowPart = convert_hex_char_to_num(str[offsetLowPart]);
 
 		if(numHighPart == (-1) || numLowPart == (-1)) {
 			return false;
@@ -208,7 +193,7 @@ bool Convert_StringToMacAddr(const char *str, MacAddr_t *macAddr)
 *
 * Public function defined in convert.h
 */
-bool Convert_MacAddrToString(const MacAddr_t *macAddr, char *string)
+bool convert_mac_addr_to_string(const mac_t *macAddr, char *string)
 {
 	char numLowPart = -1;
 	char numHighPart = -1;
@@ -222,8 +207,8 @@ bool Convert_MacAddrToString(const MacAddr_t *macAddr, char *string)
 
 	for(size_t i = 0; i < sizeof(macAddr->value); i++)
 	{
-		numHighPart = Conver_HexNumToChar((macAddr->value[i] >> 4) & 0x0F);
-		numLowPart = Conver_HexNumToChar(macAddr->value[i] & 0x0F);
+		numHighPart = convert_hex_num_to_char((macAddr->value[i] >> 4) & 0x0F);
+		numLowPart = convert_hex_num_to_char(macAddr->value[i] & 0x0F);
 
 		if(numHighPart == (-1) || numLowPart == (-1)) {
 			return false;
@@ -246,7 +231,7 @@ bool Convert_MacAddrToString(const MacAddr_t *macAddr, char *string)
 *
 * Public function defined in convert.h
 */
-bool Convert_Ipv4addrToString(Ipv4Addr_t ipAddr, char *ip)
+bool convert_ip4addr_to_string(ip4addr_t ipAddr, char *ip)
 {
 	uint8_t *p;
 
@@ -265,10 +250,10 @@ bool Convert_Ipv4addrToString(Ipv4Addr_t ipAddr, char *ip)
 *
 * Public function defined in convert.h
 */
-bool Convert_StringToIpv4addr(Ipv4Addr_t *ipAddr, const char *ip)
+bool convert_string_to_ip4addr(ip4addr_t *ipAddr, const char *ip)
 {
 	int ip1, ip2, ip3, ip4;
-	Ipv4Addr_t _ip = 0;
+	ip4addr_t _ip = 0;
 
 	if(ip == NULL || ipAddr == NULL) {
 		return false;
@@ -296,7 +281,7 @@ bool Convert_StringToIpv4addr(Ipv4Addr_t *ipAddr, const char *ip)
 *
 * Public function defined in convert.h
 */
-uint32_t Convert_BcdToNum(uint32_t bcd)
+uint32_t convert_bcd_to_num(bcd_t bcd)
 {
 	uint32_t dec = 0;
 
@@ -314,9 +299,9 @@ uint32_t Convert_BcdToNum(uint32_t bcd)
 *
 * Public function defined in convert.h
 */
-uint32_t Convert_NumToBcd(uint32_t dec)
+bcd_t convert_num_to_bcd(uint32_t dec)
 {
-	uint32_t bcd = 0;
+	bcd_t bcd = 0;
 	uint32_t i = 0;
 
 	while (dec > 0)
@@ -334,7 +319,7 @@ uint32_t Convert_NumToBcd(uint32_t dec)
 *
 * Public function defined in convert.h
 */
-uint8_t Conver_StringToUint8(const char *str)
+uint8_t convert_string_to_uint8(const char *str)
 {
 	uint8_t dig;
 	uint8_t num = 0;
@@ -343,7 +328,7 @@ uint8_t Conver_StringToUint8(const char *str)
 		return 0;
 	}
 
-	num = StringDigitNumCount(str);
+	num = string_digit_num_count(str);
 
 	switch(num)
 	{
@@ -368,7 +353,7 @@ uint8_t Conver_StringToUint8(const char *str)
 *
 * Public function defined in convert.h
 */
-uint16_t Conver_StringToUint16(const char *str)
+uint16_t convert_string_to_uint16(const char *str)
 {
 	uint16_t dig;
 	uint8_t num = 0;
@@ -377,7 +362,7 @@ uint16_t Conver_StringToUint16(const char *str)
 		return 0;
 	}
 
-	num = StringDigitNumCount(str);
+	num = string_digit_num_count(str);
 
 	switch(num)
 	{
@@ -408,7 +393,7 @@ uint16_t Conver_StringToUint16(const char *str)
 *
 * Public function defined in convert.h
 */
-uint32_t Conver_StringToUint32(const char *str)
+uint32_t convert_string_to_uint32(const char *str)
 {
 	uint32_t dig;
 	uint8_t num = 0;
@@ -417,7 +402,7 @@ uint32_t Conver_StringToUint32(const char *str)
 		return 0;
 	}
 
-	num = StringDigitNumCount(str);
+	num = string_digit_num_count(str);
 
 	switch(num)
 	{
@@ -468,7 +453,7 @@ uint32_t Conver_StringToUint32(const char *str)
 *
 * Public function defined in convert.h
 */
-void Conver_DigToStringUint8(char *str, uint8_t dig)
+void convert_uint8_to_string(char *str, uint8_t dig)
 {
 	uint8_t num = 0;
 
@@ -496,7 +481,7 @@ void Conver_DigToStringUint8(char *str, uint8_t dig)
 *
 * Public function defined in convert.h
 */
-void Conver_DigToStringUint16(char *str, uint16_t dig)
+void convert_uint16_to_string(char *str, uint16_t dig)
 {
 	uint8_t num = 0;
 
@@ -537,7 +522,7 @@ void Conver_DigToStringUint16(char *str, uint16_t dig)
 *
 * Public function defined in convert.h
 */
-void Conver_DigToStringUint32(char *str, uint32_t dig)
+void convert_uint32_to_string(char *str, uint32_t dig)
 {
 	uint8_t num = 0;
 

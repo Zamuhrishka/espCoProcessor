@@ -25,8 +25,6 @@ typedef enum
 }	ESP_WIFI_CONST;
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
-const static char ESP_ENABLE = '1';
-const static char ESP_DISABLE = '0';
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 /**
@@ -44,36 +42,36 @@ const static char ESP_DISABLE = '0';
 * <li> <b>AP_ERROR</b> - There are some error.
 * </ul>
 */
-static inline ESP_JoinApStatus_t ESP_JoinToWifiApAnswerHandle(const char answer[])
+static inline esp_softap_status_t esp_join_ap_answer_handler(const char answer[])
 {
-	ESP_JoinApStatus_t res = AP_ERROR;
+	esp_softap_status_t res = ESP_AP_ERROR;
 
-	if(ESP_PatternCheck(answer, pattern_BUSY_P)) {
-		return AP_BUSY;
+	if(esp_pattern_check(answer, PATTERN_BUSY_P)) {
+		return ESP_AP_BUSY;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_BUSY_S)) {
-		return AP_BUSY;
+	if(esp_pattern_check(answer, PATTERN_BUSY_S)) {
+		return ESP_AP_BUSY;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_WIFI_DISCONNECT)) {
-		res = AP_DISCONECT;
+	if(esp_pattern_check(answer, PATTERN_WIFI_DISCONNECT)) {
+		res = ESP_AP_DISCONECT;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_WIFI_CONNECT)) {
-		res =  AP_CONNECT;
+	if(esp_pattern_check(answer, PATTERN_WIFI_CONNECT)) {
+		res =  ESP_AP_CONNECT;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_WIFI_ALREADY_CONNECT)) {
-		res =  AP_CONNECT;
+	if(esp_pattern_check(answer, PATTERN_WIFI_ALREADY_CONNECT)) {
+		res =  ESP_AP_CONNECT;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_WIFI_GOT_IP)) {
-		res =  AP_GOT_IP;
+	if(esp_pattern_check(answer, PATTERN_WIFI_GOT_IP)) {
+		res =  ESP_AP_GOT_IP;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_OK)) {
-		res =  AP_PASS;
+	if(esp_pattern_check(answer, PATTERN_OK)) {
+		res =  ESP_AP_PASS;
 	}
 
 	return res;
@@ -87,23 +85,23 @@ static inline ESP_JoinApStatus_t ESP_JoinToWifiApAnswerHandle(const char answer[
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiMode(ESP_WifiMode_t mode, uint32_t timeout)
+bool esp_wifi_mode_setup(ESP_WifiMode_t mode, uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(MODE, (char*)&mode, 1U) == false) {
+	if(esp_at_cmd_send(MODE, (char*)&mode, 1U) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -111,20 +109,20 @@ bool ESP_SetupWifiMode(ESP_WifiMode_t mode, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, uint32_t timeout)
+bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
 {
     struct slre_cap caps[1];
-    char* answer = ESP_AllocAnswerBuffer();
+    char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQMODE, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQMODE, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	   return false;
 	}
 
@@ -143,23 +141,23 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiMode(ESP_WifiMode_t mode, bool save, uint32_t timeout)
+bool esp_wifi_mode_setup(esp_wifi_mode_t mode, bool save, uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? MODE_DEF : MODE_CUR), (char*)&mode, 1ul) == false) {
+	if(esp_at_cmd_send((save ? MODE_DEF : MODE_CUR), (char*)&mode, 1ul) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	   return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -167,20 +165,20 @@ bool ESP_SetupWifiMode(ESP_WifiMode_t mode, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, bool save, uint32_t timeout)
+bool esp_wifi_mode_request(esp_wifi_mode_t *mode, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? REQMODE_DEF : REQMODE_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQMODE_DEF : REQMODE_CUR), NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	   return false;
 	}
 
@@ -188,7 +186,7 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, bool save, uint32_t timeout)
 	   return false;
 	}
 
-	*mode = (ESP_WifiMode_t)*caps[0].ptr;
+	*mode = (esp_wifi_mode_t)*caps[0].ptr;
 
 	return true;
 }
@@ -202,14 +200,14 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t *mode, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t timeout)
+esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], uint32_t timeout)
 {
 	size_t len = 0;
 	uint8_t tryCount = MAX_TRY_COUNT;
-	ESP_JoinApStatus_t status;
-	ESPStatus_t result = ESP_INNER_ERR;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	esp_softap_status_t status;
+	esp_status_t result = ESP_INNER_ERR;
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -241,32 +239,32 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t time
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(JOIN, param, len) == false) {
+	if(esp_at_cmd_send(JOIN, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
 	do
 	{
-		if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 			return ESP_RECEIVE_ERR;
 		}
 
 		status = ESP_JoinToWifiApAnswerHandle(answer);
 		switch(status)
 		{
-			case AP_DISCONECT:
+			case ESP_AP_DISCONECT:
 				result = ESP_CONNECTION_ERR;
 				break;
-			case AP_ERROR:
-			case AP_BUSY:
+			case ESP_AP_ERROR:
+			case ESP_AP_BUSY:
 				result = ESP_PASS;
 				break;
-			case AP_CONNECT:
-			case AP_GOT_IP:
+			case ESP_AP_CONNECT:
+			case ESP_AP_GOT_IP:
 				result = ESP_PASS;
 				break;
-			case AP_PASS:
-				return ESP_PASS;
+			case ESP_AP_PASS:
+				return ESP_ESP_PASS;
 				break;
 		}
 		tryCount--;
@@ -277,15 +275,19 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t time
 }
 #else
 
-
-ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, uint32_t timeout)
+/**
+* This function join to the selected WiFi AP.
+*
+* Public function defined in esp_wifi.h
+*/
+esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], bool save, uint32_t timeout)
 {
 	size_t len = 0;
 	uint8_t tryCount = MAX_TRY_COUNT;
-	ESP_JoinApStatus_t status;
-	ESPStatus_t result = ESP_INNER_ERR;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	esp_softap_status_t status;
+	esp_status_t result = ESP_INNER_ERR;
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -317,31 +319,31 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, ui
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? JOIN_DEF : JOIN_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? JOIN_DEF : JOIN_CUR), param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
 	do
 	{
-		if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 			return ESP_RECEIVE_ERR;
 		}
 
-		status = ESP_JoinToWifiApAnswerHandle(answer);
+		status = esp_join_ap_answer_handler(answer);
 		switch(status)
 		{
-			case AP_DISCONECT:
+			case ESP_AP_DISCONECT:
 				result = ESP_CONNECTION_ERR;
 				break;
-			case AP_ERROR:
-			case AP_BUSY:
+			case ESP_AP_ERROR:
+			case ESP_AP_BUSY:
 				result = ESP_INNER_ERR;
 				break;
-			case AP_CONNECT:
-			case AP_GOT_IP:
+			case ESP_AP_CONNECT:
+			case ESP_AP_GOT_IP:
 				result = ESP_PASS;
 				break;
-			case AP_PASS:
+			case ESP_AP_PASS:
 				return ESP_PASS;
 				break;
 		}
@@ -361,26 +363,26 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, ui
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], uint32_t timeout)
+esp_status_t esp_wifi_ap_ssid_request(char ssid[], uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(REQSSID, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQSSID, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
 	if(slre_match((const char *)"\\S+:\"(\\S+)\",\\S+,\\d+,\\S+", answer, strlen(answer), caps, 1, 0) <= 0)
 	{
-		if(ESP_PatternCheck(answer, pattern_NO_AP))
+		if(esp_pattern_check(answer, PATTERN_NO_AP))
 		{
 			memset(ssid, '0', 32);
 			return ESP_PASS;
@@ -403,26 +405,26 @@ ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], bool save, uint32_t timeout)
+esp_status_t esp_wifi_ap_ssid_request(char ssid[], bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
 	if(slre_match((const char *)"\\S+:\"(\\S+)\",\\S+,\\d+,\\S+", answer, strlen(answer), caps, 1, 0) <= 0)
 	{
-		if(ESP_PatternCheck(answer, pattern_NO_AP))
+		if(esp_pattern_check(answer, PATTERN_NO_AP))
 		{
 			memset(ssid, '0', 32);
 			return ESP_PASS;
@@ -445,23 +447,23 @@ ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_UnJoinFromWifiAp(uint32_t timeout)
+bool esp_wifi_ap_unjoin(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(UNJOIN, NULL, 0) == false) {
+	if(esp_at_cmd_send(UNJOIN, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -472,11 +474,11 @@ bool ESP_UnJoinFromWifiAp(uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel, char enc, uint32_t timeout)
+esp_status_t esp_wifi_softap_cfg(const char ssid[], const char pass[], char channel, char enc, uint32_t timeout)
 {
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -514,15 +516,15 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(AP, param, len) == false) {
+	if(esp_at_cmd_send(AP, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	return (ESP_PatternCheck(answer, pattern_OK)) ? ESP_PASS : ESP_INNER_ERR;
+	return (esp_pattern_check(answer, PATTERN_OK)) ? ESP_PASS : ESP_INNER_ERR;
 }
 #else
 
@@ -531,11 +533,11 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel, char enc, bool save, uint32_t timeout)
+esp_status_t esp_wifi_softap_setup(const char ssid[], const char pass[], char channel, char enc, bool save, uint32_t timeout)
 {
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -573,15 +575,15 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 	param[len] = 0;
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? AP_DEF : AP_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? AP_DEF : AP_CUR), param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	return (ESP_PatternCheck(answer, pattern_OK)) ? ESP_PASS : ESP_INNER_ERR;
+	return (esp_pattern_check(answer, PATTERN_OK)) ? ESP_PASS : ESP_INNER_ERR;
 }
 #endif
 
@@ -590,20 +592,20 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestSoftApParam(char ssid[], char pass[], ESP_ApParam_t *param, uint32_t timeout)
+bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *param, uint32_t timeout)
 {
 	struct slre_cap caps[6];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(AP_REQ, NULL, 0) == false) {
+	if(esp_at_cmd_send(AP_REQ, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
@@ -636,20 +638,20 @@ bool ESP_RequestSoftApParam(char ssid[], char pass[], ESP_ApParam_t *param, uint
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t timeout)
+bool esp_wifi_get_ip_of_connected_station(ip4addr_t *ipv4, mac_t *mac, uint32_t timeout)
 {
 	struct slre_cap caps[2];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(CWLIF, NULL, 0) == false) {
+	if(esp_at_cmd_send(CWLIF, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
@@ -664,7 +666,7 @@ bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t time
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
+	if(!convert_string_to_ip4addr(ipv4, caps[0].ptr)) {
 		return false;
 	}
 
@@ -679,11 +681,11 @@ bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t time
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout)
+bool esp_dhcp_mode_setup(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout)
 {
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
@@ -695,15 +697,15 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t time
 
 	len = strlen(param);
 
-	if(ESP_SendAtCmd(CWDHCP, param, len) == false) {
+	if(esp_at_cmd_send(CWDHCP, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #else
 
@@ -712,12 +714,12 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t time
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save, uint32_t timeout)
+bool esp_dhcp_mode_setup(esp_wifi_mode_t mode, esp_dhcp_mode_t dhcp, bool save, uint32_t timeout)
 {
 	size_t len = 0;
 
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
@@ -729,15 +731,15 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save, ui
 
 	len = strlen(param);
 
-	if(ESP_SendAtCmd((save ? CWDHCP_DEF : CWDHCP_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? CWDHCP_DEF : CWDHCP_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 	  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #endif
 
@@ -746,23 +748,25 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save, ui
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_AutoconnectEnable(uint32_t timeout)
+bool esp_wifi_autoconnect_enable(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char esp_enable = '1';
+
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(CWAUTOCONN, &ESP_ENABLE, 1) == false) {
+	if(esp_at_cmd_send(CWAUTOCONN, &esp_enable, 1) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -770,23 +774,24 @@ bool ESP_AutoconnectEnable(uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_AutoconnectDisable(uint32_t timeout)
+bool esp_wifi_autoconnect_disable(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char esp_disable = '0';
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(CWAUTOCONN, &ESP_DISABLE, 1) == false) {
+	if(esp_at_cmd_send(CWAUTOCONN, &esp_disable, 1) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -797,18 +802,18 @@ bool ESP_AutoconnectDisable(uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout)
+bool esp_wifi_station_mac_setup(MacAddr_t mac, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_MacAddrToString(&mac, _mac)) {
+	if(!convert_mac_addr_to_string(&mac, _mac)) {
 		return false;
 	}
 
@@ -826,15 +831,15 @@ bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTAMAC, param, len) == false) {
+	if(esp_at_cmd_send(CIPSTAMAC, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		 return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #else
 
@@ -843,18 +848,18 @@ bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout)
+bool esp_wifi_station_mac_setup(mac_t mac, bool save, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_MacAddrToString(&mac, _mac)) {
+	if(!convert_mac_addr_to_string(&mac, _mac)) {
 		return false;
 	}
 
@@ -872,15 +877,15 @@ bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? CIPSTAMAC_DEF : CIPSTAMAC_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? CIPSTAMAC_DEF : CIPSTAMAC_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #endif
 
@@ -892,20 +897,20 @@ bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestStationMacAddr(MacAddr_t *mac, uint32_t timeout)
+bool esp_wifi_station_mac_request(mac_t *mac, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTAMAC, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQSTAMAC, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
@@ -918,7 +923,7 @@ bool ESP_RequestStationMacAddr(MacAddr_t *mac, uint32_t timeout)
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
+	if(!convert_string_to_mac_addr(caps[0].ptr, mac)) {
 		return false;
 	}
 
@@ -931,20 +936,20 @@ bool ESP_RequestStationMacAddr(MacAddr_t *mac, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestStationMacAddr(MacAddr_t *mac, bool save, uint32_t timeout)
+bool esp_wifi_station_mac_request(mac_t *mac, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
@@ -957,7 +962,7 @@ bool ESP_RequestStationMacAddr(MacAddr_t *mac, bool save, uint32_t timeout)
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
+	if(!convert_string_to_mac_addr(caps[0].ptr, mac)) {
 		return false;
 	}
 
@@ -973,18 +978,18 @@ bool ESP_RequestStationMacAddr(MacAddr_t *mac, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout)
+bool esp_wifi_softap_mac_setup(mac_t mac, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_MacAddrToString(&mac, _mac)) {
+	if(!convert_mac_addr_to_string(&mac, _mac)) {
 		return false;
 	}
 
@@ -1002,15 +1007,15 @@ bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPAPMAC, param, len) == false) {
+	if(esp_at_cmd_send(CIPAPMAC, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #else
 
@@ -1019,18 +1024,18 @@ bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, bool save, uint32_t timeout)
+bool esp_wifi_softap_mac_setup(mac_t mac, bool save, uint32_t timeout)
 {
 	char _mac[30] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_MacAddrToString(&mac, _mac)) {
+	if(!convert_mac_addr_to_string(&mac, _mac)) {
 		return false;
 	}
 
@@ -1048,15 +1053,15 @@ bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, bool save, uint32_t timeout)
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? CIPAPMAC_DEF : CIPAPMAC_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? CIPAPMAC_DEF : CIPAPMAC_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 #endif
 
@@ -1068,20 +1073,20 @@ bool ESP_SetupSoftApMacAddrCur(MacAddr_t mac, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestSoftApMacAddr(MacAddr_t *mac, uint32_t timeout)
+bool esp_wifi_softap_mac_request(mac_t *mac, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTAMAC, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQSTAMAC, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
@@ -1094,7 +1099,7 @@ bool ESP_RequestSoftApMacAddr(MacAddr_t *mac, uint32_t timeout)
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
+	if(!convert_string_to_mac_addr(caps[0].ptr, mac)) {
 		return false;
 	}
 
@@ -1107,20 +1112,20 @@ bool ESP_RequestSoftApMacAddr(MacAddr_t *mac, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, bool save, uint32_t timeout)
+bool esp_wifi_softap_mac_request(mac_t *mac, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
@@ -1133,7 +1138,7 @@ bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, bool save, uint32_t timeout)
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToMacAddr(caps[0].ptr, mac)) {
+	if(!convert_string_to_mac_addr(caps[0].ptr, mac)) {
 		return false;
 	}
 
@@ -1149,12 +1154,12 @@ bool ESP_RequestSoftApMacAddrCur(MacAddr_t *mac, bool save, uint32_t timeout)
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
+bool esp_wifi_station_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
@@ -1202,15 +1207,15 @@ bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask,
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTA, param, len) == false) {
+	if(esp_at_cmd_send(CIPSTA, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -1220,20 +1225,20 @@ bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask,
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
+bool esp_wifi_station_ip_request(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout)
 {
 	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQSTA, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQSTA, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
@@ -1249,17 +1254,17 @@ bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* 
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
+	if(!convert_string_to_ip4addr(ipv4, caps[0].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
+	if(!convert_string_to_ip4addr(gw, caps[1].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
+	if(!convert_string_to_ip4addr(mask, caps[2].ptr)) {
 		return false;
 	}
 
@@ -1272,18 +1277,18 @@ bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* 
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout)
+bool esp_wifi_station_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, bool save, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(ipv4, ip)) {
+	if(!convert_ip4addr_to_string(ipv4, ip)) {
 		return false;
 	}
 
@@ -1299,7 +1304,7 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(gw, ip)) {
+	if(!convert_ip4addr_to_string(gw, ip)) {
 		return false;
 	}
 
@@ -1311,7 +1316,7 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(mask, ip)) {
+	if(!convert_ip4addr_to_string(mask, ip)) {
 		return false;
 	}
 
@@ -1325,15 +1330,15 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? CIPSTA_DEF : CIPSTA_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? CIPSTA_DEF : CIPSTA_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -1341,20 +1346,20 @@ bool ESP_SetupWifiStationIpAddrCur(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t ma
 *
 * Public function defined in esp_wifi.h
 */
-ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, bool save, uint32_t timeout)
+esp_status_t esp_wifi_station_ip_request(ip4addr_t *ipv4, ip4addr_t *gw, ip4addr_t *mask, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? REQSTA_DEF : REQSTA_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQSTA_DEF : REQSTA_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1370,17 +1375,17 @@ ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4A
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
+	if(!convert_string_to_ip4addr(ipv4, caps[0].ptr)) {
 		return ESP_INNER_ERR;
 	}
 
 	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
+	if(!convert_string_to_ip4addr(gw, caps[1].ptr)) {
 		return ESP_INNER_ERR;
 	}
 
 	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
+	if(!convert_string_to_ip4addr(mask, caps[2].ptr)) {
 		return ESP_INNER_ERR;
 	}
 
@@ -1398,12 +1403,12 @@ ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4A
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
+bool esp_wifi_softap_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
@@ -1451,15 +1456,15 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPAP, param, len) == false) {
+	if(esp_at_cmd_send(CIPAP, param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -1469,20 +1474,20 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiApIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, uint32_t timeout)
+bool esp_wifi_softap_ip_request(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask, uint32_t timeout)
 {
 	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd(REQCIPAP, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQCIPAP, NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
@@ -1498,17 +1503,17 @@ bool ESP_RequestWifiApIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask,
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
+	if(!convert_string_to_ip4addr(ipv4, caps[0].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
+	if(!convert_string_to_ip4addr(gw, caps[1].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
+	if(!convert_string_to_ip4addr(mask, caps[2].ptr)) {
 		return false;
 	}
 
@@ -1522,18 +1527,18 @@ bool ESP_RequestWifiApIpAddr(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *mask,
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout)
+bool esp_wifi_softap_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, bool save, uint32_t timeout)
 {
 	char ip[20] = {0};
 	size_t len = 0;
-	char* answer = ESP_AllocAnswerBuffer();
-	char* param = ESP_AllocParamBuffer();
+	char* answer = esp_alloc_answer_buffer();
+	char* param = esp_alloc_param_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(ipv4, ip)) {
+	if(!convert_ip4addr_to_string(ipv4, ip)) {
 		return false;
 	}
 
@@ -1549,7 +1554,7 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(gw, ip)) {
+	if(!convert_ip4addr_to_string(gw, ip)) {
 		return false;
 	}
 
@@ -1561,7 +1566,7 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool
 		return false;
 	}
 
-	if(!Convert_Ipv4addrToString(mask, ip)) {
+	if(!convert_ip4addr_to_string(mask, ip)) {
 		return false;
 	}
 
@@ -1575,15 +1580,15 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd((save ? CIPAP_DEF : CIPAP_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? CIPAP_DEF : CIPAP_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
-	return ESP_PatternCheck(answer, pattern_OK);
+	return esp_pattern_check(answer, PATTERN_OK);
 }
 
 /**
@@ -1591,20 +1596,20 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool
 *
 * Public function defined in esp_wifi.h
 */
-bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, bool save, uint32_t timeout)
+bool esp_wifi_softap_ip_request(ip4addr_t* ipv4, ip4addr_t* gw, ip4addr_t* mask, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[3];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return false;
 	}
 
-	if(ESP_SendAtCmd((save ? REQCIPAP_DEF : REQCIPAP_CUR), NULL, 0) == false) {
+	if(esp_at_cmd_send((save ? REQCIPAP_DEF : REQCIPAP_CUR), NULL, 0) == false) {
 		return false;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return false;
 	}
 
@@ -1620,17 +1625,17 @@ bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask,
 	}
 
 	memset((void *)(caps[0].ptr + caps[0].len),0,1);
-	if(!Convert_StringToIpv4addr(ipv4, caps[0].ptr)) {
+	if(!convert_string_to_ip4addr(ipv4, caps[0].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[1].ptr + caps[1].len),0,1);
-	if(!Convert_StringToIpv4addr(gw, caps[1].ptr)) {
+	if(!convert_string_to_ip4addr(gw, caps[1].ptr)) {
 		return false;
 	}
 
 	memset((void *)(caps[2].ptr + caps[2].len),0,1);
-	if(!Convert_StringToIpv4addr(mask, caps[2].ptr)) {
+	if(!convert_string_to_ip4addr(mask, caps[2].ptr)) {
 		return false;
 	}
 

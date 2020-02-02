@@ -18,103 +18,103 @@
 //! @{
 typedef enum
 {
-	ESP8266_Enable           		=       '1',								///< ESP8266 can be woken up from light-sleep by GPIO
-	ESP8266_Disable          		=       '0',								///< ESP8266 can NOT be woken up from light-sleep by GPIO
-}	ESP_WakeupPinEnable_t;
+	ESP_WPIN_ENABLE           		=       '1',								///< ESP8266 can be woken up from light-sleep by GPIO
+	ESP_WPIN_DISABLE          		=       '0',								///< ESP8266 can NOT be woken up from light-sleep by GPIO
+}	esp_wpin_t;
 //! @}
 
 //! @brief Available levels for wake up pin
 //! @{
 typedef enum
 {
-	ESP_WakeupPinLowLevel           =       '0',								///< The GPIO wakes up ESP8266 on low level
-	ESP_WakeupPinHighLevel          =       '1',								///< The GPIO wakes up ESP8266 on high level
-}	ESP_WakeupPinLevel_t;
+	ESP_WPIN_LOW           			=       '0',								///< The GPIO wakes up ESP8266 on low level
+	ESP_WPIN_HIGH          			=       '1',								///< The GPIO wakes up ESP8266 on high level
+}	esp_wlevel_t;
 //! @}
 
 //! @brief Available levels for awake up pin
 //! @{
 typedef enum
 {
-	ESP_AwakeupPinLowLevel           =       '0',								///< The GPIO is set to be low level after the wakeup process
-	ESP_AwakeupPinHighLevel          =       '1',								///< The GPIO is set to be high level after the wakeup process
-}	ESP_AwakeupPinLevel_t;
+	ESP_AWPIN_LOW           		=       '0',								///< The GPIO is set to be low level after the wakeup process
+	ESP_AWPIN_HIGH          		=       '1',								///< The GPIO is set to be high level after the wakeup process
+}	esp_awlevel_t;
 //! @}
 
 //! @brief List of available data bits count
 //! @{
 typedef enum
 {
-	ESP_DataBits_5           		=       '5',								///< 5-bit data
-	ESP_DataBits_6           		=       '6',								///< 6-bit data
-	ESP_DataBits_7           		=       '7',								///< 7-bit data
-	ESP_DataBits_8           		=       '8',								///< 8-bit data
-}	ESP_DataBits_t;
+	ESP_DATABITS_5           		=       '5',								///< 5-bit data
+	ESP_DATABITS_6           		=       '6',								///< 6-bit data
+	ESP_DATABITS_7           		=       '7',								///< 7-bit data
+	ESP_DATABITS_8           		=       '8',								///< 8-bit data
+}	esp_data_bits_t;
 //! @}
 
 //! @brief List of available stop bits count
 //! @{
 typedef enum
 {
-	ESP_DataBits_1           		=       '1',								///< 1-bit stop bit
-	ESP_DataBits_1_5         		=       '2',								///< 1.5-bit stop bit
-	ESP_DataBits_2           		=       '3',								///< 2-bit stop bit
-}	ESP_StopBits_t;
+	ESP_STOPBITS_1           		=       '1',								///< 1-bit stop bit
+	ESP_STOPBITS_1_5         		=       '2',								///< 1.5-bit stop bit
+	ESP_STOPBITS_2           		=       '3',								///< 2-bit stop bit
+}	esp_stop_bits_t;
 //! @}
 
 //! @brief List of available parity check modes
 //! @{
 typedef enum
 {
-	ESP_ParityNone           		=       '0',								///< None parity check
-	ESP_ParityOdd         	 		=       '1',								///< Odd parity check
-	ESP_ParityEven           		=       '2',								///< Even parity check
-}	ESP_Parity_t;
+	ESP_PARITY_NONE           		=       '0',								///< None parity check
+	ESP_PARITY_ODD         	 		=       '1',								///< Odd parity check
+	ESP_PARITY_EVEN           		=       '2',								///< Even parity check
+}	esp_parity_t;
 //! @}
 
 //! @brief List of available flow control modes
 //! @{
 typedef enum
 {
-	ESP_FlowControlOff       		=       '0',								///< Flow control is not enabled
-	ESP_FlowControlRTS       		=       '1',								///< Enable RTS
-	ESP_FlowControlCTS       		=       '2',								///< Enable CTS
-	ESP_FlowControlBoth      		=       '3',								///< Enable both RTS and CTS
-}	ESP_FlowControl_t;
+	ESP_FLOW_CNTRL_OFF       		=       '0',								///< Flow control is not enabled
+	ESP_FLOW_CNTRL_RTS       		=       '1',								///< Enable RTS
+	ESP_FLOW_CNTRL_CTS       		=       '2',								///< Enable CTS
+	ESP_FLOW_CNTRL_BOTH      		=       '3',								///< Enable both RTS and CTS
+}	esp_flow_control_t;
 //! @}
 
 //! @brief List of available sleep modes
 //! @{
 typedef enum
 {
-	ESP_SleepModeOff       	 		=       '0',								///< Disables sleep mode
-	ESP_SleepModeLight       		=       '1',								///< Light-sleep mode
-	ESP_SleepModeModem       		=       '2',								///< Modem-sleep mode
-}	ESP_SleepModes_t;
+	ESP_SLEEP_MODE_OFF       	 	=       '0',								///< Disables sleep mode
+	ESP_SLEEP_MODE_LIGHT       		=       '1',								///< Light-sleep mode
+	ESP_SLEEP_MODE_MODEM       		=       '2',								///< Modem-sleep mode
+}	esp_sleep_mode_t;
 //! @}
 
 //! @brief Params for UART config
 //! @{
 typedef struct
 {
-	uint32_t baudRate;															///< Speed of UART port
-	ESP_DataBits_t dataBits;													///< Count of data bits
-	ESP_StopBits_t stopBits;													///< Count of stop bits
-	ESP_Parity_t parity;														///< Enable/disable parity check
-	ESP_FlowControl_t flowControl;												///< Enable/disable flow control
-}	ESP_UartParam_t;
+	uint32_t baud_rate;															///< Speed of UART port
+	esp_data_bits_t data_bits;													///< Count of data bits
+	esp_stop_bits_t stop_bits;													///< Count of stop bits
+	esp_parity_t parity;														///< Enable/disable parity check
+	esp_flow_control_t flow_control;											///< Enable/disable flow control
+}	esp_uart_t;
 //! @}
 
 //! @brief Params for wakeup gpio config
 //! @{
 typedef struct
 {
-	ESP_WakeupPinEnable_t enable;												///< Enable/disable wake up pin
-	uint8_t trigger_GPIO;														///< Sets the GPIO to wake ESP8266 up; range of value: [0, 15].
-	ESP_WakeupPinLevel_t trigger_level;											///< Trigger level for wake up pin
-	uint8_t awake_GPIO;															///< Set a GPIO as a flag of ESP8266’s being awoken form Light-sleep
-	ESP_AwakeupPinLevel_t awake_level;											///< Level of pin after the wake up process
-}	ESP_WakeupGpioParam_t;
+	esp_wpin_t enable;															///< Enable/disable wake up pin
+	uint8_t trigger_gpio;														///< Sets the GPIO to wake ESP8266 up; range of value: [0, 15].
+	esp_wlevel_t trigger_level;													///< Trigger level for wake up pin
+	uint8_t awake_gpio;															///< Set a GPIO as a flag of ESP8266’s being awoken form Light-sleep
+	esp_awlevel_t awake_level;													///< Level of pin after the wake up process
+}	esp_wgpio_t;
 //! @}
 
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
@@ -129,7 +129,7 @@ typedef struct
 *
 * @return 	true/false.
 */
-bool ESP_Test(uint32_t timeout);
+bool esp_test(uint32_t timeout);
 
 /**
 * @brief 	This function used used to restart the module.
@@ -138,7 +138,7 @@ bool ESP_Test(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_Reset(uint32_t timeout);
+bool esp_reset(uint32_t timeout);
 
 /**
 * @brief 	This function return the version of AT commands and SDK that you are using.
@@ -149,7 +149,7 @@ bool ESP_Reset(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_GetVersion(ESP_AtVersion *at, ESP_SdkVersion *sdk, uint32_t timeout);
+bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout);
 
 /**
 * @brief 	This function is used to invoke the deep-sleep mode of the module.
@@ -160,7 +160,7 @@ bool ESP_GetVersion(ESP_AtVersion *at, ESP_SdkVersion *sdk, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_EnterToDeepSleep(uint32_t time, uint32_t timeout);
+bool esp_deep_sleep(uint32_t time, uint32_t timeout);
 
 /**
 * @brief 	This function enable echo with module answers.
@@ -169,7 +169,7 @@ bool ESP_EnterToDeepSleep(uint32_t time, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_EnableEcho(uint32_t timeout);
+bool esp_enable_echo(uint32_t timeout);
 
 /**
 * @brief 	This function disable echo with module answers.
@@ -178,7 +178,7 @@ bool ESP_EnableEcho(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_DisableEcho(uint32_t timeout);
+bool esp_disable_echo(uint32_t timeout);
 
 /**
 * @brief 	This function This command is used to reset all parameters saved in flash.
@@ -190,7 +190,7 @@ bool ESP_DisableEcho(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_Restore(uint32_t timeout);
+bool esp_restore(uint32_t timeout);
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
 /**
@@ -206,7 +206,7 @@ bool ESP_Restore(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout);
+bool esp_uart_cfg(const esp_uart_t *cfg, uint32_t timeout);
 #else
 
 /**
@@ -223,7 +223,7 @@ bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, bool save, uint32_t timeout);
+bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout);
 #endif
 
 /**
@@ -235,7 +235,7 @@ bool ESP_SetupUartParam(const ESP_UartParam_t *cfg, bool save, uint32_t timeout)
 *
 * @return 	true/false.
 */
-bool ESP_Sleep(ESP_SleepModes_t mode, uint32_t timeout);
+bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout);
 
 /**
 * @brief 	This function configures a GPIO to wake ESP8266 up from Light-sleep mode.
@@ -245,7 +245,7 @@ bool ESP_Sleep(ESP_SleepModes_t mode, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout);
+bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout);
 
 /**
 * @brief 	This function sets the maximum value of the RF TX Power.
@@ -255,7 +255,7 @@ bool ESP_ConfigWakeupGpio(const ESP_WakeupGpioParam_t *gpio, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupRfPower(uint8_t power, uint32_t timeout);
+bool esp_rf_power(uint8_t power, uint32_t timeout);
 
 /**
 * @brief 	This function sets current system messages.

@@ -19,55 +19,55 @@
 //! @{
 typedef enum
 {
-	AP_DISCONECT,																///< SoftAp disconnected
-	AP_CONNECT,																	///< SoftAp connected
-	AP_BUSY,																	///< SoftAp busy
-	AP_GOT_IP,																	///< SoftAp connected and got ip address
-	AP_PASS,																	///< SoftAp ok
-	AP_ERROR,																	///< SoftAp error
-}	ESP_JoinApStatus_t;
+	ESP_AP_DISCONECT,															///< SoftAp disconnected
+	ESP_AP_CONNECT,																///< SoftAp connected
+	ESP_AP_BUSY,																///< SoftAp busy
+	ESP_AP_GOT_IP,																///< SoftAp connected and got ip address
+	ESP_AP_PASS,																///< SoftAp ok
+	ESP_AP_ERROR,																///< SoftAp error
+}	esp_softap_status_t;
 //! @}
 
 //! @brief  List of available wifi modes
 //! @{
 typedef enum
 {
-	WIFI_CLIENT           		=       '1',									///< Wifi Station mode
-	WIFI_AP               		=       '2',									///< Wifi SoftAP mode
-	WIFI_DUAL             		=       '3'										///< Wifi SoftAP+Station mode
-}	ESP_WifiMode_t;
+	ESP_WIFI_STATION          	=       '1',									///< Wifi Station mode
+	ESP_WIFI_SOFTAP             =       '2',									///< Wifi SoftAP mode
+	ESP_WIFI_DUAL             	=       '3'										///< Wifi SoftAP+Station mode
+}	esp_wifi_mode_t;
 //! @}
 
 //! @brief  List of available encription types
 //! @{
 typedef enum
 {
-	OPEN						=		'0',
-	WEP							=		'1',
-	WPA							=		'2',
-	WPA2						=		'3',
-	MIXED 						=		'4'
-}	ESP_Encription_t;
+	ESP_OPEN					=		'0',
+	ESP_WEP						=		'1',
+	ESP_WPA						=		'2',
+	ESP_WPA2					=		'3',
+	ESP_MIXED 					=		'4'
+}	esp_encription_t;
 //! @}
 
 //! @brief  List of dhcp modes
 //! @{
 typedef enum
 {
-	DHCP_OFF          			=       '0',									///< DHCP is disabled
-	DHCP_ON         			=       '1',									///< DHCP is enabled
-}	ESP_DhcpModes_t;
+	ESP_DHCP_OFF          		=       '0',									///< DHCP is disabled
+	ESP_DHCP_ON         		=       '1',									///< DHCP is enabled
+}	esp_dhcp_mode_t;
 //! @}
 
 //! @brief  Params to configurate wifi AP
 //! @{
 typedef struct
 {
-	ESP_Encription_t enc;														///< Encryption method
+	esp_encription_t enc;														///< Encryption method
 	uint8_t channel;															///< Channel ID
 	uint8_t max_con;															///< Maximum number of Stations to which ESP8266 SoftAP can be connected
 	uint8_t hidden;																///< Hide or not SoftAp
-}	ESP_ApParam_t;
+}	esp_ap_config_t;
 //! @}
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
@@ -87,7 +87,7 @@ typedef struct
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiMode(ESP_WifiMode_t mode, uint32_t timeout);
+bool esp_wifi_mode_setup(esp_wifi_mode_t mode, uint32_t timeout);
 
 /**
 * @brief 	This function request wifi work mode.
@@ -100,7 +100,7 @@ bool ESP_SetupWifiMode(ESP_WifiMode_t mode, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestWifiMode(ESP_WifiMode_t* mode, uint32_t timeout);
+bool esp_wifi_mode_request(esp_wifi_mode_t* mode, uint32_t timeout);
 #else
 
 /**
@@ -112,7 +112,7 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t* mode, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiMode(ESP_WifiMode_t mode, bool save, uint32_t timeout);
+bool esp_wifi_mode_setup(esp_wifi_mode_t mode, bool save, uint32_t timeout);
 
 /**
 * @brief 	This function request wifi work mode.
@@ -123,7 +123,7 @@ bool ESP_SetupWifiMode(ESP_WifiMode_t mode, bool save, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestWifiMode(ESP_WifiMode_t* mode, bool save, uint32_t timeout);
+bool esp_wifi_mode_request(esp_wifi_mode_t* mode, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -157,7 +157,7 @@ bool ESP_RequestWifiMode(ESP_WifiMode_t* mode, bool save, uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t timeout);
+esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], uint32_t timeout);
 #else
 
 /**
@@ -186,7 +186,7 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], uint32_t time
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, uint32_t timeout);
+esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -214,7 +214,7 @@ ESPStatus_t ESP_JoinToWifiAp(const char ssid[], const char pass[], bool save, ui
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], uint32_t timeout);
+esp_status_t esp_wifi_ap_ssid_request(char ssid[], uint32_t timeout);
 #else
 
 /**
@@ -237,7 +237,7 @@ ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], bool save, uint32_t timeout);
+esp_status_t esp_wifi_ap_ssid_request(char ssid[], bool save, uint32_t timeout);
 #endif
 
 /**
@@ -247,7 +247,7 @@ ESPStatus_t ESP_RequestNameConnectedAp(char ssid[], bool save, uint32_t timeout)
 *
 * @return 	true/false.
 */
-bool ESP_UnJoinFromWifiAp(uint32_t timeout);
+bool esp_wifi_ap_unjoin(uint32_t timeout);
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
 /**
@@ -282,7 +282,7 @@ bool ESP_UnJoinFromWifiAp(uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel, char enc, uint32_t timeout);
+esp_status_t esp_wifi_softap_cfg(const char ssid[], const char pass[], char channel, char enc, uint32_t timeout);
 #else
 
 /**
@@ -315,7 +315,7 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel, char enc, bool save, uint32_t timeout);
+esp_status_t esp_wifi_softap_setup(const char ssid[], const char pass[], char channel, char enc, bool save, uint32_t timeout);
 #endif
 
 /**
@@ -339,7 +339,7 @@ ESPStatus_t ESP_CreateWifiAp(const char ssid[], const char pass[], char channel,
 *
 * @return 	true/false.
 */
-bool ESP_RequestSoftApParam(char ssid[], char pass[], ESP_ApParam_t* param, uint32_t timeout);
+bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t* param, uint32_t timeout);
 
 /**
 * @brief 	This function get stations IP which is connected to ESP8266 softAP.
@@ -352,7 +352,7 @@ bool ESP_RequestSoftApParam(char ssid[], char pass[], ESP_ApParam_t* param, uint
 *
 * @return 	true/false.
 */
-bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t timeout);
+bool esp_wifi_get_ip_of_connected_station(ip4addr_t *ipv4, mac_t *mac, uint32_t timeout);
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
 /**
@@ -374,7 +374,7 @@ bool ESP_GetIpOfConnectedStation(Ipv4Addr_t *ipv4, MacAddr_t *mac, uint32_t time
 *
 * @return 	true/false.
 */
-bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout);
+bool esp_dhcp_mode_setup(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t timeout);
 #else
 
 /**
@@ -393,7 +393,7 @@ bool ESP_ConfigDhcpMode(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t time
 *
 * @return 	true/false.
 */
-bool ESP_ConfigDhcpModeCur(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save, uint32_t timeout);
+bool esp_dhcp_mode_setup(esp_wifi_mode_t mode, esp_dhcp_mode_t dhcp, bool save, uint32_t timeout);
 #endif
 
 /**
@@ -403,7 +403,7 @@ bool ESP_ConfigDhcpModeCur(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, bool save,
 *
 * @return 	true/false.
 */
-bool ESP_AutoconnectEnable(uint32_t timeout);
+bool esp_wifi_autoconnect_enable(uint32_t timeout);
 
 /**
 * @brief 	This function disable connect to AP automatically after power on.
@@ -412,7 +412,7 @@ bool ESP_AutoconnectEnable(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_AutoconnectDisable(uint32_t timeout);
+bool esp_wifi_autoconnect_disable(uint32_t timeout);
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
 /**
@@ -427,7 +427,7 @@ bool ESP_AutoconnectDisable(uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout);
+bool esp_wifi_station_mac_setup(MacAddr_t mac, uint32_t timeout);
 #else
 
 /**
@@ -439,7 +439,7 @@ bool ESP_SetupStationMacAddr(MacAddr_t mac, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout);
+bool esp_wifi_station_mac_setup(mac_t mac, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -455,7 +455,7 @@ bool SetupStationMacAddr(MacAddr_t mac, bool save, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestStationMacAddr(MacAddr_t* mac, uint32_t timeout);
+bool esp_wifi_station_mac_request(MacAddr_t* mac, uint32_t timeout);
 #else
 
 /**
@@ -467,7 +467,7 @@ bool ESP_RequestStationMacAddr(MacAddr_t* mac, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestStationMacAddr(MacAddr_t* mac, bool save, uint32_t timeout);
+bool esp_wifi_station_mac_request(mac_t* mac, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -483,7 +483,7 @@ bool ESP_RequestStationMacAddr(MacAddr_t* mac, bool save, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout);
+bool esp_wifi_softap_mac_setup(MacAddr_t mac, uint32_t timeout);
 #else
 
 /**
@@ -495,7 +495,7 @@ bool ESP_SetupSoftApMacAddr(MacAddr_t mac, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupSoftApMacAddr(MacAddr_t mac, bool save, uint32_t timeout);
+bool esp_wifi_softap_mac_setup(mac_t mac, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -511,7 +511,7 @@ bool ESP_SetupSoftApMacAddr(MacAddr_t mac, bool save, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestSoftApMacAddr(MacAddr_t* mac, uint32_t timeout);
+bool esp_wifi_softap_mac_request(MacAddr_t* mac, uint32_t timeout);
 #else
 
 /**
@@ -523,7 +523,7 @@ bool ESP_RequestSoftApMacAddr(MacAddr_t* mac, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_RequestSoftApMacAddrCur(MacAddr_t* mac, bool save, uint32_t timeout);
+bool esp_wifi_softap_mac_request(mac_t* mac, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -540,7 +540,7 @@ bool ESP_RequestSoftApMacAddrCur(MacAddr_t* mac, bool save, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout);
+bool esp_wifi_station_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout);
 
 /**
 * @brief 	This function request IP address of station.
@@ -555,7 +555,7 @@ bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask,
 *
 * @return 	true/false.
 */
-bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout);
+bool esp_wifi_station_ip_request(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout);
 #else
 
 /**
@@ -569,7 +569,7 @@ bool ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* 
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout);
+bool esp_wifi_station_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, bool save, uint32_t timeout);
 
 /**
 * @brief 	This function request IP address of station.
@@ -582,7 +582,7 @@ bool ESP_SetupWifiStationIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask,
 *
 * @return 	true/false.
 */
-ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, bool save, uint32_t timeout);
+esp_status_t esp_wifi_station_ip_request(ip4addr_t* ipv4, ip4addr_t* gw, ip4addr_t* mask, bool save, uint32_t timeout);
 #endif
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -599,7 +599,7 @@ ESPStatus_t ESP_RequestWifiStationIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4A
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout);
+bool esp_wifi_softap_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint32_t timeout);
 
 /**
 * @brief 	This function request IP address of softAP.
@@ -614,7 +614,7 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, uint
 *
 * @return 	true/false.
 */
-bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout);
+bool esp_wifi_softap_ip_request(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, uint32_t timeout);
 #else
 
 /**
@@ -628,7 +628,7 @@ bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask,
 *
 * @return 	true/false.
 */
-bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool save, uint32_t timeout);
+bool esp_wifi_softap_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, bool save, uint32_t timeout);
 
 /**
 * @brief 	This function request IP address of softAP.
@@ -641,5 +641,5 @@ bool ESP_SetupWifiApIpAddr(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, bool
 *
 * @return 	true/false.
 */
-bool ESP_RequestWifiApIpAddr(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* mask, bool save, uint32_t timeout);
+bool esp_wifi_softap_ip_request(ip4addr_t* ipv4, ip4addr_t* gw, ip4addr_t* mask, bool save, uint32_t timeout);
 #endif

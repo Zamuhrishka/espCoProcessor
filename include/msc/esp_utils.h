@@ -31,7 +31,7 @@ typedef struct
 	uint8_t major;
 	uint8_t minor;
 	uint8_t patch[2];
-}	ESP_AtVersion;
+}	esp_at_version_t;
 //! @}
 
 //!@brief ESP8266 SDK version struct
@@ -41,12 +41,12 @@ typedef struct
 	uint8_t major;
 	uint8_t minor;
 	uint8_t patch;
-}	ESP_SdkVersion;
+}	esp_sdk_version_t;
 //! @}
 
 //!@brief ESP8266 AT commands ID`s list
 //! @{
-enum ESP_AtCommandsList_t
+enum esp_at_cmd_list_t
 {
 	//BASIC
 	AT = 0,																		///< Test AT startup
@@ -149,25 +149,25 @@ enum ESP_AtCommandsList_t
 //! @{
 typedef enum
 {
-	pattern_OK 	= 	0,
-	pattern_ERROR,
-	pattern_WIFI_CONNECT,
-	pattern_WIFI_DISCONNECT,
-	pattern_WIFI_ALREADY_CONNECT,
-	pattern_WIFI_GOT_IP,
-	pattern_NO_AP,
-	pattern_BUSY_P,
-	pattern_BUSY_S,
-	pattern_TX_READY,
-	pattern_TRANSPARENT_READY,
-	pattern_RECEIVE,
-	pattern_ALREADY_CONNECT,
-	pattern_CLOSE,
-	pattern_CONNECT,
-	pattern_SEND_ACK,
-	pattern_TRANSPARENT_DISABLE,
-	pattern_UNDEF,
-} 	ESP_PatternsList_t;
+	PATTERN_OK 	= 	0,
+	PATTERN_ERROR,
+	PATTERN_WIFI_CONNECT,
+	PATTERN_WIFI_DISCONNECT,
+	PATTERN_WIFI_ALREADY_CONNECT,
+	PATTERN_WIFI_GOT_IP,
+	PATTERN_NO_AP,
+	PATTERN_BUSY_P,
+	PATTERN_BUSY_S,
+	PATTERN_TX_READY,
+	PATTERN_TRANSPARENT_READY,
+	PATTERN_RECEIVE,
+	PATTERN_ALREADY_CONNECT,
+	PATTERN_CLOSE,
+	PATTERN_CONNECT,
+	PATTERN_SEND_ACK,
+	PATTERN_TRANSPARENT_DISABLE,
+	PATTERN_UNDEF,
+} 	esp_pattern_list_t;
 //! @}
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
@@ -182,7 +182,7 @@ typedef enum
 *
 * @return 	true/false.
 */
-bool ESP_GetAtPayload(uint8_t cmd, char* src, uint8_t *payload);
+bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t *payload);
 
 /**
 * @brief 	This function send AT command to module.
@@ -193,7 +193,7 @@ bool ESP_GetAtPayload(uint8_t cmd, char* src, uint8_t *payload);
 *
 * @return 	true/false.
 */
-bool ESP_SendAtCmd(uint8_t cmd, const char data[], size_t size);
+bool esp_at_cmd_send(uint8_t cmd, const char data[], size_t size);
 
 /**
 * @brief 	This function send raw AT command to module.
@@ -204,7 +204,7 @@ bool ESP_SendAtCmd(uint8_t cmd, const char data[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_SendAtRawCmd(const char cmd[], const char data[], size_t size);
+bool esp_at_raw_cmd_send(const char cmd[], const char data[], size_t size);
 
 /**
 * @brief 	This function send raw data to module.
@@ -214,7 +214,7 @@ bool ESP_SendAtRawCmd(const char cmd[], const char data[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_SendAtRawData(const char data[], size_t size);
+bool esp_data_send(const char data[], size_t size);
 
 /**
 * @brief 	This function check available selected pattern
@@ -225,7 +225,7 @@ bool ESP_SendAtRawData(const char data[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_PatternCheck(const char msg[], ESP_PatternsList_t pattern);
+bool esp_pattern_check(const char msg[], esp_pattern_list_t pattern);
 
 /**
 * @brief 	This function return pointer to answer buffer.
@@ -234,7 +234,7 @@ bool ESP_PatternCheck(const char msg[], ESP_PatternsList_t pattern);
 *
 * @return 	pointer to answer buffer.
 */
-char* ESP_AllocAnswerBuffer(void);
+char* esp_alloc_answer_buffer(void);
 
 /**
 * @brief 	This function return pointer to param buffer.
@@ -243,7 +243,7 @@ char* ESP_AllocAnswerBuffer(void);
 *
 * @return 	pointer to param buffer.
 */
-char* ESP_AllocParamBuffer(void);
+char* esp_alloc_param_buffer(void);
 
 /**
 * @brief 	This function compare two AT commands sets versions.
@@ -258,7 +258,7 @@ char* ESP_AllocParamBuffer(void);
 * <li> <b>0 - if at1 = at2</b>
 * </ul>
 */
-int8_t ESP_CompareAtVersions(const ESP_AtVersion *at1, const ESP_AtVersion *at2);
+int8_t esp_at_version_compare(const esp_at_version_t *at1, const esp_at_version_t *at2);
 
 /**
 * @brief 	This function compare two SDK versions.
@@ -273,4 +273,4 @@ int8_t ESP_CompareAtVersions(const ESP_AtVersion *at1, const ESP_AtVersion *at2)
 * <li> <b>0 - if sdk1 = sdk2</b>
 * </ul>
 */
-int8_t ESP_CompareSdkVersions(const ESP_SdkVersion *sdk1, const ESP_SdkVersion *sdk2);
+int8_t esp_sdk_version_compare(const esp_sdk_version_t *sdk1, const esp_sdk_version_t *sdk2);

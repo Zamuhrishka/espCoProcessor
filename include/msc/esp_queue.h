@@ -30,7 +30,7 @@
 *
 * @return 	true/false.
 */
-bool ESP_RxQueueEnqueue(const char buffer[], size_t size);
+bool esp_rbuffer_enqueue(const char buffer[], size_t size);
 
 /**
 * @brief 	Add data into queue.
@@ -41,7 +41,7 @@ bool ESP_RxQueueEnqueue(const char buffer[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_RxQueueDenqueue(char **buffer, size_t *size);
+bool esp_rbuffer_denqueue(char **buffer, size_t *size);
 
 /**
 * @brief 	Get data from queue.
@@ -52,7 +52,7 @@ bool ESP_RxQueueDenqueue(char **buffer, size_t *size);
 *
 * @return 	true/false.
 */
-bool ESP_TxQueueEnqueue(char id, const char buffer[], size_t size);
+bool esp_tbuffer_enqueue(char id, const char buffer[], size_t size);
 
 /**
 * @brief 	Get data from queue.
@@ -63,5 +63,5 @@ bool ESP_TxQueueEnqueue(char id, const char buffer[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_TxQueueDenqueue(char *id, char **buffer, size_t *size);
+bool esp_tbuffer_denqueue(char *id, char **buffer, size_t *size);
 

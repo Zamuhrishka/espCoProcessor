@@ -22,11 +22,14 @@
 typedef struct
 {
 	uint8_t value[6];
-} 	MacAddr_t;
+} 	mac_t;
 //! @}
 
 //! Ip address (version 4)
-typedef uint32_t Ipv4Addr_t;
+typedef uint32_t ip4addr_t;
+
+//! BCD typedef
+typedef uint32_t bcd_t;
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E _______________________________________________________
 //_____ I N L I N E   F U N C T I O N _________________________________________
@@ -39,7 +42,7 @@ typedef uint32_t Ipv4Addr_t;
  *
  * @return 		the number that corresponds to hex char.
 **/
-int8_t Conver_HexCharToNum(char c);
+int8_t convert_hex_char_to_num(char c);
 
 /**
  * @brief		This function convert digit to hex char.
@@ -48,7 +51,7 @@ int8_t Conver_HexCharToNum(char c);
  *
  * @return 		the char that corresponds to digit.
 **/
-char Conver_HexNumToChar(uint8_t num);
+char convert_hex_num_to_char(uint8_t num);
 
 /**
  * @brief		This function convert string to MAC address.
@@ -58,7 +61,7 @@ char Conver_HexNumToChar(uint8_t num);
  *
  * @return 		true/false.
 **/
-bool Convert_StringToMacAddr(const char *str, MacAddr_t *macAddr);
+bool convert_string_to_mac_addr(const char *str, mac_t *mac);
 
 /**
  * @brief		This function convert MAC address to string.
@@ -68,7 +71,7 @@ bool Convert_StringToMacAddr(const char *str, MacAddr_t *macAddr);
  *
  * @return 		true/false.
 **/
-bool Convert_MacAddrToString(const MacAddr_t *macAddr, char *string);
+bool convert_mac_addr_to_string(const mac_t *mac, char *string);
 
 /**
  * @brief		This function convert IP address to string.
@@ -78,7 +81,7 @@ bool Convert_MacAddrToString(const MacAddr_t *macAddr, char *string);
  *
  * @return 		true/false.
 **/
-bool Convert_Ipv4addrToString(Ipv4Addr_t ipAddr, char *ip);
+bool convert_ip4addr_to_string(ip4addr_t ipAddr, char *ip);
 
 /**
  * @brief		This function convert string to IP address.
@@ -88,7 +91,7 @@ bool Convert_Ipv4addrToString(Ipv4Addr_t ipAddr, char *ip);
  *
  * @return 		true/false.
 **/
-bool Convert_StringToIpv4addr(Ipv4Addr_t *ipAddr, const char *ip);
+bool convert_string_to_ip4addr(ip4addr_t *ipAddr, const char *ip);
 
 /**
  * @brief		This function decode BCD number.
@@ -97,7 +100,7 @@ bool Convert_StringToIpv4addr(Ipv4Addr_t *ipAddr, const char *ip);
  *
  * @return 		decoded number.
 **/
-uint32_t Convert_NumToBcd(uint32_t dec);
+uint32_t convert_bcd_to_num(uint32_t dec);
 
 /**
  * @brief		This function code BCD number.
@@ -106,7 +109,7 @@ uint32_t Convert_NumToBcd(uint32_t dec);
  *
  * @return 		BCD number.
 **/
-uint32_t Convert_BcdToNum(uint32_t bcd);
+uint32_t convert_num_to_bcd(uint32_t bcd);
 
 /**
  * @brief		This function convert string to uint8_t number.
@@ -115,7 +118,7 @@ uint32_t Convert_BcdToNum(uint32_t bcd);
  *
  * @return 		number.
 **/
-uint8_t Conver_StringToUint8(const char *str);
+uint8_t convert_string_to_uint8(const char *str);
 
 /**
  * @brief		This function convert string to uint16_t number.
@@ -124,7 +127,7 @@ uint8_t Conver_StringToUint8(const char *str);
  *
  * @return 		number.
 **/
-uint16_t Conver_StringToUint16(const char *str);
+uint16_t convert_string_to_uint16(const char *str);
 
 /**
  * @brief		This function convert string to uint32_t number.
@@ -133,7 +136,7 @@ uint16_t Conver_StringToUint16(const char *str);
  *
  * @return 		number.
 **/
-uint32_t Conver_StringToUint32(const char *str);
+uint32_t convert_string_to_uint32(const char *str);
 
 /**
  * @brief		This function convert uint8_t number to string.
@@ -143,7 +146,7 @@ uint32_t Conver_StringToUint32(const char *str);
  *
  * @return 		void.
 **/
-void Conver_DigToStringUint8(char *str, uint8_t dig);
+void convert_uint8_to_string(char *str, uint8_t dig);
 
 /**
  * @brief		This function convert uint16_t number to string.
@@ -153,7 +156,7 @@ void Conver_DigToStringUint8(char *str, uint8_t dig);
  *
  * @return 		void.
 **/
-void Conver_DigToStringUint16(char *str, uint16_t dig);
+void convert_uint16_to_string(char *str, uint16_t dig);
 
 /**
  * @brief		This function convert uint32_t number to string.
@@ -163,7 +166,7 @@ void Conver_DigToStringUint16(char *str, uint16_t dig);
  *
  * @return 		void.
 **/
-void Conver_DigToStringUint32(char *str, uint32_t dig);
+void convert_uint32_to_string(char *str, uint32_t dig);
 
 float Utils_Round(float val, float rval);
 /* C++ detection */

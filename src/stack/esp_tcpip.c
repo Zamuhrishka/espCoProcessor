@@ -33,10 +33,10 @@
 static volatile bool tx_ready = false;
 
 //!Transmit mode
-static ESP_TransferMode_t transfer = NORMAL_MODE;
+static esp_tx_mode_t transfer = ESP_NORMAL_MODE;
 
 //!Current connection ID
-static ESP_ConnectionId_t id = ID_NONE;
+static esp_conn_id_t id = ESP_ID_NONE;
 
 //!Size of buffer
 static size_t size = 0;
@@ -44,16 +44,16 @@ static size_t size = 0;
 static char* buffer = NULL;
 
 //!Pointer of callback function for receive data handle.
-static Esp_TcpReceiveFp_t ESP_ReceiveDataCB = NULL;
+static esp_tcpip_receive_fn_t esp_tcpip_receive_cb = NULL;
 
 //!Pointer of callback function for connection open.
-static Esp_TcpConnectFp_t ESP_CloseConnectCB = NULL;
+static esp_tcpip_connect_fn_t esp_tcpip_close_connect = NULL;
 
 //!Pointer of callback function for connection close.
-static Esp_TcpConnectFp_t ESP_OpenConnectCB = NULL;
+static esp_tcpip_connect_fn_t esp_tcpip_open_connect = NULL;
 
 //!Pointer of callback function for transmit available handle
-static Esp_TcpTransmitPassFp_t ESP_TransmitPassCB = NULL;
+static esp_tcpip_transmit_fn_t esp_tcpip_transmit_cb = NULL;
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 /**
@@ -63,13 +63,13 @@ static Esp_TcpTransmitPassFp_t ESP_TransmitPassCB = NULL;
 *
 * @return 	true/false.
 */
-static bool ESP_IsBusy(const char msg[])
+static bool esp_is_busy(const char msg[])
 {
-	if(ESP_PatternCheck(msg, pattern_BUSY_P)) {
+	if(esp_pattern_check(msg, PATTERN_BUSY_P)) {
 		return true;
 	}
 
-	if(ESP_PatternCheck(msg, pattern_BUSY_S)) {
+	if(esp_pattern_check(msg, PATTERN_BUSY_S)) {
 		return true;
 	}
 
@@ -83,7 +83,7 @@ static bool ESP_IsBusy(const char msg[])
 *
 * @return 	true/false.
 */
-static bool ESP_NormalTransmit(void)
+static bool esp_normal_transmit(void)
 {
 	static enum _state
 	{
@@ -91,7 +91,7 @@ static bool ESP_NormalTransmit(void)
 		TRANSMIT,
 	}	state = PREPARATION;
 
-	char* param = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_answer_buffer();
 	char* ptr = param;
 	char number[12] = {0};
 	size_t len = 0;
@@ -103,9 +103,9 @@ static bool ESP_NormalTransmit(void)
 	switch(state)
 	{
 		case PREPARATION:
-			if(ESP_TxQueueDenqueue((char*)&id, &buffer, &size))
+			if(esp_tbuffer_denqueue((char*)&id, &buffer, &size))
 			{
-				if(id != ID_NONE)
+				if(id != ESP_ID_NONE)
 				{
 					*ptr = id;
 					ptr++;
@@ -115,13 +115,13 @@ static bool ESP_NormalTransmit(void)
 					ptr++;
 				}
 
-				Conver_DigToStringUint16(number, size);
+				convert_uint16_to_string(number, size);
 				if(strcat(ptr++, (char*)number) == NULL) {
 					return false;
 				}
 
 				len = strlen((char*)param);
-				if(ESP_SendAtCmd(CIPSEND, param, len) == false) {
+				if(esp_at_cmd_send(CIPSEND, param, len) == false) {
 					return false;
 				}
 
@@ -132,7 +132,7 @@ static bool ESP_NormalTransmit(void)
 		case TRANSMIT:
 			if(tx_ready)
 			{
-				if(ESP_SendAtRawData(buffer, size) == false) {
+				if(esp_data_send(buffer, size) == false) {
 				   return false;
 				}
 				state = PREPARATION;
@@ -151,7 +151,7 @@ static bool ESP_NormalTransmit(void)
 *
 * @return 	true/false.
 */
-static bool ESP_TransparentTransmit(void)
+static bool esp_transparent_transmit(void)
 {
 	static enum _state
 	{
@@ -164,7 +164,7 @@ static bool ESP_TransparentTransmit(void)
 	switch(state)
 	{
 		case PREPARATION:
-			if(ESP_SendAtCmd(CIPTRANSP, NULL, 0) == false) {
+			if(esp_at_cmd_send(CIPTRANSP, NULL, 0) == false) {
 				return false;
 			}
 			state = PREPARATION1;
@@ -176,9 +176,9 @@ static bool ESP_TransparentTransmit(void)
 			}
 			break;
 		case TRANSMIT:
-			if(ESP_TxQueueDenqueue((char*)&id, &buffer, &size))
+			if(esp_tbuffer_denqueue((char*)&id, &buffer, &size))
 			{
-				if(ESP_SendAtRawData(buffer, size) == false) {
+				if(esp_data_send(buffer, size) == false) {
 				   return false;
 				}
 			}
@@ -197,59 +197,59 @@ static bool ESP_TransparentTransmit(void)
 *
 * @return 	none.
 */
-static void ESP_NormalReceive(char msg[], size_t len)
+static void esp_normal_receive(char msg[], size_t len)
 {
 	struct slre_cap caps[1];
 	struct slre_cap caps_s[2];
 	struct slre_cap caps_m[3];
-	ESP_ConnectionId_t id = ID_NONE;
+	esp_conn_id_t id = ESP_ID_NONE;
 
-	if(ESP_PatternCheck(msg, pattern_CONNECT))
+	if(esp_pattern_check(msg, PATTERN_CONNECT))
 	{
 		if (slre_match((const char*)"(\\d+),CONNECT\\S*", msg, len, caps, 1, 0) > 0) {
 			id = *caps[0].ptr;
 		}
 
-		if(ESP_OpenConnectCB != NULL) {
-			ESP_OpenConnectCB(id);
+		if(esp_tcpip_open_connect != NULL) {
+			esp_tcpip_open_connect(id);
 		}
 	}
 
-	if(ESP_PatternCheck(msg, pattern_CLOSE))
+	if(esp_pattern_check(msg, PATTERN_CLOSE))
 	{
 		if (slre_match((const char*)"(\\d+),CLOSED\\S*", msg, len, caps, 1, 0) > 0) {
 			id = *caps[0].ptr;
 		}
 
-		if(ESP_CloseConnectCB != NULL) {
-			ESP_CloseConnectCB(id);
+		if(esp_tcpip_close_connect != NULL) {
+			esp_tcpip_close_connect(id);
 		}
 	}
 
-	if(ESP_PatternCheck(msg, pattern_TX_READY))
+	if(esp_pattern_check(msg, PATTERN_TX_READY))
 	{
 		tx_ready = true;
 	}
 
-	if(ESP_PatternCheck(msg, pattern_SEND_ACK))
+	if(esp_pattern_check(msg, PATTERN_SEND_ACK))
 	{
-		if(ESP_TransmitPassCB != NULL) {
-			ESP_TransmitPassCB();
+		if(esp_tcpip_transmit_cb != NULL) {
+			esp_tcpip_transmit_cb();
 		}
 	}
 
-	if(ESP_PatternCheck(msg, pattern_RECEIVE))
+	if(esp_pattern_check(msg, PATTERN_RECEIVE))
 	{
 		if (slre_match((const char*)"\\S*IPD,(\\d+):(\\S+)", msg, strlen(msg), caps_s, 2, 0) > 0)
 		{
-			if(ESP_ReceiveDataCB != NULL) {
-				ESP_ReceiveDataCB(ID_NONE, caps_s[1].ptr,  CONVER_TO_NUMBER(*caps_s[0].ptr));
+			if(esp_tcpip_receive_cb != NULL) {
+				esp_tcpip_receive_cb(ESP_ID_NONE, caps_s[1].ptr,  CONVER_TO_NUMBER(*caps_s[0].ptr));
 			}
 		}
 		else if (slre_match((const char*)"\\S*IPD,(\\d),(\\d+):(\\S+)", msg, strlen(msg), caps_m, 3, 0) > 0)
 		{
-			if(ESP_ReceiveDataCB != NULL) {
-				ESP_ReceiveDataCB(*caps_m[0].ptr, caps_m[2].ptr, CONVER_TO_NUMBER(*caps_m[1].ptr));
+			if(esp_tcpip_receive_cb != NULL) {
+				esp_tcpip_receive_cb(*caps_m[0].ptr, caps_m[2].ptr, CONVER_TO_NUMBER(*caps_m[1].ptr));
 			}
 		}
 	}
@@ -263,15 +263,15 @@ static void ESP_NormalReceive(char msg[], size_t len)
 *
 * @return 	none.
 */
-static void ESP_TransparentReceive(char msg[], size_t len)
+static void esp_transparent_receive(char msg[], size_t len)
 {
-	if(ESP_PatternCheck(msg, pattern_TRANSPARENT_READY))
+	if(esp_pattern_check(msg, PATTERN_TRANSPARENT_READY))
 	{
 		tx_ready = true;
 	}
 	else
 	{
-		ESP_ReceiveDataCB(ID_NONE, msg, len);
+		esp_tcpip_receive_cb(ESP_ID_NONE, msg, len);
 	}
 }
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
@@ -280,10 +280,11 @@ static void ESP_TransparentReceive(char msg[], size_t len)
 *
 * Public function defined in esp_tcpip.h
 */
-void ESP_RegisterReceiceCB(const Esp_TcpReceiveFp_t cb)
+void esp_register_receive_cb(const esp_tcpip_receive_fn_t cb)
 {
-	if(cb != NULL) {
-		ESP_ReceiveDataCB = cb;
+	if(cb != NULL)
+	{
+		esp_tcpip_receive_cb = cb;
 	}
 }
 
@@ -292,10 +293,11 @@ void ESP_RegisterReceiceCB(const Esp_TcpReceiveFp_t cb)
 *
 * Public function defined in esp_tcpip.h
 */
-void ESP_RegisterCloseConnectCB(const Esp_TcpConnectFp_t cb)
+void esp_register_close_conn_cb(const esp_tcpip_connect_fn_t cb)
 {
-	if(cb != NULL) {
-		ESP_CloseConnectCB = cb;
+	if(cb != NULL)
+	{
+		esp_tcpip_close_connect = cb;
 	}
 }
 
@@ -304,10 +306,11 @@ void ESP_RegisterCloseConnectCB(const Esp_TcpConnectFp_t cb)
 *
 * Public function defined in esp_tcpip.h
 */
-void ESP_RegisterOpenConnectCB(const Esp_TcpConnectFp_t cb)
+void esp_register_open_conn_cb(const esp_tcpip_connect_fn_t cb)
 {
-	if(cb != NULL) {
-		ESP_OpenConnectCB = cb;
+	if(cb != NULL)
+	{
+		esp_tcpip_open_connect = cb;
 	}
 }
 
@@ -316,10 +319,11 @@ void ESP_RegisterOpenConnectCB(const Esp_TcpConnectFp_t cb)
 *
 * Public function defined in esp_tcpip.h
 */
-void ESP_RegisterTransmitPassCB(const Esp_TcpTransmitPassFp_t cb)
+void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb)
 {
-	if(cb != NULL) {
-		ESP_TransmitPassCB = cb;
+	if(cb != NULL)
+	{
+		esp_tcpip_transmit_cb = cb;
 	}
 }
 
@@ -328,28 +332,28 @@ void ESP_RegisterTransmitPassCB(const Esp_TcpTransmitPassFp_t cb)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_RequestConnectionStatus(ESP_ConnStatus_t *status, uint32_t timeout)
+esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout)
 {
 	struct slre_cap caps[6];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd((uint8_t)CIPSTATUS, NULL, 0) == false) {
+	if(esp_at_cmd_send((uint8_t)CIPSTATUS, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
 		  return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK)) {
+	if(!esp_pattern_check(answer, PATTERN_OK)) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -372,12 +376,12 @@ ESPStatus_t ESP_RequestConnectionStatus(ESP_ConnStatus_t *status, uint32_t timeo
 	(*status).type = (strcmp (caps[2].ptr, (const char*) "TCP\0")) ? ESP_TCP : ESP_UDP;
 
 	memset((void *)(caps[3].ptr + caps[3].len),0,1);
-	if(!Convert_StringToIpv4addr(&status->remoteIp, caps[3].ptr)) {
+	if(!convert_string_to_ip4addr(&status->remoteIp, caps[3].ptr)) {
 		return ESP_INNER_ERR;
 	}
 
-	(*status).remotePort = Conver_StringToUint16(caps[4].ptr);
-	(*status).localPort = Conver_StringToUint16(caps[5].ptr);
+	(*status).remotePort = convert_string_to_uint16(caps[4].ptr);
+	(*status).localPort = convert_string_to_uint16(caps[5].ptr);
 
 	return ESP_PASS;
 }
@@ -387,27 +391,27 @@ ESPStatus_t ESP_RequestConnectionStatus(ESP_ConnStatus_t *status, uint32_t timeo
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t timeout)
+esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(connParam == NULL || (connParam->id != ID0 && connParam->id != ID1 &&
-							connParam->id != ID2 && connParam->id != ID3 &&
-							connParam->id != ID4 && connParam->id != ID_ALL &&
-							connParam->id != ID_NONE))
+	if(cfg == NULL || (cfg->id != ESP_ID0 && cfg->id != ESP_ID1 &&
+		cfg->id != ESP_ID2 && cfg->id != ESP_ID3 &&
+		cfg->id != ESP_ID4 && cfg->id != ESP_ID_ALL &&
+		cfg->id != ESP_ID_NONE))
 	{
 		return ESP_PARAM_ERR;
 	}
 
-	if(connParam->id != ID_NONE)
+	if(cfg->id != ESP_ID_NONE)
 	{
-		param[0] = connParam->id;
+		param[0] = cfg->id;
 		param[1] = ',';
 	}
 
@@ -415,7 +419,7 @@ ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t t
 		return ESP_INNER_ERR;
 	}
 
-	if(!Convert_Ipv4addrToString(connParam->remoteIp, (param + strlen((char*)param)))) {
+	if(!convert_ip4addr_to_string(cfg->remoteIp, (param + strlen((char*)param)))) {
 		return ESP_INNER_ERR;
 	}
 
@@ -423,32 +427,32 @@ ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t t
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint16((param + strlen((char*)param)), connParam->remotePort);
+	convert_uint16_to_string((param + strlen((char*)param)), cfg->remotePort);
 
-	if(connParam->keepAlive != 0)
+	if(cfg->keepAlive != 0)
 	{
 		if(strcat ((param + strlen((char*)param)), (char*)",\0") == NULL) {
 			return false;
 		}
 
-		Conver_DigToStringUint16((param + strlen((char*)param)), connParam->keepAlive);
+		convert_uint16_to_string((param + strlen((char*)param)), cfg->keepAlive);
 	}
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTART, param, len) == false) {
+	if(esp_at_cmd_send(CIPSTART, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
 	  return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	if((!ESP_PatternCheck(answer, pattern_OK)) && (!ESP_PatternCheck(answer, pattern_ALREADY_CONNECT))) {
+	if((!esp_pattern_check(answer, PATTERN_OK)) && (!esp_pattern_check(answer, PATTERN_ALREADY_CONNECT))) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -460,27 +464,27 @@ ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t t
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *connParam, uint32_t timeout)
+esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(connParam == NULL || (connParam->id != ID0 && connParam->id != ID1 &&
-							connParam->id != ID2 && connParam->id != ID3 &&
-							connParam->id != ID4 && connParam->id != ID_ALL &&
-							connParam->id != ID_NONE))
+	if(cfg == NULL || (cfg->id != ESP_ID0 && cfg->id != ESP_ID1 &&
+		cfg->id != ESP_ID2 && cfg->id != ESP_ID3 &&
+		cfg->id != ESP_ID4 && cfg->id != ESP_ID_ALL &&
+		cfg->id != ESP_ID_NONE))
 	{
 		return ESP_PARAM_ERR;
 	}
 
-	if(connParam->id != ID_NONE)
+	if(cfg->id != ESP_ID_NONE)
 	{
-		param[0] = connParam->id;
+		param[0] = cfg->id;
 		param[1] = ',';
 	}
 
@@ -488,7 +492,7 @@ ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *connParam, uint32_t t
 		return ESP_INNER_ERR;
 	}
 
-	if(!Convert_Ipv4addrToString(connParam->remoteIp, (param + strlen((char*)param)))) {
+	if(!convert_ip4addr_to_string(cfg->remoteIp, (param + strlen((char*)param)))) {
 		return ESP_INNER_ERR;
 	}
 
@@ -496,43 +500,43 @@ ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *connParam, uint32_t t
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint16((param + strlen((char*)param)), connParam->remotePort);
+	Conver_DigToStringUint16((param + strlen((char*)param)), cfg->remotePort);
 
-	if(connParam->localPort != 0)
+	if(cfg->localPort != 0)
 	{
 		if(strcat ((param + strlen((char*)param)), (char*)",\0") == NULL) {
 			return false;
 		}
 
-		Conver_DigToStringUint16((param + strlen((char*)param)), connParam->localPort);
+		Conver_DigToStringUint16((param + strlen((char*)param)), cfg->localPort);
 	}
 
-	if(connParam->mode != 0)
+	if(cfg->mode != 0)
 	{
 		if(strcat ((param + strlen((char*)param)), (char*)",\0") == NULL) {
 			return ESP_INNER_ERR;
 		}
 
-		if(strcat((param + strlen((char*)param)), (char*)&connParam->mode) == NULL) {
+		if(strcat((param + strlen((char*)param)), (char*)&cfg->mode) == NULL) {
 			return ESP_INNER_ERR;
 		}
 	}
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTART, param, len) == false) {
+	if(esp_at_cmd_send(CIPSTART, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
 	  return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	if((!ESP_PatternCheck(answer, pattern_OK)) && (!ESP_PatternCheck(answer, pattern_ALREADY_CONNECT))) {
+	if((!esp_pattern_check(answer, PATTERN_OK)) && (!esp_pattern_check(answer, PATTERN_ALREADY_CONNECT))) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -544,27 +548,27 @@ ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *connParam, uint32_t t
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_CloseMultiConnection(ESP_ConnectionId_t id, uint32_t timeout)
+esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(CIPCLOSE_M, (char*)&id, 1) == false) {
+	if(esp_at_cmd_send(CIPCLOSE_M, (char*)&id, 1) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
 	  return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -572,27 +576,27 @@ ESPStatus_t ESP_CloseMultiConnection(ESP_ConnectionId_t id, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_CloseSingleConnection(uint32_t timeout)
+esp_status_t esp_close_connection(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(CIPCLOSE_S, NULL, 0) == false) {
+	if(esp_at_cmd_send(CIPCLOSE_S, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -600,28 +604,28 @@ ESPStatus_t ESP_CloseSingleConnection(uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_MultipleConnectionEnable(uint32_t timeout)
+esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 {
-	ESP_ConnectionMode_t mode = MULTIPLE_CONNECT;
-	char* answer = ESP_AllocAnswerBuffer();
+	esp_conn_mode_t mode = ESP_MULTIPLE_CONNECT;
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(CIPMUX, (char*)&mode, 1ul) == false) {
+	if(esp_at_cmd_send(CIPMUX, (char*)&mode, 1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -629,28 +633,28 @@ ESPStatus_t ESP_MultipleConnectionEnable(uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_SingleConnectionEnable(uint32_t timeout)
+esp_status_t esp_single_connection_enable(uint32_t timeout)
 {
-	ESP_ConnectionMode_t mode = SINGLE_CONNECT;
-	char* answer = ESP_AllocAnswerBuffer();
+	esp_conn_mode_t mode = ESP_SINGLE_CONNECT;
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(CIPMUX, (char*)&mode, 1ul) == false) {
+	if(esp_at_cmd_send(CIPMUX, (char*)&mode, 1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK))
+	if(!esp_pattern_check(answer, PATTERN_OK))
 	{
 		if(strstr(answer, "CIPSERVER must be 0\r\n\0") != NULL) {
 			return ESP_SERVER_ON;
@@ -665,10 +669,10 @@ ESPStatus_t ESP_SingleConnectionEnable(uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout)
+esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
@@ -678,19 +682,19 @@ ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout)
 		return ESP_PARAM_ERR;
 	}
 
-	if(ESP_SendAtCmd(REQCIPMUX, NULL, 0) == false) {
+	if(esp_at_cmd_send(REQCIPMUX, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK))	{
+	if(!esp_pattern_check(answer, PATTERN_OK))	{
 		return ESP_INNER_ERR;
 	}
 
@@ -698,7 +702,7 @@ ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout)
 	   return ESP_INNER_ERR;
 	}
 
-	*mode = (ESP_ConnectionMode_t)(*caps[0].ptr);
+	*mode = (esp_conn_mode_t)(*caps[0].ptr);
 
 	return ESP_PASS;
 }
@@ -708,29 +712,29 @@ ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_SetupTransferMode(ESP_TransferMode_t mode, uint32_t timeout)
+esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(CIPMODE, (char*)&mode, (size_t)1ul) == false) {
+	if(esp_at_cmd_send(CIPMODE, (char*)&mode, (size_t)1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
 	transfer = mode;
 
-	return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -738,28 +742,28 @@ ESPStatus_t ESP_SetupTransferMode(ESP_TransferMode_t mode, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_RequestTransferMode(ESP_TransferMode_t *mode, uint32_t timeout)
+esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 {
 	struct slre_cap caps[1];
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtCmd(REQCIPMODE, NULL, 0ul) == false) {
+	if(esp_at_cmd_send(REQCIPMODE, NULL, 0ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_PASS;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK)) {
+	if(!esp_pattern_check(answer, PATTERN_OK)) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -767,7 +771,7 @@ ESPStatus_t ESP_RequestTransferMode(ESP_TransferMode_t *mode, uint32_t timeout)
 	   return false;
 	}
 
-	*mode = (ESP_TransferMode_t)(*caps[0].ptr);
+	*mode = (esp_tx_mode_t)(*caps[0].ptr);
 
 	return ESP_PASS;
 }
@@ -777,27 +781,27 @@ ESPStatus_t ESP_RequestTransferMode(ESP_TransferMode_t *mode, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_TransparentModeDisable(uint32_t timeout)
+esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 {
-	char* answer = ESP_AllocAnswerBuffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(ESP_SendAtRawData("+++", strlen("+++")) == false) {
+	if(esp_data_send("+++", strlen("+++")) == false) {
 	   return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
 	   return ESP_RECEIVE_ERR;
 	}
 
-	if(ESP_IsBusy(answer)) {
+	if(esp_is_busy(answer)) {
 		return ESP_BUSY;
 	}
 
-	return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -805,11 +809,11 @@ ESPStatus_t ESP_TransparentModeDisable(uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_StartServerTCP(uint16_t port, uint32_t timeout)
+esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -823,21 +827,21 @@ ESPStatus_t ESP_StartServerTCP(uint16_t port, uint32_t timeout)
 	}
 
 	len = strlen((char*)param);
-	if(ESP_SendAtCmd(CIPSERVER, param, len) == false) {
+	if(esp_at_cmd_send(CIPSERVER, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
 	while(true)
 	{
-		if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 		   return ESP_RECEIVE_ERR;
 		}
 
-		if(ESP_IsBusy(answer)) {
+		if(esp_is_busy(answer)) {
 			return ESP_BUSY;
 		}
 
-		return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+		return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 	}
 
 	return ESP_INNER_ERR;
@@ -848,12 +852,12 @@ ESPStatus_t ESP_StartServerTCP(uint16_t port, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout)
+esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout)
 {
 	char* strPort = NULL;
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -862,7 +866,7 @@ ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout)
 	param[0] = '0';
 	if(port != 0)
 	{
-		Conver_DigToStringUint32(strPort, port);
+		convert_uint32_to_string(strPort, port);
 
 		if(strcat ((char*)param, (char*)",\0") == NULL) {
 			return ESP_INNER_ERR;
@@ -874,21 +878,21 @@ ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout)
 	}
 
 	len = strlen((char*)param);
-	if(ESP_SendAtCmd(CIPSERVER, param, len) == false) {
+	if(esp_at_cmd_send(CIPSERVER, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
 	while(true)
 	{
-		if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 			return ESP_RECEIVE_ERR;
 		}
 
-		if(ESP_IsBusy(answer)) {
+		if(esp_is_busy(answer)) {
 			return ESP_BUSY;
 		}
 
-		return (!ESP_PatternCheck(answer, pattern_OK)) ? ESP_INNER_ERR : ESP_PASS;
+		return (!esp_pattern_check(answer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
 	}
 
 	return ESP_INNER_ERR;
@@ -899,29 +903,29 @@ ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_SetupServerTimeout(uint16_t servTimeout, uint32_t timeout)
+esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint16(param, servTimeout);
+	Conver_DigToStringUint16(param, stimeout);
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSTO, param, len) == false) {
+	if(esp_at_cmd_send(CIPSTO, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	return (ESP_PatternCheck(answer, pattern_ERROR)) ? ESP_INNER_ERR : ESP_PASS;
+	return (esp_pattern_check(answer, PATTERN_ERROR)) ? ESP_INNER_ERR : ESP_PASS;
 }
 
 /**
@@ -929,33 +933,33 @@ ESPStatus_t ESP_SetupServerTimeout(uint16_t servTimeout, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_SetupServerMaxConn(uint8_t max_conn, uint32_t timeout)
+esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
 	}
 
-	if(max_conn > ESP_SERVER_MAX_CONN) {
+	if(conn > ESP_SERVER_MAX_CONN) {
 		return ESP_PARAM_ERR;
 	}
 
-	Conver_DigToStringUint8(param, max_conn);
+	Conver_DigToStringUint8(param, conn);
 
 	len = strlen((char*)param);
 
-	if(ESP_SendAtCmd(CIPSERVERMAXCONN, param, len) == false) {
+	if(esp_at_cmd_send(CIPSERVERMAXCONN, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK)) {
+	if(!esp_pattern_check(answer, PATTERN_OK)) {
 		return ESP_INNER_ERR;
 	}
 
@@ -967,11 +971,11 @@ ESPStatus_t ESP_SetupServerMaxConn(uint8_t max_conn, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-ESPStatus_t ESP_SetupDomainName(const char domain[], uint32_t timeout)
+esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -987,15 +991,15 @@ ESPStatus_t ESP_SetupDomainName(const char domain[], uint32_t timeout)
 	param[len] = '"';
 	len++;
 
-	if(ESP_SendAtCmd(CIPDOMAIN, param, len) == false) {
+	if(esp_at_cmd_send(CIPDOMAIN, param, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
-	if(!ESP_PatternCheck(answer, pattern_OK)) {
+	if(!esp_pattern_check(answer, PATTERN_OK)) {
 		return ESP_INNER_ERR;
 	}
 
@@ -1007,32 +1011,32 @@ ESPStatus_t ESP_SetupDomainName(const char domain[], uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-uint32_t ESP_Ping(Ipv4Addr_t ip, uint32_t timeout)
+uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	size_t len = 0;
-	char* param = ESP_AllocParamBuffer();
-	char* answer = ESP_AllocAnswerBuffer();
+	char* param = esp_alloc_param_buffer();
+	char* answer = esp_alloc_answer_buffer();
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
 	}
 
 	param[0] = '"';
-	Convert_Ipv4addrToString(ip, &param[1]);
+	convert_ip4addr_to_string(ip, &param[1]);
 	len = strlen((char*)param);
 	param[len] = '"';
 	len++;
 
-	if(ESP_SendAtCmd(PING, param, len) == false) {
+	if(esp_at_cmd_send(PING, param, len) == false) {
 		return 0;
 	}
 
-	if(ESP_HardWareReceiveUartBlock((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
 		return 0;
 	}
 
-	if(ESP_PatternCheck(answer, pattern_ERROR)) {
+	if(esp_pattern_check(answer, PATTERN_ERROR)) {
 		return 0;
 	}
 
@@ -1048,13 +1052,13 @@ uint32_t ESP_Ping(Ipv4Addr_t ip, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-bool ESP_TransmitData(ESP_ConnectionId_t id, const char data[], size_t size)
+bool esp_tcp_transmit(esp_conn_id_t id, const char data[], size_t size)
 {
     if((data == NULL) || ((size == 0))) {
     	return false;
     }
 
-    return ESP_TxQueueEnqueue((char)id, data, size);
+    return esp_tbuffer_enqueue((char)id, data, size);
 }
 
 /**
@@ -1062,17 +1066,17 @@ bool ESP_TransmitData(ESP_ConnectionId_t id, const char data[], size_t size)
 *
 * Public function defined in esp_tcpip.h
 */
-bool ESP_TransmitDataHandle(void)
+bool esp_tcp_transmit_handle(void)
 {
 	bool res = false;
 
-	if(transfer == TRANSPARENT_MODE)
+	if(transfer == ESP_TRANSPARENT_MODE)
 	{
-		res = ESP_TransparentTransmit();
+		res = esp_transparent_transmit();
 	}
 	else
 	{
-		res = ESP_NormalTransmit();
+		res = esp_normal_transmit();
 	}
 
 	return res;
@@ -1083,15 +1087,15 @@ bool ESP_TransmitDataHandle(void)
 *
 * Public function defined in esp_tcpip.h
 */
-void ESP_TcpMsgHandleCallBack(char* msg, size_t len)
+void esp_tcp_receive_handle(char* msg, size_t len)
 {
-	if(transfer == TRANSPARENT_MODE)
+	if(transfer == ESP_TRANSPARENT_MODE)
 	{
-		ESP_TransparentReceive(msg, len);
+		esp_transparent_receive(msg, len);
 	}
 	else
 	{
-		ESP_NormalReceive(msg, len);
+		esp_normal_receive(msg, len);
 	}
 }
 

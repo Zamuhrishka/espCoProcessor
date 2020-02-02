@@ -19,7 +19,7 @@
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
 //!UART receive buffer
-static char receive_data[BUFFER_SIZE] = {0};
+static char esp_hardware_buffer[BUFFER_SIZE] = {0};
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 /**
 * @brief 	This function disable UART interrupt.
@@ -28,7 +28,7 @@ static char receive_data[BUFFER_SIZE] = {0};
 *
 * @return 	none.
 */
-inline static void ESP_UartIrqDisable(void)
+inline static void esp_uart_disable_irq(void)
 {
 	extern UART_HandleTypeDef huart3;
 	__HAL_UART_DISABLE_IT(&huart3, UART_IT_IDLE);
@@ -41,7 +41,7 @@ inline static void ESP_UartIrqDisable(void)
 *
 * @return 	none.
 */
-inline static void ESP_UartIrqEnable(void)
+inline static void esp_uart_enable_irq(void)
 {
 	extern UART_HandleTypeDef huart3;
 	__HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
@@ -54,7 +54,7 @@ inline static void ESP_UartIrqEnable(void)
 *
 * @return 	none.
 */
-inline static void ESP_UartClrFlag(void)
+inline static void esp_uart_clear_irq_flag(void)
 {
 	uint8_t byte = 0;
 	extern UART_HandleTypeDef huart3;
@@ -70,7 +70,7 @@ inline static void ESP_UartClrFlag(void)
 *
 * @return 	none.
 */
-inline static bool ESP_IsUartIrq(void)
+inline static bool esp_uart_test_irq(void)
 {
 	extern UART_HandleTypeDef huart3;
 	return (__HAL_UART_GET_FLAG(&huart3, UART_FLAG_IDLE) == SET) ? true : false;
@@ -83,7 +83,7 @@ inline static bool ESP_IsUartIrq(void)
 *
 * @return 	none.
 */
-inline static void ESP_DmaIrqDisable(void)
+inline static void esp_uart_dma_disable_irq(void)
 {
 	extern UART_HandleTypeDef huart3;
 
@@ -100,7 +100,7 @@ inline static void ESP_DmaIrqDisable(void)
 *
 * @return 	none.
 */
-inline static void ESP_DmaIrqEnable(void)
+inline static void esp_uart_dma_enable_irq(void)
 {
 }
 
@@ -111,7 +111,7 @@ inline static void ESP_DmaIrqEnable(void)
 *
 * @return 	none.
 */
-inline static bool ESP_IsDmaIrq(void)
+inline static bool esp_uart_dma_test_irq(void)
 {
 	extern DMA_HandleTypeDef hdma_usart3_rx;
 	return (__HAL_DMA_GET_FLAG(&hdma_usart3_rx, DMA_FLAG_TCIF1_5) == SET) ? true : false;
@@ -124,7 +124,7 @@ inline static bool ESP_IsDmaIrq(void)
 *
 * @return 	none.
 */
-inline static void ESP_ClrDmaIrq(void)
+inline static void esp_uart_dma_clear_irq_flag(void)
 {
 	extern DMA_HandleTypeDef hdma_usart3_rx;
 	__HAL_DMA_CLEAR_FLAG(&hdma_usart3_rx, DMA_FLAG_TCIF1_5);
@@ -137,7 +137,7 @@ inline static void ESP_ClrDmaIrq(void)
 *
 * @return 	none.
 */
-inline static void ESP_DmaDisable(void)
+inline static void esp_uart_dma_disable(void)
 {
 	extern DMA_HandleTypeDef hdma_usart3_rx;
 	__HAL_DMA_DISABLE(&hdma_usart3_rx);
@@ -150,7 +150,7 @@ inline static void ESP_DmaDisable(void)
 *
 * @return 	none.
 */
-inline static void ESP_DmaEnable(void)
+inline static void esp_uart_dma_enable(void)
 {
 	extern DMA_HandleTypeDef hdma_usart3_rx;
 	__HAL_DMA_ENABLE(&hdma_usart3_rx);
@@ -163,7 +163,7 @@ inline static void ESP_DmaEnable(void)
 *
 * @return 	number of received bytes.
 */
-inline static size_t ESP_DmaGetNbm(void)
+inline static size_t esp_uart_dma_get_nbm(void)
 {
 	extern DMA_HandleTypeDef hdma_usart3_rx;
 	return __HAL_DMA_GET_COUNTER((&hdma_usart3_rx));
@@ -176,7 +176,7 @@ inline static size_t ESP_DmaGetNbm(void)
 *
 * @return 	none.
 */
-inline static void ESP_ReceiveDmaCfg(uint8_t *pData, uint16_t Size)
+inline static void esp_uart_dma_receive_cfg(uint8_t *pData, uint16_t Size)
 {
 	extern UART_HandleTypeDef huart3;
 
@@ -189,143 +189,124 @@ inline static void ESP_ReceiveDmaCfg(uint8_t *pData, uint16_t Size)
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
 /**
-* @brief 	This function init hardware unit.
+* This function init hardware unit.
 *
-* @param	none.
-*
-* @return 	none.
+* Public function defined in esp_port.h
 */
-void ESP_HardWareInit(void)
+void esp_harware_init(void)
 {
-	ESP_HardWarePowerOn();
-	ESP_HardWareSwitchMode(BLOCK);
+	esp_hardware_power_on();
+	esp_hardware_switch_mode(BLOCK);
 }
 
 /**
-* @brief 	This function switch between block and unblock modes.
+* This function switch between block and unblock modes.
 *
-* @param	mode[in] - type of mode.
-*
-* @return 	none.
+* Public function defined in esp_port.h
 */
-void ESP_HardWareSwitchMode(Blocking_t mode)
+void esp_hardware_switch_mode(esp_blocking_t mode)
 {
 	if(mode == BLOCK)
 	{
-		ESP_UartIrqDisable();
-		ESP_DmaDisable();
+		esp_uart_disable_irq();
+		esp_uart_dma_disable();
 	}
 	else
 	{
-		ESP_DmaDisable();
-		ESP_UartClrFlag();
-		ESP_UartIrqEnable();
-		ESP_ReceiveDmaCfg((uint8_t*)receive_data, sizeof(receive_data));
+		esp_uart_dma_disable();
+		esp_uart_clear_irq_flag();
+		esp_uart_enable_irq();
+		esp_uart_dma_receive_cfg((uint8_t*)esp_hardware_buffer, sizeof(esp_hardware_buffer));
 	}
 }
 
 /**
-* @brief 	Low level function for enable power on module.
+* This function is low level function for enable power on module.
 *
-* @param	none.
-*
-* @return 	true/false.
+* Public function defined in esp_port.h
 */
-bool ESP_HardWarePowerOn(void)
+bool esp_hardware_power_on(void)
 {
 	return false;
 }
 
 /**
-* @brief 	Low level function for disable power on module.
+* This function is low level function for disable power on module.
 *
-* @param	none.
-*
-* @return 	true/false.
+* Public function defined in esp_port.h
 */
-bool ESP_HardWarePowerOff(void)
+bool esp_hardware_power_off(void)
 {
 	return false;
 }
 
 /**
-* @brief 	Low level function for transmit data throw UART.
+* This function is low level function for transmit data throw UART.
 *
-* @param	data[in] - array of data.
-* @param	size[in] - size of data.
-*
-* @return 	none.
+* Public function defined in esp_port.h
 */
-bool ESP_HardWareTransmitUartBlock(const char data[], uint16_t size)
+bool esp_hardware_transmit_block(const char data[], uint16_t size)
 {
 	return HAL_UART_Transmit_DMA(&huart3, (uint8_t*)data, size) == HAL_OK ? true : false;
 }
 
 /**
-* @brief 	Low level function for transmit data throw UART in block mode.
+* This function is low level function for receive data
+* throw UART in block mode.
 *
-* @param	data[in] - array of data.
-* @param	size[in] - size of data.
-* @param	timeout[in] - timeout in msec. for waiting data.
-*
-* @return 	none.
+* Public function defined in esp_port.h
 */
-ESPStatus_t ESP_HardWareReceiveUartBlock(uint8_t* data, uint16_t size, uint32_t timeout)
+esp_status_t esp_hardware_receive_block(uint8_t* data, uint16_t size, uint32_t timeout)
 {
 	uint32_t _timeout = 0ul;
 
-	ESP_HardWareSwitchMode(BLOCK);
+	esp_hardware_switch_mode(BLOCK);
 
-	ESP_UartIrqDisable();
-	ESP_DmaDisable();
-	ESP_ReceiveDmaCfg(data, size);
+	esp_uart_disable_irq();
+	esp_uart_dma_disable();
+	esp_uart_dma_receive_cfg(data, size);
 
 	_timeout = HAL_GetTick() + timeout;
-	while(!ESP_IsUartIrq())
+	while(!esp_uart_test_irq())
 	{
 		 if(HAL_GetTick() > _timeout) {
 		  return ESP_TIMEOUT;
 		 }
 
-		 if(ESP_IsDmaIrq())
+		 if(esp_uart_dma_test_irq())
 		 {
-			 ESP_ClrDmaIrq();
+			 esp_uart_dma_clear_irq_flag();
 			 return ESP_SIZE_ERR;
 		 }
 	};
 
-	ESP_UartClrFlag();
-	ESP_DmaIrqDisable();
-	ESP_DmaDisable();
+	esp_uart_clear_irq_flag();
+	esp_uart_dma_disable_irq();
+	esp_uart_dma_disable();
 
 	return ESP_PASS;
 }
 
 /**
-* @brief 	This function is interrupt handler for received
-*			data throw UART.
+* This function is interrupt handler for received
+* data throw UART
 *
-* @warning	This function need to be put in the RX UART
-* 			interrupt vector handler.
-*
-* @param	none.
-*
-* @return 	none.
+* Public function defined in esp_port.h
 */
-void ESP_HardWareReceiveIrq(void)
+void esp_hardware_receive_irq(void)
 {
 	size_t size = 0;
 
-	if(ESP_IsUartIrq())
+	if(esp_uart_test_irq())
 	{
-		size = BUFFER_SIZE - ESP_DmaGetNbm();
+		size = BUFFER_SIZE - esp_uart_dma_get_nbm();
 
-		if(!ESP_RxQueueEnqueue(receive_data, size)) {
+		if(!esp_rbuffer_enqueue(esp_hardware_buffer, size)) {
 			//TODO: Add error handler
 		}
 
-		ESP_UartClrFlag();
-		ESP_DmaIrqDisable();
-		ESP_ReceiveDmaCfg((uint8_t*)receive_data, sizeof(receive_data));
+		esp_uart_clear_irq_flag();
+		esp_uart_dma_disable_irq();
+		esp_uart_dma_receive_cfg((uint8_t*)esp_hardware_buffer, sizeof(esp_hardware_buffer));
 	}
 }

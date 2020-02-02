@@ -16,15 +16,15 @@
 //_____ C O N F I G S  ________________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ D E F I N I T I O N ___________________________________________________
-//! @brief  Connection status
+//! @brief  Connection state
 //! @{
 typedef enum
 {
-	ESP_GOTIP        		=       '2',										///< The ESP8266 Station is connected to an AP and its IP is obtained
+	ESP_GOT_IP        		=       '2',										///< The ESP8266 Station is connected to an AP and its IP is obtained
 	ESP_CONNECTED        	=       '3',										///< The ESP8266 Station has created a TCP or UDP transmission
 	ESP_DISCONNECTED		=		'4',										///< The TCP or UDP transmission of ESP8266 Station is disconnected
 	ESP_NOT_CONNECTED		=		'5',										///< The ESP8266 Station does NOT connect to an AP
-}	ESP_ConnStat_t;
+}	esp_conn_state_t;
 //! @}
 
 //! @brief  Connection types
@@ -33,7 +33,7 @@ typedef enum
 {
 	ESP_TCP        			=       1,											///< TCP connection type
 	ESP_UDP        			=       2,											///< UDP connection type
-}	ESP_ConnType_t;
+}	esp_conn_type_t;
 //! @}
 
 //! @brief  Connection wifi types
@@ -42,97 +42,97 @@ typedef enum
 {
 	ESP_CLIENT        		=       1,											///< Create the TCP client
 	ESP_SERVER       		=       2,											///< Create the TCP server
-}	ESP_ConnTeType_t;
+}	esp_conn_tetype_t;
 //! @}
 
 //! @brief  Transmit modes
 //! @{
 typedef enum
 {
-	NORMAL_MODE        		=       '0',										///< Normal transmit mode
-	TRANSPARENT_MODE        =       '1',										///< Transparent transmit mode
-}	ESP_TransferMode_t;
+	ESP_NORMAL_MODE        	=       '0',									///< Normal transmit mode
+	ESP_TRANSPARENT_MODE    =       '1',									///< Transparent transmit mode
+}	esp_tx_mode_t;
 //! @}
 
 //! @brief List of connections modes
 //! @{
 typedef enum
 {
-	SINGLE_CONNECT        	=       '0',										///< Single connection mode
-	MULTIPLE_CONNECT        =       '1',										///< Multiple connection mode
-}	ESP_ConnectionMode_t;
+	ESP_SINGLE_CONNECT       =       '0',									///< Single connection mode
+	ESP_MULTIPLE_CONNECT     =       '1',									///< Multiple connection mode
+}	esp_conn_mode_t;
 //! @}
 
 //! @brief List of UDP connection work modes
 //! @{
 typedef enum
 {
-	UDP_MODE0        		=       '0',
-	UDP_MODE1        		=       '1',
-	UDP_MODE2        		=       '2',
-}	ESP_UdpMode_t;
+	ESP_UDP_MODE0        	=       '0',
+	ESP_UDP_MODE1        	=       '1',
+	ESP_UDP_MODE2        	=       '2',
+}	esp_udp_mode_t;
 //! @}
 
 //! @brief  List of valid connection IDs
 //! @{
 typedef enum
 {
-	ID0           			=       '0',
-	ID1         			=       '1',
-	ID2         			=       '2',
-	ID3         			=       '3',
-	ID4         			=       '4',
-	ID_ALL         			=       '5',
-	ID_NONE					=		'6'
-}	ESP_ConnectionId_t;
+	ESP_ID0           		=       '0',
+	ESP_ID1         		=       '1',
+	ESP_ID2         		=       '2',
+	ESP_ID3         		=       '3',
+	ESP_ID4         		=       '4',
+	ESP_ID_ALL         		=       '5',
+	ESP_ID_NONE				=		'6'
+}	esp_conn_id_t;
 //! @}
 
 //! @brief  structure of TCP/IP connection status
 //! @{
 typedef struct
 {
-	ESP_ConnStat_t stat;														///< Status of the ESP8266 Station interface.
-	ESP_ConnTeType_t tetype;													///< Server or Client
-	ESP_ConnType_t type;														///< String parameter, "TCP" or "UDP"
-	ESP_ConnectionId_t id;														///< ID of the connection (0~4), used for multiple connections
-	Ipv4Addr_t remoteIp;														///< The remote IP address
+	esp_conn_state_t stat;														///< Status of the ESP8266 Station interface.
+	esp_conn_tetype_t tetype;													///< Server or Client
+	esp_conn_type_t type;														///< String parameter, "TCP" or "UDP"
+	esp_conn_id_t id;															///< ID of the connection (0~4), used for multiple connections
+	ip4addr_t remoteIp;														///< The remote IP address
 	uint16_t remotePort;														///< The remote port number
 	uint16_t localPort;															///< ESP8266 local port number
-}	ESP_ConnStatus_t;
+}	esp_conn_status_t;
 //! @}
 
 //! @brief  structure of TCP connection param
 //! @{
 typedef struct
 {
-	ESP_ConnectionId_t id;														///< ID of the connection (0~4), used for multiple connections
-	Ipv4Addr_t remoteIp;														///< The remote IP address
+	esp_conn_id_t id;															///< ID of the connection (0~4), used for multiple connections
+	ip4addr_t remoteIp;														///< The remote IP address
 	uint16_t remotePort;														///< The remote port number
 	uint16_t localPort;															///< ESP8266 local port number
 	uint32_t keepAlive;															///< Detection time interval when TCP is kept alive
-}	TCP_ConnParam_t;
+}	esp_tcp_cfg_t;
 //! @}
 
 //! @brief  structure of UDP connection param
 //! @{
 typedef struct
 {
-	ESP_ConnectionId_t id;														///< ID of the connection (0~4), used for multiple connections
+	esp_conn_id_t id;															///< ID of the connection (0~4), used for multiple connections
 	uint16_t localPort;															///< ESP8266 local port number
-	Ipv4Addr_t remoteIp;														///< The remote IP address
+	ip4addr_t remoteIp;														///< The remote IP address
 	uint16_t remotePort;														///< The remote port number
-	ESP_UdpMode_t mode;
-}	UDP_ConnParam_t;
+	esp_udp_mode_t mode;
+}	esp_udp_cfg_t;
 //! @}
 
 //!Prototype of callback function for receive data handle.
-typedef bool (*Esp_TcpReceiveFp_t)(ESP_ConnectionId_t id, const char data[], size_t size);
+typedef bool (*esp_tcpip_receive_fn_t)(esp_conn_id_t id, const char data[], size_t size);
 
 //!Prototype of callback function for connection open/close.
-typedef bool (*Esp_TcpConnectFp_t)(ESP_ConnectionId_t id);
+typedef bool (*esp_tcpip_connect_fn_t)(esp_conn_id_t id);
 
 //!Prototype of callback function for transmit available handle
-typedef void (*Esp_TcpTransmitPassFp_t)(void);
+typedef void (*esp_tcpip_transmit_fn_t)(void);
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
@@ -144,7 +144,7 @@ typedef void (*Esp_TcpTransmitPassFp_t)(void);
 *
 * @return 	none.
 */
-void ESP_RegisterReceiceCB(const Esp_TcpReceiveFp_t cb);
+void esp_register_receive_cb(const esp_tcpip_receive_fn_t cb);
 
 /**
 * @brief 	This function register TCP connection close callback.
@@ -153,7 +153,7 @@ void ESP_RegisterReceiceCB(const Esp_TcpReceiveFp_t cb);
 *
 * @return 	none.
 */
-void ESP_RegisterCloseConnectCB(const Esp_TcpConnectFp_t cb);
+void esp_register_close_conn_cb(const esp_tcpip_connect_fn_t cb);
 
 /**
 * @brief 	This function register TCP connection close callback.
@@ -162,7 +162,7 @@ void ESP_RegisterCloseConnectCB(const Esp_TcpConnectFp_t cb);
 *
 * @return 	none.
 */
-void ESP_RegisterOpenConnectCB(const Esp_TcpConnectFp_t cb);
+void esp_register_open_conn_cb(const esp_tcpip_connect_fn_t cb);
 
 /**
 * @brief 	This function register transmit pass callback.
@@ -171,7 +171,7 @@ void ESP_RegisterOpenConnectCB(const Esp_TcpConnectFp_t cb);
 *
 * @return 	none.
 */
-void ESP_RegisterTransmitPassCB(const Esp_TcpTransmitPassFp_t cb);
+void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb);
 
 /**
 * @brief 	This function read the connection status.
@@ -189,7 +189,7 @@ void ESP_RegisterTransmitPassCB(const Esp_TcpTransmitPassFp_t cb);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_RequestConnectionStatus(ESP_ConnStatus_t *status, uint32_t timeout);
+esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout);
 
 /**
 * @brief 	This function establish TCP connection.
@@ -208,7 +208,7 @@ ESPStatus_t ESP_RequestConnectionStatus(ESP_ConnStatus_t *status, uint32_t timeo
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t timeout);
+esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout);
 
 /**
 * @brief 	This function establish UDP connection.
@@ -227,7 +227,7 @@ ESPStatus_t ESP_EstablishConnectTCP(const TCP_ConnParam_t *connParam, uint32_t t
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *param, uint32_t timeout);
+esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout);
 
 /**
 * @brief 	This function close connection by ID.
@@ -244,7 +244,7 @@ ESPStatus_t ESP_EstablishConnectUDP(const UDP_ConnParam_t *param, uint32_t timeo
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_CloseMultiConnection(ESP_ConnectionId_t id, uint32_t timeout);
+esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout);
 
 /**
 * @brief 	This function close current connection.
@@ -260,7 +260,7 @@ ESPStatus_t ESP_CloseMultiConnection(ESP_ConnectionId_t id, uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_CloseSingleConnection(uint32_t timeout);
+esp_status_t esp_close_connection(uint32_t timeout);
 
 /**
 * @brief 	This function enable multiple connections mode.
@@ -281,7 +281,7 @@ ESPStatus_t ESP_CloseSingleConnection(uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_MultipleConnectionEnable(uint32_t timeout);
+esp_status_t esp_multiple_connection_enable(uint32_t timeout);
 
 /**
 * @brief 	This function enable single connections mode.
@@ -302,7 +302,7 @@ ESPStatus_t ESP_MultipleConnectionEnable(uint32_t timeout);
 * <li> <b>ESP_PASS</b> - There are no error.
 * </ul>
 */
-ESPStatus_t ESP_SingleConnectionEnable(uint32_t timeout);
+esp_status_t esp_single_connection_enable(uint32_t timeout);
 
 /**
 * @brief 	This function request multiplexer mode.
@@ -321,7 +321,7 @@ ESPStatus_t ESP_SingleConnectionEnable(uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout);
+esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout);
 
 /**
 * @brief 	This function setup transfer mode.
@@ -343,7 +343,7 @@ ESPStatus_t ESP_RequestConfigMux(ESP_ConnectionMode_t *mode, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_SetupTransferMode(ESP_TransferMode_t mode, uint32_t timeout);
+esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout);
 
 /**
 * @brief 	This function request transfer mode.
@@ -362,7 +362,7 @@ ESPStatus_t ESP_SetupTransferMode(ESP_TransferMode_t mode, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_RequestTransferMode(ESP_TransferMode_t *mode, uint32_t timeout);
+esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout);
 
 /**
 * @brief 	This function disable transparent transmit mode.
@@ -386,7 +386,7 @@ ESPStatus_t ESP_RequestTransferMode(ESP_TransferMode_t *mode, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_TransparentModeDisable(uint32_t timeout);
+esp_status_t esp_transparent_mode_disable(uint32_t timeout);
 
 /**
 * @brief 	This function start TCP server.
@@ -409,7 +409,7 @@ ESPStatus_t ESP_TransparentModeDisable(uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_StartServerTCP(uint16_t port, uint32_t timeout);
+esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout);
 
 /**
 * @brief 	This function stop TCP server.
@@ -428,7 +428,7 @@ ESPStatus_t ESP_StartServerTCP(uint16_t port, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout);
+esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout);
 
 /**
 * @brief 	This function sets the TCP Server Timeout.
@@ -451,7 +451,7 @@ ESPStatus_t ESP_CloseServerTCP(uint16_t port, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_SetupServerTimeout(uint16_t servTimeout, uint32_t timeout);
+esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout);
 
 /**
 * @brief 	This function set the Maximum Connections Allowed by Server.
@@ -473,7 +473,7 @@ ESPStatus_t ESP_SetupServerTimeout(uint16_t servTimeout, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_SetupServerMaxConn(uint8_t max_conn, uint32_t timeout);
+esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout);
 
 /**
 * @brief 	This function setup DNS name.
@@ -494,7 +494,7 @@ ESPStatus_t ESP_SetupServerMaxConn(uint8_t max_conn, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-ESPStatus_t ESP_SetupDomainName(const char domain[], uint32_t timeout);
+esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout);
 
 /**
 * @brief 	This function ping packets.
@@ -504,7 +504,7 @@ ESPStatus_t ESP_SetupDomainName(const char domain[], uint32_t timeout);
 *
 * @return	the response time of ping.
 */
-uint32_t ESP_Ping(Ipv4Addr_t ip, uint32_t timeout);
+uint32_t esp_ping(ip4addr_t ip, uint32_t timeout);
 
 /**
 * @brief 	This function add data into transmit buffer.
@@ -517,7 +517,7 @@ uint32_t ESP_Ping(Ipv4Addr_t ip, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool ESP_TransmitData(ESP_ConnectionId_t id, const char data[], size_t size);
+bool esp_tcp_transmit(esp_conn_id_t id, const char data[], size_t size);
 
 /**
 * @brief 	This function handle of transmit buffer.
@@ -526,7 +526,7 @@ bool ESP_TransmitData(ESP_ConnectionId_t id, const char data[], size_t size);
 *
 * @return 	true/false.
 */
-bool ESP_TransmitDataHandle(void);
+bool esp_tcp_transmit_handle(void);
 
 /**
 * @brief 	This function handle TCP connections.
@@ -536,4 +536,4 @@ bool ESP_TransmitDataHandle(void);
 *
 * @return 	none.
 */
-void ESP_TcpMsgHandleCallBack(char* msg, size_t len);
+void esp_tcp_receive_handle(char* msg, size_t len);

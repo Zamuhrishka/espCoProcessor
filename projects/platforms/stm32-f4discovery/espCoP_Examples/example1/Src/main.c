@@ -90,7 +90,7 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static bool receice_handlle(ESP_ConnectionId_t id, const char data[], size_t size)
+static bool receice_handlle(esp_conn_id_t id, const char data[], size_t size)
 {
 	if(data == NULL || size == 0)
 	{
@@ -104,17 +104,17 @@ static bool receice_handlle(ESP_ConnectionId_t id, const char data[], size_t siz
 	debug_info("\r\n");
 	debug_info("\r\n");
 
-	ESP_TransmitData(id, message, sizeof(message));
+	esp_tcp_transmit(id, message, sizeof(message));
 	return true;
 }
 
-static bool disconnect_handlle(ESP_ConnectionId_t id)
+static bool disconnect_handlle(esp_conn_id_t id)
 {
 	debug_info("[TCP]: Connection %c close\r\n", id);
 	return true;
 }
 
-static bool connect_handlle(ESP_ConnectionId_t id)
+static bool connect_handlle(esp_conn_id_t id)
 {
 	debug_info("[TCP]: Connection %c open\r\n", id);
 	return true;
@@ -136,23 +136,23 @@ int main(void)
 	const char ssid[] = SSID;
 	const char password[] = PASS;
 	char ssid_cur[35] = {0};
-	Ipv4Addr_t ip = 0;
-	Ipv4Addr_t gw = 0;
-	Ipv4Addr_t mask = 0;
-	TCP_ConnParam_t connParam;
+	ip4addr_t ip = 0;
+	ip4addr_t gw = 0;
+	ip4addr_t mask = 0;
+	esp_tcp_cfg_t connParam;
 	char ipStr[] = "192.168.100.7\0";
 	char _ip[] = "000.000.000.000\0";
 	char _gw[] = "000.000.000.000\0";
 	char _msk[] = "000.000.000.000\0";
 
-	ESP_AtVersion at_version = {0};
-	ESP_SdkVersion sdk_version = {0};
+	esp_at_version_t at_version = {0};
+	esp_sdk_version_t sdk_version = {0};
 
-	ESP_ConnStatus_t status;
-	ESP_TransferMode_t transfer;
-	ESP_ConnectionMode_t mux;
+	esp_conn_status_t status;
+	esp_tx_mode_t transfer;
+	esp_conn_mode_t mux;
 	uint32_t count = 3;
-	ESPStatus_t res = ESP_INNER_ERR;
+	esp_status_t res = ESP_INNER_ERR;
 
   /* USER CODE END 1 */
 
@@ -181,16 +181,16 @@ int main(void)
   /* USER CODE BEGIN 2 */
   debug_init();
 
-  ESP_RegisterReceiceCB(&receice_handlle);
-  ESP_RegisterCloseConnectCB(&disconnect_handlle);
-  ESP_RegisterOpenConnectCB(&connect_handlle);
-  ESP_RegisterTransmitPassCB(&transmit_pass_handle);
-  ESP_Init();
+  esp_register_receive_cb(&receice_handlle);
+  esp_register_close_conn_cb(&disconnect_handlle);
+  esp_register_open_conn_cb(&connect_handlle);
+  esp_register_transmit_cb(&transmit_pass_handle);
+  esp_init();
 
-  Convert_StringToIpv4addr(&connParam.remoteIp, ipStr);
+  convert_string_to_ip4addr(&connParam.remoteIp, ipStr);
   connParam.remotePort = 9000;
   connParam.keepAlive = 0;
-  connParam.id = ID_NONE;
+  connParam.id = ESP_ID_NONE;
 
   debug_info("Example #1\r\n");
   debug_info("\t- WiFi in station mode\r\n");
@@ -201,21 +201,21 @@ int main(void)
   debug_info("\r\n");
 
 
-  ESP_GetVersion(&at_version, &sdk_version, 2000);
+  esp_get_version(&at_version, &sdk_version, 2000);
 
 
   debug_info("Setup WiFi station mode...");
-  if(ESP_SetupWifiMode(WIFI_CLIENT, false, 5000u))
+  if(esp_wifi_mode_setup(ESP_WIFI_STATION, false, 5000u))
   {
 	  debug_info(" PASS\r\n");
 
 	  debug_info("Check connection to AP status: \r\n");
-	  if(ESP_RequestNameConnectedAp(ssid_cur, false, 5000u) == ESP_PASS)
+	  if(esp_wifi_ap_ssid_request(ssid_cur, false, 5000u) == ESP_PASS)
 	  {
 		  if(strlen(ssid_cur) != 0)
 		  {
 			  debug_info("\tjoin to %s\r\n", ssid_cur);
-			  if(ESP_UnJoinFromWifiAp(5000u))
+			  if(esp_wifi_ap_unjoin(5000u))
 			  {
 				  debug_info("\tunjoin from %s\r\n", ssid_cur);
 			  }
@@ -229,7 +229,7 @@ int main(void)
 	  debug_info("Join to SSID: %s...", ssid);
 	  while(res != ESP_PASS && count > 0)
 	  {
-		  res = ESP_JoinToWifiAp(ssid, password, false, 5000u);
+		  res = esp_wifi_ap_join(ssid, password, false, 5000u);
 		  count--;
 	  }
 
@@ -242,16 +242,16 @@ int main(void)
 		  count = 1;
 		  while(res != ESP_PASS && count != 0)
 		  {
-			  res = ESP_RequestWifiStationIpAddr(&ip, &gw, &mask, false, 5000u);
+			  res = esp_wifi_station_ip_request(&ip, &gw, &mask, false, 5000u);
 			  count++;
 		  }
 		  if(res == ESP_PASS)
 		  {
 			  debug_info(" PASS\r\n");
 
-			  Convert_Ipv4addrToString(ip, _ip);
-			  Convert_Ipv4addrToString(gw, _gw);
-			  Convert_Ipv4addrToString(mask, _msk);
+			  convert_ip4addr_to_string(ip, _ip);
+			  convert_ip4addr_to_string(gw, _gw);
+			  convert_ip4addr_to_string(mask, _msk);
 
 			  debug_info("\tIP: %s\r\n", _ip);
 			  debug_info("\tGW: %s\r\n", _gw);
@@ -268,25 +268,25 @@ int main(void)
 
 		  while(res != ESP_PASS)
 		  {
-			  res = ESP_RequestConfigMux(&mux, 5000u);
+			  res = esp_mux_cfg_request(&mux, 5000u);
 			  count++;
 		  }
 		  if(res == ESP_PASS)
 		  {
 			  debug_info(" PASS\r\n");
-			  if(mux != SINGLE_CONNECT)
+			  if(mux != ESP_SINGLE_CONNECT)
 			  {
 				  debug_info("Setup single mode...");
-				  if(ESP_SingleConnectionEnable(5000u) == ESP_SERVER_ON)
+				  if(esp_single_connection_enable(5000u) == ESP_SERVER_ON)
 				  {
 					  debug_info(" FAULT\r\n");
 					  debug_info("\t Need disable TCP Server...");
-					  if(ESP_CloseServerTCP(0, 5000u))
+					  if(esp_tcp_server_close(0, 5000u))
 					  {
 						  debug_info(" PASS\r\n");
 
 						  debug_info("Setup single mode...");
-						  if(ESP_SingleConnectionEnable(5000u))
+						  if(esp_single_connection_enable(5000u))
 						  {
 							  debug_info(" PASS\r\n");
 						  }
@@ -315,16 +315,16 @@ int main(void)
 			  count = 0;
 			  while(res != ESP_PASS)
 			  {
-				  res = ESP_RequestTransferMode(&transfer, 5000u);
+				  res = esp_transmit_mode_request(&transfer, 5000u);
 				  count++;
 			  }
 			  if(res == ESP_PASS)
 			  {
 				  debug_info(" PASS\r\n");
-				  if(transfer != NORMAL_MODE)
+				  if(transfer != ESP_NORMAL_MODE)
 				  {
 					  debug_info("Setup normal transfer mode...");
-					  if(ESP_SetupTransferMode(NORMAL_MODE, 5000u) == ESP_PASS)
+					  if(esp_transmit_mode_setup(ESP_NORMAL_MODE, 5000u) == ESP_PASS)
 					  {
 						  debug_info(" PASS\r\n");
 					  }
@@ -348,14 +348,14 @@ int main(void)
 			  }
 
 			  debug_info("Establish TCP connection...");
-			  if(ESP_EstablishConnectTCP(&connParam, 5000u) == ESP_PASS)
+			  if(esp_tcp_connect(&connParam, 5000u) == ESP_PASS)
 			  {
 				  debug_info(" PASS\r\n");
-				  if(ESP_RequestConnectionStatus(&status, 5000u) == ESP_PASS)
+				  if(esp_conn_status_request(&status, 5000u) == ESP_PASS)
 				  {
 					  debug_info("\tID: %c\r\n", status.id);
 					  debug_info("\tlocalPort: %d\r\n", status.localPort);
-					  Convert_Ipv4addrToString(status.remoteIp, _ip);
+					  convert_ip4addr_to_string(status.remoteIp, _ip);
 					  debug_info("\tremoteIp: %s\r\n", _ip);
 					  debug_info("\tremotePort: %d\r\n", status.remotePort);
 					  debug_info("\tstat: %c\r\n", status.stat);
@@ -367,8 +367,8 @@ int main(void)
 				  debug_error(" FAULT\r\n");
 			  }
 
-			  ESP_HardWareSwitchMode(UNBLOCK);
-			  ESP_TransmitData(ID_NONE, message, sizeof(message));
+			  esp_hardware_switch_mode(UNBLOCK);
+			  esp_tcp_transmit(ESP_ID_NONE, message, sizeof(message));
 		  }
 		  else
 		  {
@@ -390,8 +390,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	ESP_MsgHandlCallBack();
-	ESP_TransmitDataHandle();
+	esp_message_handle();
+	esp_tcp_transmit_handle();
   }
   /* USER CODE END 3 */
 }
