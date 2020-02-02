@@ -131,7 +131,7 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint32(param, time);
+	convert_uint32_to_string(param, time);
 	param_size = strlen((char*)param);
 
 	if(esp_at_cmd_send(GSLP, param, param_size) == false) {
@@ -282,7 +282,7 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint32(param, cfg->baud_rate);
+	convert_uint32_to_string(param, cfg->baud_rate);
 	len = strlen((char*)param);
 
 	if(strcat ((char*)param, (char*)",\0") == NULL) {
@@ -354,7 +354,7 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 	param[len++] = gpio->enable;
 	param[len++] = ',';
 
-	Conver_DigToStringUint8(&param[len], gpio->trigger_gpio);
+	convert_uint8_to_string(&param[len], gpio->trigger_gpio);
 
 	len += strlen((char*)param);
 	param[len++] = ',';
@@ -364,7 +364,7 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 
 	if(gpio->awake_gpio != 0)
 	{
-		Conver_DigToStringUint8(&param[len], gpio->awake_gpio);
+		convert_uint8_to_string(&param[len], gpio->awake_gpio);
 
 		len += strlen((char*)param);
 		param[len++] = ',';
@@ -398,7 +398,7 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint8(param, power);
+	convert_uint8_to_string(param, power);
 
 	len += strlen((char*)param);
 
@@ -428,7 +428,7 @@ bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint8(param, msg);
+	convert_uint8_to_string(param, msg);
 
 	len += strlen((char*)param);
 
@@ -458,7 +458,7 @@ bool ESP_SetupSystemMessageDef(uint8_t msg, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint8(param, msg);
+	convert_uint8_to_string(param, msg);
 
 	len += strlen((char*)param);
 

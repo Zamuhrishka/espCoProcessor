@@ -54,6 +54,9 @@ typedef enum
 	ESP_UNDEFINE_EVT
 } 	esp_event_t;
 //! @}
+
+//!Prototype of callback function for transmit available handle
+typedef void (*esp_message_garbage_fn_t)(char* msg, size_t len);
 //_____ V A R I A B L E   D E C L A R A T I O N S ____________________________________________________
 //_____ F U N C T I O N   D E C L A R A T I O N S ____________________________________________________
 /**

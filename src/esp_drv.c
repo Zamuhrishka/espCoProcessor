@@ -20,6 +20,8 @@
 //_____ D E F I N I T I O N ____________________________________________________
 //_____ M A C R O S ____________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  _________________________________
+//!Pointer of callback function for transmit available handle
+static esp_message_garbage_fn_t esp_msg_garbage_cb = NULL;
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   __________________
 //_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   ___________________
 //_____ F U N C T I O N   D E F I N I T I O N   ________________________________
@@ -49,6 +51,11 @@ bool esp_message_handle(void)
 	if(esp_rbuffer_denqueue(&buffer, &size))
 	{
 		esp_tcp_receive_handle(buffer, size);
+	}
+
+	if(esp_msg_garbage_cb != NULL)
+	{
+		esp_msg_garbage_cb(buffer, size);
 	}
 
 	return true;

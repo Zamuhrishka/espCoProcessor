@@ -500,7 +500,7 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint16((param + strlen((char*)param)), cfg->remotePort);
+	convert_uint16_to_string((param + strlen((char*)param)), cfg->remotePort);
 
 	if(cfg->localPort != 0)
 	{
@@ -508,7 +508,7 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 			return false;
 		}
 
-		Conver_DigToStringUint16((param + strlen((char*)param)), cfg->localPort);
+		convert_uint16_to_string((param + strlen((char*)param)), cfg->localPort);
 	}
 
 	if(cfg->mode != 0)
@@ -823,7 +823,7 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 	if(port != 0)
 	{
 		param[1] = ',';
-		Conver_DigToStringUint16((char*)&param[2], port);
+		convert_uint16_to_string((char*)&param[2], port);
 	}
 
 	len = strlen((char*)param);
@@ -913,7 +913,7 @@ esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	Conver_DigToStringUint16(param, stimeout);
+	convert_uint16_to_string(param, stimeout);
 
 	len = strlen((char*)param);
 
@@ -947,7 +947,7 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 		return ESP_PARAM_ERR;
 	}
 
-	Conver_DigToStringUint8(param, conn);
+	convert_uint8_to_string(param, conn);
 
 	len = strlen((char*)param);
 
@@ -1044,7 +1044,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 		return 0;
 	}
 
-	return Conver_StringToUint32(caps[0].ptr);
+	return convert_string_to_uint32(caps[0].ptr);
 }
 
 /**
