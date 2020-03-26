@@ -9,16 +9,12 @@
 *
 ********************************************************************************/
 //_____ I N C L U D E S _______________________________________________________
-#include "stack/esp_tcpip.h"
+#include "esp_tcpip.h"
 
 #include <string.h>
 #include <assert.h>
-#include <stdio.h>
-#include "slre.h"
 #include "esp_utils.h"
-#include "esp_queue.h"
-#include "stack/esp_basic.h"
-#include "stack/esp_wifi.h"
+#include "slre.h"
 #include "toolbox/convert.h"
 //_____ C O N F I G S  ________________________________________________________________________
 // If unit testing is enabled override assert with mock_assert().

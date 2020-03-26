@@ -9,13 +9,11 @@
 *
 ********************************************************************************/
 //_____ I N C L U D E S _______________________________________________________
-#include <esp_port.h>
+#include "esp_wifi.h"
+
 #include <string.h>
 #include <assert.h>
-#include "stack/esp_basic.h"
-#include "stack/esp_wifi.h"
 #include "esp_utils.h"
-#include "esp_queue.h"
 #include "slre.h"
 #include "convert.h"
 //_____ C O N F I G S  ________________________________________________________________________
