@@ -46,7 +46,7 @@ bool esp_test(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_send(cmd, sizeof(cmd)) == false) {
+	if(esp_data_transmit(cmd, sizeof(cmd), 0) == false) {
 		return false;
 	}
 
