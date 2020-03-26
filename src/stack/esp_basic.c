@@ -50,7 +50,7 @@ bool esp_test(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -74,7 +74,7 @@ bool esp_reset(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -100,7 +100,7 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -146,7 +146,7 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -171,7 +171,7 @@ bool esp_enable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -196,7 +196,7 @@ bool esp_disable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -220,7 +220,7 @@ bool esp_restore(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -267,7 +267,7 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -312,7 +312,7 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -337,7 +337,7 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
     	return false;
     }
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -384,8 +384,8 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-	  return false;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return false;
 	}
 
 	return esp_pattern_check(answer, PATTERN_OK);
@@ -414,7 +414,7 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 

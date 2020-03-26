@@ -353,8 +353,8 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		  return ESP_RECEIVE_ERR;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_is_busy(answer)) {
@@ -452,8 +452,8 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
-	  return ESP_RECEIVE_ERR;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_is_busy(answer)) {
@@ -536,8 +536,8 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 5000ul) < 0) {
-	  return ESP_RECEIVE_ERR;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_is_busy(answer)) {
@@ -568,8 +568,8 @@ esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
-	  return ESP_RECEIVE_ERR;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_is_busy(answer)) {
@@ -596,7 +596,7 @@ esp_status_t esp_close_connection(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 20000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -625,7 +625,7 @@ esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -654,7 +654,7 @@ esp_status_t esp_single_connection_enable(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -694,7 +694,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -732,7 +732,7 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -763,7 +763,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -801,8 +801,8 @@ esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 	   return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 10000ul) < 0) {
-	   return ESP_RECEIVE_ERR;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_is_busy(answer)) {
@@ -841,8 +841,8 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
-		   return ESP_RECEIVE_ERR;
+		if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+			return ESP_RECEIVE_ERR;
 		}
 
 		if(esp_is_busy(answer)) {
@@ -892,7 +892,7 @@ esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+		if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 			return ESP_RECEIVE_ERR;
 		}
 
@@ -929,7 +929,7 @@ esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -963,7 +963,7 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1003,7 +1003,7 @@ esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1040,8 +1040,8 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 		return 0;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, 6000ul) < 0) {
-		return 0;
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		return ESP_RECEIVE_ERR;
 	}
 
 	if(esp_pattern_check(answer, PATTERN_ERROR)) {
