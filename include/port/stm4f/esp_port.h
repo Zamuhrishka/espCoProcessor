@@ -71,12 +71,12 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size);
 * @brief 	Low level function for receive data throw UART in block mode.
 *
 * @param[in] data: array of data.
-* @param[in] size: size of data.
+* @param[in] maxsize: maximum size of data.
 * @param[in] timeout: timeout in msec. for waiting data.
 *
 * @return 	none.
 */
-esp_status_t esp_hardware_receive_block(uint8_t* data, uint16_t size, uint32_t timeout);
+esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout);
 
 /**
 * @brief 	This function is interrupt handler for received

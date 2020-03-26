@@ -256,7 +256,7 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size)
 *
 * Public function defined in esp_port.h
 */
-esp_status_t esp_hardware_receive_block(uint8_t* data, uint16_t size, uint32_t timeout)
+esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout)
 {
 	uint32_t _timeout = 0ul;
 
@@ -264,7 +264,7 @@ esp_status_t esp_hardware_receive_block(uint8_t* data, uint16_t size, uint32_t t
 
 	esp_uart_disable_irq();
 	esp_uart_dma_disable();
-	esp_uart_dma_receive_cfg(data, size);
+	esp_uart_dma_receive_cfg(data, maxsize);
 
 	_timeout = HAL_GetTick() + timeout;
 	while(!esp_uart_test_irq())
