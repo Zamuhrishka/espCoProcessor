@@ -120,7 +120,7 @@ bool esp_wifi_mode_setup(ESP_WifiMode_t mode, uint32_t timeout)
 */
 bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
 {
-    struct slre_cap caps[1];
+    struct slre_cap caps[1] = {0};
     char* answer = NULL;
 
     assert(NULL != mode);
@@ -180,7 +180,7 @@ bool esp_wifi_mode_setup(esp_wifi_mode_t mode, bool save, uint32_t timeout)
 */
 bool esp_wifi_mode_request(esp_wifi_mode_t *mode, bool save, uint32_t timeout)
 {
-	struct slre_cap caps[1];
+	struct slre_cap caps[1] = {0};
 	char* answer = NULL;
 
 	assert(NULL != mode);

@@ -342,7 +342,7 @@ void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb)
 */
 esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout)
 {
-	struct slre_cap caps[6];
+	struct slre_cap caps[6] = {0};
 	char* answer = NULL;
 
 	assert(NULL != status);
@@ -676,7 +676,7 @@ esp_status_t esp_single_connection_enable(uint32_t timeout)
 */
 esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 {
-	struct slre_cap caps[1];
+	struct slre_cap caps[1] = {0};
 	char* answer = NULL;
 
 	assert(NULL != mode);
@@ -749,7 +749,7 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 */
 esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 {
-	struct slre_cap caps[1];
+	struct slre_cap caps[1] = {0};
 	char* answer = NULL;
 
 	assert(NULL != mode);
