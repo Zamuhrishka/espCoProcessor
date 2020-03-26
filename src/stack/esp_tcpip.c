@@ -143,7 +143,10 @@ static bool esp_normal_transmit(void)
 			}
 			break;
 		default:
+		{
 			state = PREPARATION;
+			assert(false);
+		}
 	}
 	return true;
 }
@@ -188,7 +191,10 @@ static bool esp_transparent_transmit(void)
 			}
 			break;
 		default:
+		{
 			state = PREPARATION;
+			assert(false);
+		}
 	}
 	return true;
 }
