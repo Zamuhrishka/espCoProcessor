@@ -114,6 +114,8 @@ bool esp_wifi_mode_setup(ESP_WifiMode_t mode, uint32_t timeout)
 /**
 * This function request wifi work mode.
 *
+* @warning	This API is deprecated!
+*
 * Public function defined in esp_wifi.h
 */
 bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
@@ -137,7 +139,7 @@ bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
 		return false;
 	}
 
-	if (slre_match((const char *)"\\S+:(\\d)\\r\\n\\r\\nOK\\r\\n", answer, strlen(answer), caps, 1, 0) <= 0) {
+	if(slre_match((const char *)"\\S+:(\\d)\\r\\n\\r\\nOK\\r\\n", answer, strlen(answer), caps, 1, 0) <= 0) {
 	   return false;
 	}
 
@@ -197,7 +199,7 @@ bool esp_wifi_mode_request(esp_wifi_mode_t *mode, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if (slre_match((const char *)"\\S+:(\\d)\\r\\n\\r\\nOK\\r\\n", answer, strlen(answer), caps, 1, 0) <= 0) {
+	if(slre_match((const char *)"\\S+:(\\d)\\r\\n\\r\\nOK\\r\\n", answer, strlen(answer), caps, 1, 0) <= 0) {
 	   return false;
 	}
 

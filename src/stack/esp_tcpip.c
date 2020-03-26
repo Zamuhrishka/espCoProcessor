@@ -382,7 +382,7 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 	(*status).id = *caps[1].ptr;
 	(*status).type = (strcmp (caps[2].ptr, (const char*) "TCP\0")) ? ESP_TCP : ESP_UDP;
 
-	memset((void *)(caps[3].ptr + caps[3].len),0,1);
+	memset((void *)(caps[3].ptr + caps[3].len), 0, 1);
 	if(!convert_string_to_ip4addr(&status->remoteIp, caps[3].ptr)) {
 		return ESP_INNER_ERR;
 	}
