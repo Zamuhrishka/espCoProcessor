@@ -40,9 +40,9 @@ extern void mock_assert(const int result, const char* const expression,
 bool esp_test(uint32_t timeout)
 {
 	char cmd[] = "AT\r\n";
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -50,11 +50,11 @@ bool esp_test(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
@@ -64,9 +64,9 @@ bool esp_test(uint32_t timeout)
 */
 bool esp_reset(uint32_t timeout)
 {
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -74,11 +74,11 @@ bool esp_reset(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
@@ -89,14 +89,14 @@ bool esp_reset(uint32_t timeout)
 bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout)
 {
 	struct slre_cap caps[4] = {0};
-	char* answer = NULL;
+	char* pAnswer = NULL;
 
 	assert(NULL != at);
 	assert(NULL != sdk);
 
-	answer = esp_alloc_answer_buffer();
+	pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -104,11 +104,11 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	if (slre_match((const char *)"AT version:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), caps, 4, 0) <= 0) {
+	if (slre_match((const char *)"AT version:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\\S+", pAnswer, strlen(pAnswer), caps, 4, 0) <= 0) {
 	   return false;
 	}
 
@@ -117,7 +117,7 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 	at->patch[0] = convert_string_to_uint8(caps[2].ptr);
 	at->patch[1] = convert_string_to_uint8(caps[3].ptr);
 
-	if (slre_match((const char *)"\\S+\r\nSDK version:(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), caps, 3, 0) <= 0) {
+	if (slre_match((const char *)"\\S+\r\nSDK version:(\\d+)\\.(\\d+)\\.(\\d+)\\S+", pAnswer, strlen(pAnswer), caps, 3, 0) <= 0) {
 	   return false;
 	}
 
@@ -136,38 +136,38 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 {
 	size_t param_size = 0;
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	convert_uint32_to_string(param, time);
-	param_size = strlen((char*)param);
+	convert_uint32_to_string(pParam, time);
+	param_size = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(GSLP, param, param_size) == false) {
+	if(esp_at_cmd_send(GSLP, pParam, param_size) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
-* This function enable echo with module answers.
+* This function enable echo with module pAnswers.
 *
 * Public function defined in esp_basic.h
 */
 bool esp_enable_echo(uint32_t timeout)
 {
 	char esp_enable = '1';
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -175,7 +175,7 @@ bool esp_enable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -183,16 +183,16 @@ bool esp_enable_echo(uint32_t timeout)
 }
 
 /**
-* This function disable echo with module answers.
+* This function disable echo with module pAnswers.
 *
 * Public function defined in esp_basic.h
 */
 bool esp_disable_echo(uint32_t timeout)
 {
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 	char esp_disable = '0';
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -200,7 +200,7 @@ bool esp_disable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -214,9 +214,9 @@ bool esp_disable_echo(uint32_t timeout)
 */
 bool esp_restore(uint32_t timeout)
 {
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -224,11 +224,11 @@ bool esp_restore(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 #ifdef ESP_DEPRECATED_API_SUPPORT
@@ -245,40 +245,40 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 
 	assert(NULL != cfg);
 
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	Conver_DigToStringUint32(param, cfg->baudRate);
-	len = strlen((char*)param);
+	Conver_DigToStringUint32(pParam, cfg->baudRate);
+	len = strlen((char*)pParam);
 
-	if(strcat ((char*)param, (char*)",\0") == NULL) {
+	if(strcat ((char*)pParam, (char*)",\0") == NULL) {
 		return false;
 	}
 
-	len = strlen((char*)param);
-	param[len++] = cfg->dataBits;
-	param[len++] = ',';
-	param[len++] = cfg->stopBits;
-	param[len++] = ',';
-	param[len++] = cfg->parity;
-	param[len++] = ',';
-	param[len++] = cfg->flowControl;
-	param[len] = 0;
-	len = strlen((char*)param);
+	len = strlen((char*)pParam);
+	pParam[len++] = cfg->dataBits;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->stopBits;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->parity;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->flowControl;
+	pParam[len] = 0;
+	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(UART, param, len) == false) {
+	if(esp_at_cmd_send(UART, pParam, len) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 #else
 
@@ -293,40 +293,40 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 
 	assert(NULL != cfg);
 
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	convert_uint32_to_string(param, cfg->baud_rate);
-	len = strlen((char*)param);
+	convert_uint32_to_string(pParam, cfg->baud_rate);
+	len = strlen((char*)pParam);
 
-	if(strcat ((char*)param, (char*)",\0") == NULL) {
+	if(strcat ((char*)pParam, (char*)",\0") == NULL) {
 		return false;
 	}
 
-	len = strlen((char*)param);
-	param[len++] = cfg->data_bits;
-	param[len++] = ',';
-	param[len++] = cfg->stop_bits;
-	param[len++] = ',';
-	param[len++] = cfg->parity;
-	param[len++] = ',';
-	param[len++] = cfg->flow_control;
-	param[len] = 0;
-	len = strlen((char*)param);
+	len = strlen((char*)pParam);
+	pParam[len++] = cfg->data_bits;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->stop_bits;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->parity;
+	pParam[len++] = ',';
+	pParam[len++] = cfg->flow_control;
+	pParam[len] = 0;
+	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? UART_DEF : UART_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? UART_DEF : UART_CUR), pParam, len) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 #endif
 
@@ -337,9 +337,9 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 */
 bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 {
-	char* answer = esp_alloc_answer_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer) {
+	if(NULL == pAnswer) {
 		return false;
 	}
 
@@ -347,11 +347,11 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
     	return false;
     }
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
@@ -362,48 +362,48 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = NULL;
-	char* answer = NULL;
+	char* pParam = NULL;
+	char* pAnswer = NULL;
 
 	assert(NULL != gpio);
 
-	param = esp_alloc_param_buffer();
-	answer = esp_alloc_answer_buffer();
+	pParam = esp_alloc_param_buffer();
+	pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	param[len++] = gpio->enable;
-	param[len++] = ',';
+	pParam[len++] = gpio->enable;
+	pParam[len++] = ',';
 
-	convert_uint8_to_string(&param[len], gpio->trigger_gpio);
+	convert_uint8_to_string(&pParam[len], gpio->trigger_gpio);
 
-	len += strlen((char*)param);
-	param[len++] = ',';
+	len += strlen((char*)pParam);
+	pParam[len++] = ',';
 
-	param[len++] = gpio->trigger_level;
-	param[len++] = ',';
+	pParam[len++] = gpio->trigger_level;
+	pParam[len++] = ',';
 
 	if(gpio->awake_gpio != 0)
 	{
-		convert_uint8_to_string(&param[len], gpio->awake_gpio);
+		convert_uint8_to_string(&pParam[len], gpio->awake_gpio);
 
-		len += strlen((char*)param);
-		param[len++] = ',';
+		len += strlen((char*)pParam);
+		pParam[len++] = ',';
 	}
 
-	param[len++] = gpio->awake_level;
+	pParam[len++] = gpio->awake_level;
 
-	if(esp_at_cmd_send(WAKEUPGPIO, param, len) == false) {
+	if(esp_at_cmd_send(WAKEUPGPIO, pParam, len) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
@@ -414,26 +414,26 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 bool esp_rf_power(uint8_t power, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	convert_uint8_to_string(param, power);
+	convert_uint8_to_string(pParam, power);
 
-	len += strlen((char*)param);
+	len += strlen((char*)pParam);
 
-	if(esp_at_cmd_send(RFPOWER, param, len) == false) {
+	if(esp_at_cmd_send(RFPOWER, pParam, len) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
 
 /**
@@ -444,24 +444,24 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == answer || NULL == param) {
+	if(NULL == pAnswer || NULL == pParam) {
 		return false;
 	}
 
-	convert_uint8_to_string(param, msg);
+	convert_uint8_to_string(pParam, msg);
 
-	len += strlen((char*)param);
+	len += strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? SYSMSG_DEF : SYSMSG_CUR), param, len) == false) {
+	if(esp_at_cmd_send((save ? SYSMSG_DEF : SYSMSG_CUR), pParam, len) == false) {
 		return false;
 	}
 
-	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
-	return esp_pattern_check(answer, PATTERN_OK);
+	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
