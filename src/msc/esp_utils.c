@@ -271,6 +271,26 @@ bool esp_data_send(const char data[], size_t size)
 	return true;
 }
 
+
+/**
+* This function send raw data to module.
+*
+* Public function defined in esp_utils.h
+*/
+bool esp_data_transmit(const char data[], size_t size, uint32_t timeout)
+{
+	return esp_hardware_transmit_block(data, size);
+}
+
+/**
+* This function send raw data to module.
+*
+* Public function defined in esp_utils.h
+*/
+esp_status_t esp_data_receive(char data[], size_t maxsize, uint32_t timeout)
+{
+	return esp_hardware_receive_block(data, maxsize, timeout);
+}
 /**
 * This function check available selected pattern
 * in message.
