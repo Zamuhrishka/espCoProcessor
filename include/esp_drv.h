@@ -34,6 +34,7 @@ typedef enum
 	ESP_INNER_ERR		=		(-5),																///< Some inner error
 	ESP_SIZE_ERR		=		(-6),																///< Size error
 	ESP_CONNECTION_ERR 	= 		(-7),																///< Connection error
+	ESP_MEM_ALLOC_ERR	=		(-8),
 } 	esp_status_t;
 //! @}
 
