@@ -18,6 +18,15 @@
 #include "esp_queue.h"
 #include "slre.h"
 #include "convert.h"
+//_____ C O N F I G S  ________________________________________________________________________
+// If unit testing is enabled override assert with mock_assert().
+#if defined(UNIT_TESTING)
+extern void mock_assert(const int result, const char* const expression,
+                        const char * const file, const int line);
+#undef assert
+#define assert(expression) \
+    mock_assert((int)(expression), #expression, __FILE__, __LINE__);
+#endif // UNIT_TESTING
 //_____ D E F I N I T I O N ___________________________________________________
 typedef enum
 {
@@ -634,7 +643,7 @@ bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *param, u
 }
 
 /**
-* This function get station’s IP which is connected to ESP8266 softAP.
+* This function get stationï¿½s IP which is connected to ESP8266 softAP.
 *
 * Public function defined in esp_wifi.h
 */

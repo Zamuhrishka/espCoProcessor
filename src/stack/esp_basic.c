@@ -16,8 +16,15 @@
 #include "convert.h"
 #include "esp_drv.h"
 #include "esp_utils.h"
-#include "esp_port.h"
-#include "esp_queue.h"
+//_____ C O N F I G S  ________________________________________________________________________
+// If unit testing is enabled override assert with mock_assert().
+#if defined(UNIT_TESTING)
+extern void mock_assert(const int result, const char* const expression,
+                        const char * const file, const int line);
+#undef assert
+#define assert(expression) \
+    mock_assert((int)(expression), #expression, __FILE__, __LINE__);
+#endif // UNIT_TESTING
 //_____ D E F I N I T I O N ___________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
