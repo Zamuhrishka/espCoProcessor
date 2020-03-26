@@ -11,7 +11,7 @@
 //_____ I N C L U D E S _______________________________________________________
 #include <esp_port.h>
 #include <string.h>
-#include <stdio.h>
+#include <assert.h>
 #include "stack/esp_basic.h"
 #include "stack/esp_wifi.h"
 #include "esp_utils.h"

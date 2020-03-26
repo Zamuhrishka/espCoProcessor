@@ -12,6 +12,7 @@
 #include "stack/esp_basic.h"
 
 #include <string.h>
+#include <assert.h>
 #include "slre.h"
 #include "convert.h"
 #include "esp_drv.h"

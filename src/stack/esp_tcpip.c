@@ -12,7 +12,7 @@
 #include "stack/esp_tcpip.h"
 
 #include <string.h>
-#include <string.h>
+#include <assert.h>
 #include <stdio.h>
 #include "slre.h"
 #include "esp_utils.h"
