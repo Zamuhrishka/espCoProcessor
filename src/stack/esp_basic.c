@@ -9,7 +9,7 @@
 *
 ********************************************************************************/
 //_____ I N C L U D E S _______________________________________________________
-#include "stack/esp_basic.h"
+#include "esp_basic.h"
 
 #include <string.h>
 #include <assert.h>
@@ -441,55 +441,25 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 *
 * Public function defined in esp_basic.h
 */
-bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout)
+bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 {
 	size_t len = 0;
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	convert_uint8_to_string(param, msg);
 
 	len += strlen((char*)param);
 
-	if(esp_at_cmd_send(SYSMSG_CUR, param, len) == false) {
+	if(esp_at_cmd_send((save ? SYSMSG_DEF : SYSMSG_CUR), param, len) == false) {
 		return false;
 	}
 
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
-		return false;
-	}
-
-	return esp_pattern_check(answer, PATTERN_OK);
-}
-
-/**
-* This function sets current system messages.
-*
-* Public function defined in esp_basic.h
-*/
-bool ESP_SetupSystemMessageDef(uint8_t msg, uint32_t timeout)
-{
-	size_t len = 0;
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
-
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
-
-	convert_uint8_to_string(param, msg);
-
-	len += strlen((char*)param);
-
-	if(esp_at_cmd_send(SYSMSG_DEF, param, len) == false) {
-		return false;
-	}
-
-	if(esp_hardware_receive_block((uint8_t*)answer, ESP_ANSWER_BUFF_SIZE, timeout) < 0) {
+	if(esp_data_receive(answer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
 		return false;
 	}
 
