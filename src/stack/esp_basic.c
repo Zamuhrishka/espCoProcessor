@@ -42,7 +42,7 @@ bool esp_test(uint32_t timeout)
 	char cmd[] = "AT\r\n";
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -66,7 +66,7 @@ bool esp_reset(uint32_t timeout)
 {
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -89,11 +89,14 @@ bool esp_reset(uint32_t timeout)
 bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout)
 {
 	struct slre_cap capsAt[4];
-	struct slre_cap capsSDK[3];
-	char* answer = esp_alloc_answer_buffer();
+	char* answer = NULL;
 
 	assert(NULL != at);
 	assert(NULL != sdk);
+
+	answer = esp_alloc_answer_buffer();
+
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -136,8 +139,8 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	convert_uint32_to_string(param, time);
@@ -161,10 +164,10 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 */
 bool esp_enable_echo(uint32_t timeout)
 {
-	char* answer = esp_alloc_answer_buffer();
 	char esp_enable = '1';
+	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -189,7 +192,7 @@ bool esp_disable_echo(uint32_t timeout)
 	char* answer = esp_alloc_answer_buffer();
 	char esp_disable = '0';
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -213,7 +216,7 @@ bool esp_restore(uint32_t timeout)
 {
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -245,8 +248,8 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL || cfg == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	Conver_DigToStringUint32(param, cfg->baudRate);
@@ -293,8 +296,8 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL || cfg == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	convert_uint32_to_string(param, cfg->baud_rate);
@@ -336,7 +339,7 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 {
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	if(NULL == answer) {
 		return false;
 	}
 
@@ -359,14 +362,16 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 {
 	size_t len = 0;
-	char* param = esp_alloc_param_buffer();
-	char* answer = esp_alloc_answer_buffer();
+	char* param = NULL;
+	char* answer = NULL;
 
 	assert(NULL != gpio);
 
+	param = esp_alloc_param_buffer();
+	answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL || gpio == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	param[len++] = gpio->enable;
@@ -412,8 +417,8 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
+	if(NULL == answer || NULL == param) {
+		return false;
 	}
 
 	convert_uint8_to_string(param, power);
