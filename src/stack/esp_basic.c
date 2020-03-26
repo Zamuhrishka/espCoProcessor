@@ -92,7 +92,8 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 	struct slre_cap capsSDK[3];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || at == NULL || sdk == NULL) {
+	assert(NULL != at);
+	assert(NULL != sdk);
 		return false;
 	}
 
@@ -238,6 +239,9 @@ bool esp_restore(uint32_t timeout)
 bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 {
 	size_t len = 0;
+
+	assert(NULL != cfg);
+
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
@@ -283,6 +287,9 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 {
 	size_t len = 0;
+
+	assert(NULL != cfg);
+
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
@@ -354,6 +361,9 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 	size_t len = 0;
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
+
+	assert(NULL != gpio);
+
 
 	if(answer == NULL || param == NULL || gpio == NULL) {
 		return ESP_INNER_ERR;

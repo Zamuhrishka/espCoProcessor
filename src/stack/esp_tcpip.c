@@ -345,8 +345,8 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 	struct slre_cap caps[6];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
+	assert(NULL != status);
+
 	}
 
 	if(esp_at_cmd_send((uint8_t)CIPSTATUS, NULL, 0) == false) {
@@ -405,9 +405,7 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != cfg);
 
 	if(cfg == NULL || (cfg->id != ESP_ID0 && cfg->id != ESP_ID1 &&
 		cfg->id != ESP_ID2 && cfg->id != ESP_ID3 &&
@@ -477,6 +475,8 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 	size_t len = 0;
 	char* param = esp_alloc_param_buffer();
 	char* answer = esp_alloc_answer_buffer();
+
+	assert(NULL != cfg);
 
 	if(answer == NULL || param == NULL) {
 		return ESP_INNER_ERR;
@@ -682,9 +682,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != mode);
 
 	if(mode == NULL) {
 		return ESP_PARAM_ERR;
@@ -755,8 +753,8 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
+	assert(NULL != mode);
+
 	}
 
 	if(esp_at_cmd_send(REQCIPMODE, NULL, 0ul) == false) {
@@ -1062,9 +1060,8 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 */
 bool esp_tcp_transmit(esp_conn_id_t id, const char data[], size_t size)
 {
-    if((data == NULL) || ((size == 0))) {
-    	return false;
-    }
+	assert(NULL != data);
+	assert(size);
 
     return esp_tbuffer_enqueue((char)id, data, size);
 }
@@ -1097,6 +1094,8 @@ bool esp_tcp_transmit_handle(void)
 */
 void esp_tcp_receive_handle(char* msg, size_t len)
 {
+	assert(msg);
+
 	if(transfer == ESP_TRANSPARENT_MODE)
 	{
 		esp_transparent_receive(msg, len);

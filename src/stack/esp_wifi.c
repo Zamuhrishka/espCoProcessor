@@ -123,7 +123,8 @@ bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
     struct slre_cap caps[1];
     char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+    assert(NULL != mode);
+
 		return false;
 	}
 
@@ -179,7 +180,8 @@ bool esp_wifi_mode_request(esp_wifi_mode_t *mode, bool save, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	assert(NULL != mode);
+
 		return false;
 	}
 
@@ -218,9 +220,8 @@ esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], uint32_t tim
 	char* answer = esp_alloc_answer_buffer();
 	char* param = esp_alloc_param_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != ssid);
+	assert(NULL != pass);
 
 	if((ssid == NULL) || (pass == NULL)) {
 		return ESP_PARAM_ERR;
@@ -298,9 +299,8 @@ esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], bool save, u
 	char* answer = esp_alloc_answer_buffer();
 	char* param = esp_alloc_param_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != ssid);
+	assert(NULL != pass);
 
 	if((ssid == NULL) || (pass == NULL)) {
 		return ESP_PARAM_ERR;
@@ -377,8 +377,8 @@ esp_status_t esp_wifi_ap_ssid_request(char ssid[], uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
+	assert(NULL != ssid);
+
 	}
 
 	if(esp_at_cmd_send(REQSSID, NULL, 0) == false) {
@@ -419,8 +419,8 @@ esp_status_t esp_wifi_ap_ssid_request(char ssid[], bool save, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
-		return ESP_INNER_ERR;
+	assert(NULL != ssid);
+
 	}
 
 	if(esp_at_cmd_send((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
@@ -489,9 +489,8 @@ esp_status_t esp_wifi_softap_cfg(const char ssid[], const char pass[], char chan
 	char* answer = esp_alloc_answer_buffer();
 	char* param = esp_alloc_param_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != ssid);
+	assert(NULL != pass);
 
 	if((ssid == NULL) || (pass == NULL)) {
 		return ESP_PARAM_ERR;
@@ -548,9 +547,8 @@ esp_status_t esp_wifi_softap_setup(const char ssid[], const char pass[], char ch
 	char* answer = esp_alloc_answer_buffer();
 	char* param = esp_alloc_param_buffer();
 
-	if(answer == NULL || param == NULL) {
-		return ESP_INNER_ERR;
-	}
+	assert(NULL != ssid);
+	assert(NULL != pass);
 
 	if((ssid == NULL) || (pass == NULL)) {
 		return ESP_PARAM_ERR;
@@ -606,7 +604,10 @@ bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *param, u
 	struct slre_cap caps[6];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	assert(NULL != ssid);
+	assert(NULL != pass);
+	assert(NULL != param);
+
 		return false;
 	}
 
@@ -652,7 +653,9 @@ bool esp_wifi_get_ip_of_connected_station(ip4addr_t *ipv4, mac_t *mac, uint32_t 
 	struct slre_cap caps[2];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	assert(NULL != ipv4);
+	assert(NULL != mac);
+
 		return false;
 	}
 
@@ -910,6 +913,8 @@ bool esp_wifi_station_mac_request(mac_t *mac, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
+	assert(NULL != mac);
+
 
 	if(answer == NULL) {
 		return false;
@@ -949,6 +954,8 @@ bool esp_wifi_station_mac_request(mac_t *mac, bool save, uint32_t timeout)
 {
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
+	assert(NULL != mac);
+
 
 	if(answer == NULL) {
 		return false;
@@ -1087,7 +1094,8 @@ bool esp_wifi_softap_mac_request(mac_t *mac, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	assert(NULL != mac);
+
 		return false;
 	}
 
@@ -1126,7 +1134,8 @@ bool esp_wifi_softap_mac_request(mac_t *mac, bool save, uint32_t timeout)
 	struct slre_cap caps[1];
 	char* answer = esp_alloc_answer_buffer();
 
-	if(answer == NULL) {
+	assert(NULL != mac);
+
 		return false;
 	}
 
@@ -1238,6 +1247,11 @@ bool esp_wifi_station_ip_request(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* m
 {
 	struct slre_cap caps[3];
 	char* answer = esp_alloc_answer_buffer();
+
+	assert(NULL != ipv4);
+	assert(NULL != gw);
+	assert(NULL != mask);
+
 
 	if(answer == NULL) {
 		return false;
@@ -1359,6 +1373,11 @@ esp_status_t esp_wifi_station_ip_request(ip4addr_t *ipv4, ip4addr_t *gw, ip4addr
 {
 	struct slre_cap caps[3];
 	char* answer = esp_alloc_answer_buffer();
+
+	assert(NULL != ipv4);
+	assert(NULL != gw);
+	assert(NULL != mask);
+
 
 	if(answer == NULL) {
 		return false;
@@ -1488,6 +1507,11 @@ bool esp_wifi_softap_ip_request(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *ma
 	struct slre_cap caps[3];
 	char* answer = esp_alloc_answer_buffer();
 
+	assert(NULL != ipv4);
+	assert(NULL != gw);
+	assert(NULL != mask);
+
+
 	if(answer == NULL) {
 		return false;
 	}
@@ -1609,6 +1633,11 @@ bool esp_wifi_softap_ip_request(ip4addr_t* ipv4, ip4addr_t* gw, ip4addr_t* mask,
 {
 	struct slre_cap caps[3];
 	char* answer = esp_alloc_answer_buffer();
+
+	assert(NULL != ipv4);
+	assert(NULL != gw);
+	assert(NULL != mask);
+
 
 	if(answer == NULL) {
 		return false;
