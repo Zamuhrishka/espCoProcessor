@@ -88,7 +88,7 @@ bool esp_reset(uint32_t timeout)
 */
 bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout)
 {
-	struct slre_cap capsAt[4];
+	struct slre_cap caps[4] = {0};
 	char* answer = NULL;
 
 	assert(NULL != at);
@@ -108,22 +108,22 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 		return false;
 	}
 
-	if (slre_match((const char *)"AT version:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), capsAt, 4, 0) <= 0) {
+	if (slre_match((const char *)"AT version:(\\d+)\\.(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), caps, 4, 0) <= 0) {
 	   return false;
 	}
 
-	if (slre_match((const char *)"\\S+\r\nSDK version:(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), capsSDK, 3, 0) <= 0) {
+	at->major = convert_string_to_uint8(caps[0].ptr);
+	at->minor = convert_string_to_uint8(caps[1].ptr);
+	at->patch[0] = convert_string_to_uint8(caps[2].ptr);
+	at->patch[1] = convert_string_to_uint8(caps[3].ptr);
+
+	if (slre_match((const char *)"\\S+\r\nSDK version:(\\d+)\\.(\\d+)\\.(\\d+)\\S+", answer, strlen(answer), caps, 3, 0) <= 0) {
 	   return false;
 	}
 
-	at->major = convert_string_to_uint8(capsAt[0].ptr);
-	at->minor = convert_string_to_uint8(capsAt[1].ptr);
-	at->patch[0] = convert_string_to_uint8(capsAt[2].ptr);
-	at->patch[1] = convert_string_to_uint8(capsAt[3].ptr);
-
-	sdk->major = convert_string_to_uint8(capsSDK[0].ptr);
-	sdk->minor = convert_string_to_uint8(capsSDK[1].ptr);
-	sdk->patch = convert_string_to_uint8(capsSDK[2].ptr);
+	sdk->major = convert_string_to_uint8(caps[0].ptr);
+	sdk->minor = convert_string_to_uint8(caps[1].ptr);
+	sdk->patch = convert_string_to_uint8(caps[2].ptr);
 
 	return true;
 }
