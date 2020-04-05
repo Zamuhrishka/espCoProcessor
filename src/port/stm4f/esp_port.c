@@ -8,6 +8,13 @@
 * @brief
 *
 ********************************************************************************/
+//_____ C O N F I G S  __________________________________________________________
+//! Max size of queue buffer
+#define ESP_RX_QUEUE_SIZE                 				(10U)
+
+//! Max size of each of element of queue
+#define ESP_RX_PAYLOAD_LENGTH							(200U)
+
 //_____ I N C L U D E S _______________________________________________________
 #include "esp_port.h"
 
@@ -16,10 +23,26 @@
 #include "usart.h"
 #include "stm32f4xx_hal_dma.h"
 //_____ D E F I N I T I O N ___________________________________________________
+//! @brief Static queue structure
+//! @{
+typedef struct
+{
+	struct {
+		size_t size;
+		char buffer[ESP_RX_PAYLOAD_LENGTH];
+	}	data[ESP_RX_QUEUE_SIZE];																//!array of data
+    size_t size;																				//!count of store data
+    size_t write;																				//!pointer to the write position
+    size_t read;																				//!pointer to the read position
+} 	esp_rqueue_t;
+//! @}
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
 //!UART receive buffer
 static char esp_hardware_buffer[BUFFER_SIZE] = {0};
+
+//!Receive Queue
+static esp_rqueue_t rqueue = {0};
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 /**
 * @brief 	This function disable UART interrupt.
@@ -186,32 +209,60 @@ inline static void esp_uart_dma_receive_cfg(uint8_t *pData, uint16_t Size)
 
 	HAL_UART_Receive_DMA(&huart3, pData, Size);
 }
-//_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
-//_____ F U N C T I O N   D E F I N I T I O N   _______________________________
+
 /**
-* This function init hardware unit.
+* This function add data into receive queue.
 *
-* Public function defined in esp_port.h
+* Public function defined in esp_queue.h
 */
-void esp_harware_init(void)
+static bool esp_rbuffer_enqueue(const char buffer[], size_t size)
 {
-	esp_hardware_power_on();
-	esp_hardware_switch_mode(BLOCK);
+	if(rqueue.size == ESP_QUEUE_SIZE) {
+		return false;
+	}
+
+	rqueue.data[rqueue.write].size = size;
+	if(memcpy(&rqueue.data[rqueue.write].buffer, buffer, size) == NULL) {
+		return false;
+	}
+
+	rqueue.size++;
+	rqueue.write = (rqueue.write == ESP_QUEUE_SIZE - 1ul) ? 0ul: (rqueue.write + 1ul);
+
+	return true;
 }
 
 /**
-* This function switch between block and unblock modes.
+* This function get data from receive queue.
 *
-* Public function defined in esp_port.h
+* Public function defined in esp_queue.h
 */
-void esp_hardware_switch_mode(esp_blocking_t mode)
+static bool esp_rbuffer_denqueue(char **buffer, size_t *size)
 {
-	if(mode == BLOCK)
-	{
-		esp_uart_disable_irq();
-		esp_uart_dma_disable();
+	if(rqueue.size == 0) {
+		return false;
 	}
-	else
+
+	*size = rqueue.data[rqueue.read].size;
+	*buffer = rqueue.data[rqueue.read].buffer;
+
+	rqueue.size--;
+	rqueue.read = (rqueue.read == ESP_QUEUE_SIZE - 1ul) ? 0ul : (rqueue.read + 1ul);
+
+	return true;
+}
+
+static bool esp_rbuffer_is_empty(void)
+{
+	if(rqueue.size == 0) {
+		return true;
+	}
+
+	return false;
+}
+
+//_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
+//_____ F U N C T I O N   D E F I N I T I O N   _______________________________
 	{
 		esp_uart_dma_disable();
 		esp_uart_clear_irq_flag();

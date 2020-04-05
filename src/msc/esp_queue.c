@@ -21,27 +21,6 @@
 typedef struct
 {
 	size_t size;
-	char buffer[ESP_PAYLOAD_LENGTH];
-}	esp_rpacket_t;
-//! @}
-
-//! @brief Static queue structure
-//! @{
-typedef struct
-{
-	esp_rpacket_t data[ESP_QUEUE_SIZE];														//!array of data
-    size_t size;																				//!count of store data
-    size_t write;																				//!pointer to the write position
-    size_t read;																				//!pointer to the read position
-} 	esp_rqueue_t;
-//! @}
-
-
-//! @brief Static queue structure
-//! @{
-typedef struct
-{
-	size_t size;
 	char id;
 	char buffer[ESP_PAYLOAD_LENGTH];
 }	esp_tpacket_t;
@@ -51,63 +30,18 @@ typedef struct
 //! @{
 typedef struct
 {
-	esp_tpacket_t data[ESP_QUEUE_SIZE];														//!array of data
+	esp_tpacket_t data[ESP_QUEUE_SIZE];															//!array of data
     size_t size;																				//!count of store data
     size_t write;																				//!pointer to the write position
     size_t read;																				//!pointer to the read position
 } 	esp_tqueue_t;
 //! @}
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________________________
-//!Receive Queue
-static esp_rqueue_t rqueue = {0};
-
 //!Transmit Queue
 static esp_tqueue_t tqueue = {0};
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________________________
 //_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   __________________________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________________________
-/**
-* This function add data into receive queue.
-*
-* Public function defined in esp_queue.h
-*/
-bool esp_rbuffer_enqueue(const char buffer[], size_t size)
-{
-	if(rqueue.size == ESP_QUEUE_SIZE) {
-		return false;
-	}
-
-	rqueue.data[rqueue.write].size = size;
-	if(memcpy(&rqueue.data[rqueue.write].buffer, buffer, size) == NULL) {
-		return false;
-	}
-
-	rqueue.size++;
-	rqueue.write = (rqueue.write == ESP_QUEUE_SIZE - 1ul) ? 0ul: (rqueue.write + 1ul);
-
-	return true;
-}
-
-/**
-* This function get data from receive queue.
-*
-* Public function defined in esp_queue.h
-*/
-bool esp_rbuffer_denqueue(char **buffer, size_t *size)
-{
-	if(rqueue.size == 0) {
-		return false;
-	}
-
-	*size = rqueue.data[rqueue.read].size;
-	*buffer = rqueue.data[rqueue.read].buffer;
-
-	rqueue.size--;
-	rqueue.read = (rqueue.read == ESP_QUEUE_SIZE - 1ul) ? 0ul : (rqueue.read + 1ul);
-
-	return true;
-}
-
 /**
 * This function add data into transmit queue.
 *
