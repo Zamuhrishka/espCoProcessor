@@ -101,7 +101,7 @@ bool esp_wifi_mode_setup(ESP_WifiMode_t mode, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(MODE, (char*)&mode, 1U) == false) {
+	if(esp_cmd_transmit(MODE, (char*)&mode, 1U) == false) {
 		return false;
 	}
 
@@ -133,7 +133,7 @@ bool esp_wifi_mode_request(ESP_WifiMode_t *mode, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(REQMODE, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQMODE, NULL, 0) == false) {
 		return false;
 	}
 
@@ -165,7 +165,7 @@ bool esp_wifi_mode_setup(esp_wifi_mode_t mode, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send((save ? MODE_DEF : MODE_CUR), (char*)&mode, 1ul) == false) {
+	if(esp_cmd_transmit((save ? MODE_DEF : MODE_CUR), (char*)&mode, 1ul) == false) {
 		return false;
 	}
 
@@ -195,7 +195,7 @@ bool esp_wifi_mode_request(esp_wifi_mode_t *mode, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send((save ? REQMODE_DEF : REQMODE_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQMODE_DEF : REQMODE_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -262,7 +262,7 @@ esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], uint32_t tim
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(JOIN, pParam, len) == false) {
+	if(esp_cmd_transmit(JOIN, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -344,7 +344,7 @@ esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], bool save, u
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? JOIN_DEF : JOIN_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? JOIN_DEF : JOIN_CUR), pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -402,7 +402,7 @@ esp_status_t esp_wifi_ap_ssid_request(char ssid[], uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(REQSSID, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQSSID, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -449,7 +449,7 @@ esp_status_t esp_wifi_ap_ssid_request(char ssid[], bool save, uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQSSID_DEF : REQSSID_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -491,7 +491,7 @@ bool esp_wifi_ap_unjoin(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(UNJOIN, NULL, 0) == false) {
+	if(esp_cmd_transmit(UNJOIN, NULL, 0) == false) {
 		return false;
 	}
 
@@ -554,7 +554,7 @@ esp_status_t esp_wifi_softap_cfg(const char ssid[], const char pass[], char chan
 	pParam[len] = 0;
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(AP, pParam, len) == false) {
+	if(esp_cmd_transmit(AP, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -615,7 +615,7 @@ esp_status_t esp_wifi_softap_setup(const char ssid[], const char pass[], char ch
 	pParam[len] = 0;
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? AP_DEF : AP_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? AP_DEF : AP_CUR), pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -648,7 +648,7 @@ bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *pParam, 
 		return false;
 	}
 
-	if(esp_at_cmd_send(AP_REQ, NULL, 0) == false) {
+	if(esp_cmd_transmit(AP_REQ, NULL, 0) == false) {
 		return false;
 	}
 
@@ -681,7 +681,7 @@ bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *pParam, 
 }
 
 /**
-* This function get stationï¿½s IP which is connected to ESP8266 softAP.
+* This function get station’s IP which is connected to ESP8266 softAP.
 *
 * Public function defined in esp_wifi.h
 */
@@ -700,7 +700,7 @@ bool esp_wifi_get_ip_of_connected_station(ip4addr_t *ipv4, mac_t *mac, uint32_t 
 		return false;
 	}
 
-	if(esp_at_cmd_send(CWLIF, NULL, 0) == false) {
+	if(esp_cmd_transmit(CWLIF, NULL, 0) == false) {
 		return false;
 	}
 
@@ -750,7 +750,7 @@ bool esp_dhcp_mode_setup(ESP_WifiMode_t mode, ESP_DhcpModes_t dhcp, uint32_t tim
 
 	len = strlen(pParam);
 
-	if(esp_at_cmd_send(CWDHCP, pParam, len) == false) {
+	if(esp_cmd_transmit(CWDHCP, pParam, len) == false) {
 		return false;
 	}
 
@@ -784,7 +784,7 @@ bool esp_dhcp_mode_setup(esp_wifi_mode_t mode, esp_dhcp_mode_t dhcp, bool save, 
 
 	len = strlen(pParam);
 
-	if(esp_at_cmd_send((save ? CWDHCP_DEF : CWDHCP_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? CWDHCP_DEF : CWDHCP_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -811,7 +811,7 @@ bool esp_wifi_autoconnect_enable(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(CWAUTOCONN, &esp_enable, 1) == false) {
+	if(esp_cmd_transmit(CWAUTOCONN, &esp_enable, 1) == false) {
 		return false;
 	}
 
@@ -837,7 +837,7 @@ bool esp_wifi_autoconnect_disable(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(CWAUTOCONN, &esp_disable, 1) == false) {
+	if(esp_cmd_transmit(CWAUTOCONN, &esp_disable, 1) == false) {
 		return false;
 	}
 
@@ -885,7 +885,7 @@ bool esp_wifi_station_mac_setup(MacAddr_t mac, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSTAMAC, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSTAMAC, pParam, len) == false) {
 		return false;
 	}
 
@@ -931,7 +931,7 @@ bool esp_wifi_station_mac_setup(mac_t mac, bool save, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? CIPSTAMAC_DEF : CIPSTAMAC_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? CIPSTAMAC_DEF : CIPSTAMAC_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -965,7 +965,7 @@ bool esp_wifi_station_mac_request(mac_t *mac, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(REQSTAMAC, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQSTAMAC, NULL, 0) == false) {
 		return false;
 	}
 
@@ -1009,7 +1009,7 @@ bool esp_wifi_station_mac_request(mac_t *mac, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -1071,7 +1071,7 @@ bool esp_wifi_softap_mac_setup(mac_t mac, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPAPMAC, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPAPMAC, pParam, len) == false) {
 		return false;
 	}
 
@@ -1117,7 +1117,7 @@ bool esp_wifi_softap_mac_setup(mac_t mac, bool save, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? CIPAPMAC_DEF : CIPAPMAC_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? CIPAPMAC_DEF : CIPAPMAC_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -1151,7 +1151,7 @@ bool esp_wifi_softap_mac_request(mac_t *mac, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(REQSTAMAC, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQSTAMAC, NULL, 0) == false) {
 		return false;
 	}
 
@@ -1195,7 +1195,7 @@ bool esp_wifi_softap_mac_request(mac_t *mac, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQSTAMAC_DEF : REQSTAMAC_CUR), NULL, 0) == false) {
 		return false;
 	}
 
@@ -1281,7 +1281,7 @@ bool esp_wifi_station_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, 
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSTA, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSTA, pParam, len) == false) {
 		return false;
 	}
 
@@ -1315,7 +1315,7 @@ bool esp_wifi_station_ip_request(Ipv4Addr_t* ipv4, Ipv4Addr_t* gw, Ipv4Addr_t* m
 		return false;
 	}
 
-	if(esp_at_cmd_send(REQSTA, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQSTA, NULL, 0) == false) {
 		return false;
 	}
 
@@ -1411,7 +1411,7 @@ bool esp_wifi_station_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, boo
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? CIPSTA_DEF : CIPSTA_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? CIPSTA_DEF : CIPSTA_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -1443,7 +1443,7 @@ esp_status_t esp_wifi_station_ip_request(ip4addr_t *ipv4, ip4addr_t *gw, ip4addr
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send((save ? REQSTA_DEF : REQSTA_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQSTA_DEF : REQSTA_CUR), NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -1544,7 +1544,7 @@ bool esp_wifi_softap_ip_setup(Ipv4Addr_t ipv4, Ipv4Addr_t gw, Ipv4Addr_t mask, u
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPAP, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPAP, pParam, len) == false) {
 		return false;
 	}
 
@@ -1578,7 +1578,7 @@ bool esp_wifi_softap_ip_request(Ipv4Addr_t *ipv4, Ipv4Addr_t *gw, Ipv4Addr_t *ma
 		return false;
 	}
 
-	if(esp_at_cmd_send(REQCIPAP, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQCIPAP, NULL, 0) == false) {
 		return false;
 	}
 
@@ -1675,7 +1675,7 @@ bool esp_wifi_softap_ip_setup(ip4addr_t ipv4, ip4addr_t gw, ip4addr_t mask, bool
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? CIPAP_DEF : CIPAP_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? CIPAP_DEF : CIPAP_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -1707,7 +1707,7 @@ bool esp_wifi_softap_ip_request(ip4addr_t* ipv4, ip4addr_t* gw, ip4addr_t* mask,
 		return false;
 	}
 
-	if(esp_at_cmd_send((save ? REQCIPAP_DEF : REQCIPAP_CUR), NULL, 0) == false) {
+	if(esp_cmd_transmit((save ? REQCIPAP_DEF : REQCIPAP_CUR), NULL, 0) == false) {
 		return false;
 	}
 

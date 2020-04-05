@@ -72,7 +72,7 @@ bool esp_reset(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(RST, NULL, 0) == false) {
+	if(esp_cmd_transmit(RST, NULL, 0) == false) {
 		return false;
 	}
 
@@ -103,7 +103,7 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 		return false;
 	}
 
-	if(esp_at_cmd_send(GMR, NULL, 0) == false) {
+	if(esp_cmd_transmit(GMR, NULL, 0) == false) {
 		return false;
 	}
 
@@ -150,7 +150,7 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 	convert_uint32_to_string(pParam, time);
 	param_size = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(GSLP, pParam, param_size) == false) {
+	if(esp_cmd_transmit(GSLP, pParam, param_size) == false) {
 		return false;
 	}
 
@@ -176,7 +176,7 @@ bool esp_enable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(ATE, &esp_enable, 1) == false) {
+	if(esp_cmd_transmit(ATE, &esp_enable, 1) == false) {
 		return false;
 	}
 
@@ -202,7 +202,7 @@ bool esp_disable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(ATE, &esp_disable, 1) == false) {
+	if(esp_cmd_transmit(ATE, &esp_disable, 1) == false) {
 		return false;
 	}
 
@@ -227,7 +227,7 @@ bool esp_restore(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_at_cmd_send(RESTORE, NULL, 0) == false) {
+	if(esp_cmd_transmit(RESTORE, NULL, 0) == false) {
 		return false;
 	}
 
@@ -277,7 +277,7 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 	pParam[len] = 0;
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(UART, pParam, len) == false) {
+	if(esp_cmd_transmit(UART, pParam, len) == false) {
 		return false;
 	}
 
@@ -325,7 +325,7 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 	pParam[len] = 0;
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? UART_DEF : UART_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? UART_DEF : UART_CUR), pParam, len) == false) {
 		return false;
 	}
 
@@ -351,7 +351,7 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 		return false;
 	}
 
-    if(esp_at_cmd_send(SLEEP, (char*)&mode, 1ul) == false) {
+    if(esp_cmd_transmit(SLEEP, (char*)&mode, 1ul) == false) {
     	return false;
     }
 
@@ -403,7 +403,7 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 
 	pParam[len++] = gpio->awake_level;
 
-	if(esp_at_cmd_send(WAKEUPGPIO, pParam, len) == false) {
+	if(esp_cmd_transmit(WAKEUPGPIO, pParam, len) == false) {
 		return false;
 	}
 
@@ -433,7 +433,7 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 
 	len += strlen((char*)pParam);
 
-	if(esp_at_cmd_send(RFPOWER, pParam, len) == false) {
+	if(esp_cmd_transmit(RFPOWER, pParam, len) == false) {
 		return false;
 	}
 
@@ -463,7 +463,7 @@ bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 
 	len += strlen((char*)pParam);
 
-	if(esp_at_cmd_send((save ? SYSMSG_DEF : SYSMSG_CUR), pParam, len) == false) {
+	if(esp_cmd_transmit((save ? SYSMSG_DEF : SYSMSG_CUR), pParam, len) == false) {
 		return false;
 	}
 

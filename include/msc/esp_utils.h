@@ -193,7 +193,7 @@ bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t *payload);
 *
 * @return 	true/false.
 */
-bool esp_at_cmd_send(uint8_t cmd, const char data[], size_t size);
+bool esp_cmd_transmit(uint8_t cmd, const char data[], size_t size);
 
 /**
 * @brief 	This function send raw AT command to module.

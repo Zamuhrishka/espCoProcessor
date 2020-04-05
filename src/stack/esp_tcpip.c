@@ -355,7 +355,7 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send((uint8_t)CIPSTATUS, NULL, 0) == false) {
+	if(esp_cmd_transmit((uint8_t)CIPSTATUS, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -451,7 +451,7 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSTART, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSTART, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -532,7 +532,7 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSTART, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSTART, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -565,7 +565,7 @@ esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(CIPCLOSE_M, (char*)&id, 1) == false) {
+	if(esp_cmd_transmit(CIPCLOSE_M, (char*)&id, 1) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -594,7 +594,7 @@ esp_status_t esp_close_connection(uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(CIPCLOSE_S, NULL, 0) == false) {
+	if(esp_cmd_transmit(CIPCLOSE_S, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -624,7 +624,7 @@ esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(CIPMUX, (char*)&mode, 1ul) == false) {
+	if(esp_cmd_transmit(CIPMUX, (char*)&mode, 1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -654,7 +654,7 @@ esp_status_t esp_single_connection_enable(uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(CIPMUX, (char*)&mode, 1ul) == false) {
+	if(esp_cmd_transmit(CIPMUX, (char*)&mode, 1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -695,7 +695,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(REQCIPMUX, NULL, 0) == false) {
+	if(esp_cmd_transmit(REQCIPMUX, NULL, 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -734,7 +734,7 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(CIPMODE, (char*)&mode, (size_t)1ul) == false) {
+	if(esp_cmd_transmit(CIPMODE, (char*)&mode, (size_t)1ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -770,7 +770,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_at_cmd_send(REQCIPMODE, NULL, 0ul) == false) {
+	if(esp_cmd_transmit(REQCIPMODE, NULL, 0ul) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -847,7 +847,7 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 	}
 
 	len = strlen((char*)pParam);
-	if(esp_at_cmd_send(CIPSERVER, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSERVER, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -898,7 +898,7 @@ esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout)
 	}
 
 	len = strlen((char*)pParam);
-	if(esp_at_cmd_send(CIPSERVER, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSERVER, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -937,7 +937,7 @@ esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSTO, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSTO, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -971,7 +971,7 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 
 	len = strlen((char*)pParam);
 
-	if(esp_at_cmd_send(CIPSERVERMAXCONN, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPSERVERMAXCONN, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -1011,7 +1011,7 @@ esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout)
 	pParam[len] = '"';
 	len++;
 
-	if(esp_at_cmd_send(CIPDOMAIN, pParam, len) == false) {
+	if(esp_cmd_transmit(CIPDOMAIN, pParam, len) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
@@ -1048,7 +1048,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 	pParam[len] = '"';
 	len++;
 
-	if(esp_at_cmd_send(PING, pParam, len) == false) {
+	if(esp_cmd_transmit(PING, pParam, len) == false) {
 		return 0;
 	}
 

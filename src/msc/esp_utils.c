@@ -203,7 +203,7 @@ bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t* payload)
 *
 * Public function defined in esp_utils.h
 */
-bool esp_at_cmd_send(uint8_t cmd, const char data[], size_t size)
+bool esp_cmd_transmit(uint8_t cmd, const char data[], size_t size)
 {
 	uint8_t i = 2;
 	char* ptr = AT_CMD[cmd];
@@ -270,7 +270,6 @@ bool esp_data_send(const char data[], size_t size)
 	esp_hardware_transmit_block(data, size);
 	return true;
 }
-
 
 /**
 * This function send raw data to module.
