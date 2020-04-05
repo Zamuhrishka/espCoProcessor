@@ -30,7 +30,7 @@
 *
 * @return 	true/false.
 */
-bool esp_rbuffer_enqueue(const char buffer[], size_t size);
+//bool esp_rbuffer_enqueue(const char buffer[], size_t size);
 
 /**
 * @brief 	Add data into queue.
@@ -41,7 +41,13 @@ bool esp_rbuffer_enqueue(const char buffer[], size_t size);
 *
 * @return 	true/false.
 */
-bool esp_rbuffer_denqueue(char **buffer, size_t *size);
+//bool esp_rbuffer_denqueue(char **buffer, size_t *size);
+
+
+
+//bool esp_rbuffer_is_empty(void);
+//bool esp_rbuffer_is_full(void);
+
 
 /**
 * @brief 	Get data from queue.
