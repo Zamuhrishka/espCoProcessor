@@ -335,15 +335,11 @@ esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeou
 */
 void esp_hardware_receive_irq(void)
 {
-	size_t size = 0;
-
 	if(esp_uart_test_irq())
 	{
-		size = BUFFER_SIZE - esp_uart_dma_get_nbm();
+		size_t size = BUFFER_SIZE - esp_uart_dma_get_nbm();
 
-		if(!esp_rbuffer_enqueue(esp_hardware_buffer, size)) {
-			//TODO: Add error handler
-		}
+		esp_rbuffer_enqueue(esp_hardware_buffer, size);
 
 		esp_uart_clear_irq_flag();
 		esp_uart_dma_disable_irq();
