@@ -125,7 +125,7 @@ static bool esp_normal_transmit(void)
 				}
 
 				len = strlen((char*)pParam);
-				if(esp_at_cmd_send(CIPSEND, pParam, len) == false) {
+				if(esp_cmd_transmit(CIPSEND, pParam, len) == false) {
 					return false;
 				}
 
@@ -143,10 +143,9 @@ static bool esp_normal_transmit(void)
 			}
 			break;
 		default:
-		{
 			state = PREPARATION;
 			assert(false);
-		}
+			break;
 	}
 	return true;
 }
@@ -171,7 +170,7 @@ static bool esp_transparent_transmit(void)
 	switch(state)
 	{
 		case PREPARATION:
-			if(esp_at_cmd_send(CIPTRANSP, NULL, 0) == false) {
+			if(esp_cmd_transmit(CIPTRANSP, NULL, 0) == false) {
 				return false;
 			}
 			state = PREPARATION1;
@@ -191,10 +190,9 @@ static bool esp_transparent_transmit(void)
 			}
 			break;
 		default:
-		{
 			state = PREPARATION;
 			assert(false);
-		}
+			break;
 	}
 	return true;
 }
