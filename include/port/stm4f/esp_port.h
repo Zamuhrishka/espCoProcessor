@@ -76,7 +76,8 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size);
 *
 * @return 	none.
 */
-esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout);
+//esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout);
+esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeout);
 
 /**
 * @brief 	This function is interrupt handler for received

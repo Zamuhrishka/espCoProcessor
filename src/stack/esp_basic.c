@@ -40,6 +40,7 @@ extern void mock_assert(const int result, const char* const expression,
 bool esp_test(uint32_t timeout)
 {
 	char cmd[] = "AT\r\n";
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -50,7 +51,7 @@ bool esp_test(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -64,6 +65,7 @@ bool esp_test(uint32_t timeout)
 */
 bool esp_reset(uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -74,7 +76,7 @@ bool esp_reset(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -89,6 +91,7 @@ bool esp_reset(uint32_t timeout)
 bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t timeout)
 {
 	struct slre_cap caps[4] = {0};
+	size_t len = 0;
 	char* pAnswer = NULL;
 
 	assert(NULL != at);
@@ -104,7 +107,7 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -136,6 +139,7 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 {
 	size_t param_size = 0;
+	size_t len = 0;
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
@@ -150,7 +154,7 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -165,6 +169,7 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 bool esp_enable_echo(uint32_t timeout)
 {
 	char esp_enable = '1';
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -175,7 +180,7 @@ bool esp_enable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -190,6 +195,7 @@ bool esp_enable_echo(uint32_t timeout)
 bool esp_disable_echo(uint32_t timeout)
 {
 	char* pAnswer = esp_alloc_answer_buffer();
+	size_t len = 0;
 	char esp_disable = '0';
 
 	if(NULL == pAnswer) {
@@ -200,7 +206,7 @@ bool esp_disable_echo(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -215,6 +221,7 @@ bool esp_disable_echo(uint32_t timeout)
 bool esp_restore(uint32_t timeout)
 {
 	char* pAnswer = esp_alloc_answer_buffer();
+	size_t len = 0;
 
 	if(NULL == pAnswer) {
 		return false;
@@ -224,7 +231,7 @@ bool esp_restore(uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -274,7 +281,7 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -322,7 +329,7 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -337,6 +344,7 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 */
 bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -347,7 +355,7 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
     	return false;
     }
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -399,7 +407,7 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -429,7 +437,7 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 
@@ -459,7 +467,7 @@ bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return false;
 	}
 

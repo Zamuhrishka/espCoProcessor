@@ -287,10 +287,11 @@ bool esp_data_transmit(const char data[], size_t size, uint32_t timeout)
 *
 * Public function defined in esp_utils.h
 */
-esp_status_t esp_data_receive(char data[], size_t maxsize, uint32_t timeout)
+esp_status_t esp_response_receive(char **msg, size_t *len, uint32_t timeout)
 {
-	return esp_hardware_receive_block(data, maxsize, timeout);
+	return esp_hardware_receive_block(msg, len, timeout);
 }
+
 /**
 * This function check available selected pattern
 * in message.

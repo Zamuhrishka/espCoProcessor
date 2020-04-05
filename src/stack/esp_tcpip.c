@@ -344,6 +344,7 @@ void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb)
 */
 esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout)
 {
+	size_t len = 0;
 	struct slre_cap caps[6] = {0};
 	char* pAnswer = NULL;
 
@@ -358,7 +359,7 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -370,7 +371,7 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 	   return ESP_INNER_ERR;
 	}
 
-	if (slre_match((const char*)"STATUS:(\\d)\r\n\\S+CIPSTATUS:(\\d),\"(\\S+)\",\"(\\S+)\",(\\d+),(\\d+),\\S+", pAnswer, strlen(pAnswer), caps, 6, 0) <= 0) {
+	if (slre_match((const char*)"STATUS:(\\d)\r\n\\S+CIPSTATUS:(\\d),\"(\\S+)\",\"(\\S+)\",(\\d+),(\\d+),\\S+", pAnswer, /*strlen(pAnswer)*/len, caps, 6, 0) <= 0) {
 	   return ESP_PATTERN_ERR;
 	}
 
@@ -454,7 +455,7 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -535,7 +536,7 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -557,6 +558,7 @@ esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
 */
 esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -567,7 +569,7 @@ esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -585,6 +587,7 @@ esp_status_t esp_close_connection_m(esp_conn_id_t id, uint32_t timeout)
 */
 esp_status_t esp_close_connection(uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -595,7 +598,7 @@ esp_status_t esp_close_connection(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -613,6 +616,7 @@ esp_status_t esp_close_connection(uint32_t timeout)
 */
 esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 {
+	size_t len = 0;
 	esp_conn_mode_t mode = ESP_MULTIPLE_CONNECT;
 	char* pAnswer = esp_alloc_answer_buffer();
 
@@ -624,7 +628,7 @@ esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -642,6 +646,7 @@ esp_status_t esp_multiple_connection_enable(uint32_t timeout)
 */
 esp_status_t esp_single_connection_enable(uint32_t timeout)
 {
+	size_t len = 0;
 	esp_conn_mode_t mode = ESP_SINGLE_CONNECT;
 	char* pAnswer = esp_alloc_answer_buffer();
 
@@ -653,7 +658,7 @@ esp_status_t esp_single_connection_enable(uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -678,6 +683,7 @@ esp_status_t esp_single_connection_enable(uint32_t timeout)
 */
 esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 {
+	size_t len = 0;
 	struct slre_cap caps[1] = {0};
 	char* pAnswer = NULL;
 
@@ -693,7 +699,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -705,7 +711,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	if (slre_match("\\S*CIPMUX:(\\d+)\\S*", pAnswer, strlen(pAnswer), caps, 1, 0) <= 0) {
+	if (slre_match("\\S*CIPMUX:(\\d+)\\S*", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -721,6 +727,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 */
 esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -731,7 +738,7 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -751,6 +758,7 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 */
 esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 {
+	size_t len = 0;
 	struct slre_cap caps[1] = {0};
 	char* pAnswer = NULL;
 
@@ -766,7 +774,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -778,7 +786,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 	   return ESP_INNER_ERR;
 	}
 
-	if (slre_match("\\S*CIPMODE:(\\d+)\\S*", pAnswer, strlen(pAnswer), caps, 1, 0) <= 0) {
+	if (slre_match("\\S*CIPMODE:(\\d+)\\S*", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
 	   return false;
 	}
 
@@ -794,6 +802,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 */
 esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 {
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer) {
@@ -804,7 +813,7 @@ esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 	   return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -844,7 +853,7 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 			return ESP_RECEIVE_ERR;
 		}
 
@@ -895,7 +904,7 @@ esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+		if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 			return ESP_RECEIVE_ERR;
 		}
 
@@ -932,7 +941,7 @@ esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -966,7 +975,7 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1006,7 +1015,7 @@ esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1043,7 +1052,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 		return 0;
 	}
 
-	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) != ESP_PASS) {
+	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1051,7 +1060,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 		return 0;
 	}
 
-	if (slre_match((const char*)"\\+(\\d+)\r\n", pAnswer, strlen(pAnswer), caps, 1, 0) <= 0) {
+	if (slre_match((const char*)"\\+(\\d+)\r\n", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
 		return 0;
 	}
 

@@ -307,33 +307,22 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size)
 *
 * Public function defined in esp_port.h
 */
-esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout)
+esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeout)
 {
 	uint32_t _timeout = 0ul;
 
-	esp_hardware_switch_mode(BLOCK);
-
-	esp_uart_disable_irq();
-	esp_uart_dma_disable();
-	esp_uart_dma_receive_cfg(data, maxsize);
-
 	_timeout = HAL_GetTick() + timeout;
-	while(!esp_uart_test_irq())
+
+	while(esp_rbuffer_is_empty())
 	{
 		 if(HAL_GetTick() > _timeout) {
-		  return ESP_TIMEOUT;
+			 return ESP_TIMEOUT;
 		 }
+	}
 
-		 if(esp_uart_dma_test_irq())
-		 {
-			 esp_uart_dma_clear_irq_flag();
-			 return ESP_SIZE_ERR;
-		 }
-	};
-
-	esp_uart_clear_irq_flag();
-	esp_uart_dma_disable_irq();
-	esp_uart_dma_disable();
+	 if(!esp_rbuffer_denqueue(msg, len)) {
+		 return ESP_INNER_ERR;
+	 }
 
 	return ESP_PASS;
 }
