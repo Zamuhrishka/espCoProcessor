@@ -263,12 +263,18 @@ static bool esp_rbuffer_is_empty(void)
 
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
-	{
-		esp_uart_dma_disable();
-		esp_uart_clear_irq_flag();
-		esp_uart_enable_irq();
-		esp_uart_dma_receive_cfg((uint8_t*)esp_hardware_buffer, sizeof(esp_hardware_buffer));
-	}
+/**
+* This function init hardware unit.
+*
+* Public function defined in esp_port.h
+*/
+void esp_harware_init(void)
+{
+	esp_hardware_power_on();
+	esp_uart_dma_disable();
+	esp_uart_clear_irq_flag();
+	esp_uart_enable_irq();
+	esp_uart_dma_receive_cfg((uint8_t*)esp_hardware_buffer, sizeof(esp_hardware_buffer));
 }
 
 /**
