@@ -15,7 +15,6 @@
 #include <stack/esp_wifi.h>
 #include <stack/esp_tcpip.h>
 #include "esp_drv.h"
-#include "esp_queue.h"
 #include <esp_port.h>
 //_____ D E F I N I T I O N ____________________________________________________
 //_____ M A C R O S ____________________________________________________________
@@ -23,7 +22,7 @@
 //!Pointer of callback function for transmit available handle
 static esp_message_garbage_fn_t esp_msg_garbage_cb = NULL;
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   __________________
-//_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   ___________________
+//_____ S T A T I ï¿½  F U N C T I O N   D E F I N I T I O N   ___________________
 //_____ F U N C T I O N   D E F I N I T I O N   ________________________________
 /**
 * This function initializate.

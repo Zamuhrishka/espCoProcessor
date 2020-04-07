@@ -14,7 +14,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "esp_queue.h"
 #include "esp_port.h"
 //_____ D E F I N I T I O N ___________________________________________________
 //_____ M A C R O S ___________________________________________________________

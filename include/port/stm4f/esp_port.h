@@ -8,7 +8,6 @@
 ********************************************************************************/
 #pragma once
 //_____ I N C L U D E S _______________________________________________________
-#include "esp_queue.h"
 #include "esp_drv.h"
 #include "esp_utils.h"
 #include <stdbool.h>
