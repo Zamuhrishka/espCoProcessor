@@ -36,6 +36,8 @@ extern void mock_assert(const int result, const char* const expression,
 //!Allow transmit flag
 static volatile bool tx_ready = false;
 
+static esp_tcpip_event_t tcpip_event = ESP_NO_EVT;
+
 //!Transmit mode
 static esp_tx_mode_t transfer = ESP_NORMAL_MODE;
 
@@ -60,6 +62,21 @@ static esp_tcpip_connect_fn_t esp_tcpip_open_connect = NULL;
 static esp_tcpip_transmit_fn_t esp_tcpip_transmit_cb = NULL;
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
+static void esp_tcpip_set_event(esp_tcpip_event_t evt)
+{
+	tcpip_event = evt;
+}
+
+static void esp_tcpip_clr_event(esp_tcpip_event_t evt)
+{
+	tcpip_event = 0;
+}
+
+static bool esp_tcpip_tst_event(esp_tcpip_event_t evt)
+{
+	return tcpip_event;
+}
+
 /**
 * @brief 	This function check the pAnswer from chip for busy flag.
 *
