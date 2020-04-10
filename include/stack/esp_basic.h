@@ -261,18 +261,9 @@ bool esp_rf_power(uint8_t power, uint32_t timeout);
 * @brief 	This function sets current system messages.
 *
 * @param[in] msg sets current system messages.
+* @param[in] save flag save or not configuration in ESP8266 flash memory.
 * @param[in] timeout timeout in msec for waiting answer from chip.
 *
 * @return 	true/false.
 */
-bool ESP_SetupSystemMessageCur(uint8_t msg, uint32_t timeout);
-
-/**
-* @brief 	This function sets current system messages.
-*
-* @param[in] msg sets current system messages.
-* @param[in] timeout timeout in msec for waiting answer from chip.
-*
-* @return 	true/false.
-*/
-bool ESP_SetupSystemMessageDef(uint8_t msg, uint32_t timeout);
+bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout);
