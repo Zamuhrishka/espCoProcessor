@@ -7,22 +7,31 @@
 * @brief
 *******************************************************************************/
 //_____ I N C L U D E S ________________________________________________________
+#include "esp.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stack/esp_basic.h>
-#include <stack/esp_wifi.h>
-#include <stack/esp_tcpip.h>
-#include "esp_drv.h"
-#include <esp_port.h>
+#include <assert.h>
+#include "stack/esp_basic.h"
+#include "stack/esp_wifi.h"
+#include "stack/esp_tcpip.h"
+#include "esp_port.h"
+//_____ C O N F I G S  ________________________________________________________
+// If unit testing is enabled override assert with mock_assert().
+#if defined(UNIT_TESTING)
+extern void mock_assert(const int result, const char* const expression,
+                        const char * const file, const int line);
+#undef assert
+#define assert(expression) \
+    mock_assert((int)(expression), #expression, __FILE__, __LINE__);
+#endif // UNIT_TESTING
 //_____ D E F I N I T I O N ____________________________________________________
 //_____ M A C R O S ____________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  _________________________________
-//!Pointer of callback function for transmit available handle
-static esp_message_garbage_fn_t esp_msg_garbage_cb = NULL;
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   __________________
-//_____ S T A T I ï¿½  F U N C T I O N   D E F I N I T I O N   ___________________
+//_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   ___________________
 //_____ F U N C T I O N   D E F I N I T I O N   ________________________________
 /**
 * This function initializate.
@@ -34,28 +43,16 @@ bool esp_init(void)
 	esp_harware_init();
 	esp_hardware_power_on();
 	esp_disable_echo(1000);
+
 	return true;
 }
 
-/**
-* This function handle of receive data.
-*
-* Public function defined in esp_drv.h
-*/
-bool esp_message_handle(void)
+void esp_receive_handle(void)
 {
-	size_t size = 0;
-	char* buffer = NULL;
+	esp_tcp_receive_handle();
+}
 
-	if(esp_rbuffer_denqueue(&buffer, &size))
-	{
-		esp_tcp_receive_handle(buffer, size);
-	}
-
-	if(esp_msg_garbage_cb != NULL)
-	{
-		esp_msg_garbage_cb(buffer, size);
-	}
-
-	return true;
+void esp_transmit_handle(void)
+{
+	esp_tcp_transmit_handle();
 }

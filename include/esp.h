@@ -6,9 +6,7 @@
 *******************************************************************************/
 #pragma once
 //_____ I N C L U D E S _______________________________________________________________________________
-#include "stdbool.h"
-#include "stdint.h"
-#include "stdlib.h"
+#include <stdbool.h>
 //_____ C O N F I G S ________________________________________________________________________________
 //_____ M A C R O S __________________________________________________________________________________
 //_____ D E F I N I T I O N __________________________________________________________________________
@@ -55,9 +53,6 @@ typedef enum
 	ESP_UNDEFINE_EVT
 } 	esp_event_t;
 //! @}
-
-//!Prototype of callback function for transmit available handle
-typedef void (*esp_message_garbage_fn_t)(char* msg, size_t len);
 //_____ V A R I A B L E   D E C L A R A T I O N S ____________________________________________________
 //_____ F U N C T I O N   D E C L A R A T I O N S ____________________________________________________
 /**
@@ -68,12 +63,6 @@ typedef void (*esp_message_garbage_fn_t)(char* msg, size_t len);
 * @return 	true/false.
 */
 bool esp_init(void);
+void esp_receive_handle(void);
+void esp_transmit_handle(void);
 
-/**
-* @brief 	This function handle of receive data.
-*
-* @param	none.
-*
-* @return 	true/false.
-*/
-bool esp_message_handle(void);
