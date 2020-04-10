@@ -924,6 +924,9 @@ esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout)
 esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 {
 	size_t len = 0;
+
+	assert(7200 > stimeout);
+
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
@@ -954,6 +957,9 @@ esp_status_t esp_tcp_server_timeout_setup(uint16_t stimeout, uint32_t timeout)
 esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 {
 	size_t len = 0;
+
+	assert(5 > conn);
+
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
