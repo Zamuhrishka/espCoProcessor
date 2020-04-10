@@ -473,7 +473,7 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout)
+esp_status_t esp_udp_transmission(const esp_udp_cfg_t *cfg, uint32_t timeout)
 {
 	size_t len = 0;
 	char* pParam = NULL;
@@ -827,7 +827,7 @@ esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
+esp_status_t esp_tcp_server_create(uint16_t port, uint32_t timeout)
 {
 	size_t len = 0;
 	char* pParam = esp_alloc_param_buffer();
@@ -870,7 +870,7 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout)
+esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout)
 {
 	char* strPort = NULL;
 	size_t len = 0;
@@ -1070,7 +1070,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 *
 * Public function defined in esp_tcpip.h
 */
-bool esp_tcp_transmit(esp_conn_id_t id, const char data[], size_t size)
+bool esp_tcp_send(esp_conn_id_t id, const uint8_t data[], size_t size)
 {
 	assert(NULL != data);
 	assert(size);

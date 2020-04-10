@@ -227,7 +227,7 @@ esp_status_t esp_tcp_connect(const esp_tcp_cfg_t *cfg, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-esp_status_t esp_udp_connect(const esp_udp_cfg_t *cfg, uint32_t timeout);
+esp_status_t esp_udp_transmission(const esp_udp_cfg_t *cfg, uint32_t timeout);
 
 /**
 * @brief 	This function close connection by ID.
@@ -409,7 +409,7 @@ esp_status_t esp_transparent_mode_disable(uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout);
+esp_status_t esp_tcp_server_create(uint16_t port, uint32_t timeout);
 
 /**
 * @brief 	This function stop TCP server.
@@ -428,7 +428,7 @@ esp_status_t esp_tcp_server_open(uint16_t port, uint32_t timeout);
 * <li> <b>ESP_PARAM_ERR</b> - Wrong params.
 * </ul>
 */
-esp_status_t esp_tcp_server_close(uint16_t port, uint32_t timeout);
+esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout);
 
 /**
 * @brief 	This function sets the TCP Server Timeout.
@@ -517,7 +517,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout);
 *
 * @return 	true/false.
 */
-bool esp_tcp_transmit(esp_conn_id_t id, const char data[], size_t size);
+bool esp_tcp_send(esp_conn_id_t id, const uint8_t data[], size_t size);
 
 /**
 * @brief 	This function handle of transmit buffer.
@@ -536,4 +536,4 @@ bool esp_tcp_transmit_handle(void);
 *
 * @return 	none.
 */
-void esp_tcp_receive_handle(char* msg, size_t len);
+void esp_tcp_receive_handle(void);
