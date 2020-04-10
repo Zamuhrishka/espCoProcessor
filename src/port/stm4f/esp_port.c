@@ -217,7 +217,7 @@ inline static void esp_uart_dma_receive_cfg(uint8_t *pData, uint16_t Size)
 */
 static bool esp_rbuffer_enqueue(const char buffer[], size_t size)
 {
-	if(rqueue.size == ESP_QUEUE_SIZE) {
+	if(rqueue.size == ESP_RX_QUEUE_SIZE) {
 		return false;
 	}
 
@@ -227,7 +227,7 @@ static bool esp_rbuffer_enqueue(const char buffer[], size_t size)
 	}
 
 	rqueue.size++;
-	rqueue.write = (rqueue.write == ESP_QUEUE_SIZE - 1ul) ? 0ul: (rqueue.write + 1ul);
+	rqueue.write = (rqueue.write == ESP_RX_QUEUE_SIZE - 1ul) ? 0ul: (rqueue.write + 1ul);
 
 	return true;
 }
@@ -247,7 +247,7 @@ static bool esp_rbuffer_denqueue(char **buffer, size_t *size)
 	*buffer = rqueue.data[rqueue.read].buffer;
 
 	rqueue.size--;
-	rqueue.read = (rqueue.read == ESP_QUEUE_SIZE - 1ul) ? 0ul : (rqueue.read + 1ul);
+	rqueue.read = (rqueue.read == ESP_RX_QUEUE_SIZE - 1ul) ? 0ul : (rqueue.read + 1ul);
 
 	return true;
 }
