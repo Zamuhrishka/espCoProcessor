@@ -333,6 +333,25 @@ esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeou
 	return ESP_PASS;
 }
 
+
+
+bool esp_hardware_receive(char **msg, size_t *len)
+{
+
+	if(esp_rbuffer_is_empty()) {
+		return false;
+	}
+
+	 if(!esp_rbuffer_denqueue(msg, len)) {
+		 return false;
+	 }
+
+	return true;
+}
+
+
+
+
 /**
 * This function is interrupt handler for received
 * data throw UART
