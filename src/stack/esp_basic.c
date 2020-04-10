@@ -13,11 +13,11 @@
 
 #include <string.h>
 #include <assert.h>
+#include <esp.h>
 #include "slre.h"
 #include "convert.h"
-#include "esp_drv.h"
 #include "esp_utils.h"
-//_____ C O N F I G S  ________________________________________________________________________
+//_____ C O N F I G S  ________________________________________________________
 // If unit testing is enabled override assert with mock_assert().
 #if defined(UNIT_TESTING)
 extern void mock_assert(const int result, const char* const expression,
