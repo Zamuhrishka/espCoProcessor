@@ -26,15 +26,49 @@ extern void mock_assert(const int result, const char* const expression,
     mock_assert((int)(expression), #expression, __FILE__, __LINE__);
 #endif // UNIT_TESTING
 //_____ D E F I N I T I O N ___________________________________________________
+//! Max size of queue buffer
+#define ESP_QUEUE_SIZE                 				(10U)
+
+//! Max size of each of element of queue
+#define ESP_PAYLOAD_LENGTH							(200U)
+
 //!Maximum connections for TCP server
-#define ESP_SERVER_MAX_CONN						5
+#define ESP_SERVER_MAX_CONN							(5)
 
 //!Maximum length of domain name
-#define ESP_DOMAIN_NAME_LENGTH					64
+#define ESP_DOMAIN_NAME_LENGTH						(64)
+
+//! @brief Static queue structure
+//! @{
+typedef struct
+{
+//	esp_tpacket_t data[ESP_QUEUE_SIZE];															//!array of data
+
+	struct
+	{
+		size_t size;
+		char id;
+		char buffer[ESP_PAYLOAD_LENGTH];
+	} data[ESP_QUEUE_SIZE];
+
+
+    size_t size;																				//!count of store data
+    size_t write;																				//!pointer to the write position
+    size_t read;																				//!pointer to the read position
+} 	esp_tqueue_t;
+//! @}
+
+typedef enum
+{
+	ESP_NO_EVT				=	0x00,
+	ESP_START_TRANSMIT_EVT	=	0x01,
+	EST_TRANSMIT_PASS_EVT	=	0x02,
+} 	esp_tcpip_event_t;
+
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
-//!Allow transmit flag
-static volatile bool tx_ready = false;
+//!Transmit Queue
+static esp_tqueue_t tqueue = {0};
 
 static esp_tcpip_event_t tcpip_event = ESP_NO_EVT;
 
@@ -60,6 +94,11 @@ static esp_tcpip_connect_fn_t esp_tcpip_open_connect = NULL;
 
 //!Pointer of callback function for transmit available handle
 static esp_tcpip_transmit_fn_t esp_tcpip_transmit_cb = NULL;
+
+//!Pointer of callback function for transmit available handle
+#if 0
+static esp_message_garbage_fn_t esp_msg_garbage_cb = NULL;
+#endif
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 static void esp_tcpip_set_event(esp_tcpip_event_t evt)
@@ -76,6 +115,51 @@ static bool esp_tcpip_tst_event(esp_tcpip_event_t evt)
 {
 	return tcpip_event;
 }
+
+/**
+* This function add data into transmit queue.
+*
+* Public function defined in esp_queue.h
+*/
+static bool esp_tbuffer_enqueue(char id, const uint8_t buffer[], size_t size)
+{
+	if(tqueue.size == ESP_QUEUE_SIZE) {
+		return false;
+	}
+
+	tqueue.data[tqueue.write].size = size;
+	tqueue.data[tqueue.write].id = id;
+	if(memcpy(&tqueue.data[tqueue.write].buffer, buffer, size) == NULL) {
+		return false;
+	}
+
+	tqueue.size++;
+	tqueue.write = (tqueue.write == ESP_QUEUE_SIZE - 1ul) ? 0ul: (tqueue.write + 1ul);
+
+	return true;
+}
+
+/**
+* This function get data from transmit queue.
+*
+* Public function defined in esp_queue.h
+*/
+static bool esp_tbuffer_denqueue(char *id, char **buffer, size_t *size)
+{
+	if(tqueue.size == 0) {
+		return false;
+	}
+
+	*size = tqueue.data[tqueue.read].size;
+	*id = tqueue.data[tqueue.read].id;
+	*buffer = tqueue.data[tqueue.read].buffer;
+
+	tqueue.size--;
+	tqueue.read = (tqueue.read == ESP_QUEUE_SIZE - 1ul) ? 0ul : (tqueue.read + 1ul);
+
+	return true;
+}
+
 
 /**
 * @brief 	This function check the pAnswer from chip for busy flag.
@@ -109,7 +193,9 @@ static bool esp_normal_transmit(void)
 	static enum _state
 	{
 		PREPARATION = 0,
+		WAIT_TRANSMIT_ALLOW,
 		TRANSMIT,
+		WAIT_TRANSMIT_ACK
 	}	state = PREPARATION;
 
 	char* pParam = esp_alloc_answer_buffer();
@@ -146,16 +232,31 @@ static bool esp_normal_transmit(void)
 					return false;
 				}
 
+				state = WAIT_TRANSMIT_ALLOW;
+				esp_tcpip_clr_event(ESP_START_TRANSMIT_EVT);
+			}
+			break;
+		case WAIT_TRANSMIT_ALLOW:
+			if(esp_tcpip_tst_event(ESP_START_TRANSMIT_EVT))
+			{
 				state = TRANSMIT;
-				tx_ready = false;
+				esp_tcpip_clr_event(ESP_START_TRANSMIT_EVT);
 			}
 			break;
 		case TRANSMIT:
-			if(tx_ready)
+			if(esp_data_send(buffer, size) == false)
 			{
-				if(esp_data_send(buffer, size) == false) {
-				   return false;
-				}
+				state = PREPARATION;
+				return false;
+			}
+
+			state = WAIT_TRANSMIT_ACK;
+			esp_tcpip_clr_event(EST_TRANSMIT_PASS_EVT);
+			break;
+		case WAIT_TRANSMIT_ACK:
+			if(esp_tcpip_tst_event(EST_TRANSMIT_PASS_EVT))
+			{
+				esp_tcpip_clr_event(EST_TRANSMIT_PASS_EVT);
 				state = PREPARATION;
 			}
 			break;
@@ -179,7 +280,7 @@ static bool esp_transparent_transmit(void)
 	static enum _state
 	{
 		PREPARATION = 0,
-		PREPARATION1,
+		WAIT_TRANSMIT_ALLOW,
 		TRANSMIT,
 		STOP
 	}	state = PREPARATION;
@@ -190,12 +291,13 @@ static bool esp_transparent_transmit(void)
 			if(esp_cmd_transmit(CIPTRANSP, NULL, 0) == false) {
 				return false;
 			}
-			state = PREPARATION1;
+			state = WAIT_TRANSMIT_ALLOW;
 			break;
-		case PREPARATION1:
-			if(tx_ready)
+		case WAIT_TRANSMIT_ALLOW:
+			if(esp_tcpip_tst_event(ESP_START_TRANSMIT_EVT))
 			{
 				state = TRANSMIT;
+				esp_tcpip_clr_event(ESP_START_TRANSMIT_EVT);
 			}
 			break;
 		case TRANSMIT:
@@ -253,11 +355,12 @@ static void esp_normal_receive(char msg[], size_t len)
 
 	if(esp_pattern_check(msg, PATTERN_TX_READY))
 	{
-		tx_ready = true;
+		esp_tcpip_set_event(ESP_START_TRANSMIT_EVT);
 	}
 
 	if(esp_pattern_check(msg, PATTERN_SEND_ACK))
 	{
+		esp_tcpip_set_event(EST_TRANSMIT_PASS_EVT);
 		if(esp_tcpip_transmit_cb != NULL) {
 			esp_tcpip_transmit_cb();
 		}
@@ -292,11 +395,13 @@ static void esp_transparent_receive(char msg[], size_t len)
 {
 	if(esp_pattern_check(msg, PATTERN_TRANSPARENT_READY))
 	{
-		tx_ready = true;
+		esp_tcpip_set_event(ESP_START_TRANSMIT_EVT);
 	}
 	else
 	{
-		esp_tcpip_receive_cb(ESP_ID_NONE, msg, len);
+		if(esp_tcpip_receive_cb != NULL) {
+			esp_tcpip_receive_cb(/*ESP_ID_NONE*/ESP_ID0, msg, len);
+		}
 	}
 }
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
@@ -761,9 +866,13 @@ esp_status_t esp_transmit_mode_setup(esp_tx_mode_t mode, uint32_t timeout)
 		return ESP_BUSY;
 	}
 
+	if(!esp_pattern_check(pAnswer, PATTERN_OK)) {
+		return ESP_INNER_ERR;
+	}
+
 	transfer = mode;
 
-	return (!esp_pattern_check(pAnswer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return ESP_PASS;
 }
 
 /**
