@@ -709,7 +709,7 @@ esp_status_t esp_mux_cfg_request(esp_conn_mode_t *mode, uint32_t timeout)
 		return ESP_INNER_ERR;
 	}
 
-	if (slre_match("\\S*CIPMUX:(\\d+)\\S*", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
+	if (slre_match("\\S*CIPMUX:(\\d+)\\S*", pAnswer, len, caps, 1, 0) <= 0) {
 	   return ESP_INNER_ERR;
 	}
 
@@ -784,7 +784,7 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 	   return ESP_INNER_ERR;
 	}
 
-	if (slre_match("\\S*CIPMODE:(\\d+)\\S*", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
+	if (slre_match("\\S*CIPMODE:(\\d+)\\S*", pAnswer, len, caps, 1, 0) <= 0) {
 	   return false;
 	}
 
@@ -1049,7 +1049,7 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 		return 0;
 	}
 
-	if (slre_match((const char*)"\\+(\\d+)\r\n", pAnswer, /*strlen(pAnswer)*/len, caps, 1, 0) <= 0) {
+	if (slre_match((const char*)"\\+(\\d+)\r\n", pAnswer, len, caps, 1, 0) <= 0) {
 		return 0;
 	}
 
@@ -1090,22 +1090,31 @@ bool esp_tcp_transmit_handle(void)
 	return res;
 }
 
-/**
-* This function handle TCP connections.
-*
-* Public function defined in esp_tcpip.h
-*/
-void esp_tcp_receive_handle(char* msg, size_t len)
+void esp_tcp_receive_handle(void)
 {
-	assert(msg);
+	size_t size = 0;
+	char* buffer = NULL;
 
-	if(transfer == ESP_TRANSPARENT_MODE)
+	if(esp_data_receive(&buffer, &size))
 	{
-		esp_transparent_receive(msg, len);
-	}
-	else
-	{
-		esp_normal_receive(msg, len);
+		if(transfer == ESP_TRANSPARENT_MODE)
+		{
+			esp_transparent_receive(buffer, size);
+		}
+		else
+		{
+			esp_normal_receive(buffer, size);
+		}
+
+#if 0
+		if(esp_msg_garbage_cb != NULL)
+		{
+			esp_msg_garbage_cb(buffer, size);
+		}
+#endif
 	}
 }
+
+
+
 
