@@ -800,26 +800,11 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 */
 esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 {
-	size_t len = 0;
-	char* pAnswer = esp_alloc_answer_buffer();
-
-	if(NULL == pAnswer) {
-		return ESP_MEM_ALLOC_ERR;
-	}
-
 	if(esp_data_send("+++", strlen("+++")) == false) {
 	   return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_response_receive(&pAnswer, &len, timeout) != ESP_PASS) {
-		return ESP_RECEIVE_ERR;
-	}
-
-	if(esp_is_busy(pAnswer)) {
-		return ESP_BUSY;
-	}
-
-	return (!esp_pattern_check(pAnswer, PATTERN_OK)) ? ESP_INNER_ERR : ESP_PASS;
+	return ESP_PASS;
 }
 
 /**
