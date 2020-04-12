@@ -13,7 +13,7 @@
 #include "stdbool.h"
 #include "stdlib.h"
 #include "cmockery.h"
-#include "esp_drv.h"
+#include "esp.h"
 #include "esp_basic.h"
 #include <string.h>
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________________________
@@ -23,10 +23,10 @@ static void Test_TestCmd(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_Test(2000);
+	result = esp_test(2000);
 	assert_true(result);
 }
 
@@ -34,23 +34,23 @@ static void Test_ResetCmd(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_Reset(2000);
+	result = esp_reset(2000);
 	assert_true(result);
 }
 
 static void Test_ReqVersionCmd(void **state)
 {
 	bool result = false;
-	char at[50] = {0};
-	char sdk[50] = {0};
+	esp_at_version_t at = {0};
+	esp_sdk_version_t sdk = {0};
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_GetVersion(at, sdk, 2000);
+	result = esp_get_version(&at, &sdk, 2000);
 	assert_true(result);
 }
 
@@ -58,10 +58,10 @@ static void Test_EnterDeepSleepCmd(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_EnterToDeepSleep(1000, 2000);
+	result = esp_deep_sleep(1000, 2000);
 	assert_true(result);
 }
 
@@ -69,13 +69,13 @@ static void Test_EchoCmd(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_EnableEcho(2000);
+	result = esp_enable_echo(2000);
 	assert_true(result);
 
-	result = ESP_DisableEcho(2000);
+	result = esp_disable_echo(2000);
 	assert_true(result);
 }
 
@@ -83,40 +83,40 @@ static void Test_RestoreCmd(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_Restore(2000);
+	result = esp_restore(2000);
 	assert_true(result);
 }
 
 static void Test_UartCurCmd(void **state)
 {
 	bool result = false;
-	ESP_UartParam_t param;
+	esp_uart_t param;
 
-	param.baudRate = 115200;
-	param.dataBits = ESP_DataBits_8;
-	param.flowControl = ESP_FlowControlOff;
-	param.parity = ESP_ParityNone;
-	param.stopBits = ESP_DataBits_1;
+	param.baud_rate = 115200;
+	param.data_bits = ESP_DATABITS_8;
+	param.flow_control = ESP_FLOW_CNTRL_OFF;
+	param.parity = ESP_PARITY_NONE;
+	param.stop_bits = ESP_STOPBITS_1;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_SetupUartParamCur(&param, 2000);
+	result = esp_uart_cfg(&param, false, 2000);
 	assert_true(result);
 }
 
 static void Test_SleepCmd(void **state)
 {
 	bool result = false;
-	ESP_SleepModes_t mode = ESP_SleepModeLight;
+	esp_sleep_mode_t mode = ESP_SLEEP_MODE_LIGHT;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_Sleep(mode, 2000);
+	result = esp_sleep(mode, 2000);
 	assert_true(result);
 }
 
@@ -124,18 +124,18 @@ static void Test_SleepCmd(void **state)
 static void Test_ConfigWakeupPinCmd(void **state)
 {
 	bool result = false;
-	ESP_WakeupGpioParam_t gpio;
+	esp_wgpio_t gpio;
 
-	gpio.awake_GPIO = 3;
-	gpio.awake_level = ESP_AwakeupPinHighLevel;
-	gpio.enable = ESP8266_Enable;
-	gpio.trigger_GPIO = 5;
-	gpio.trigger_level = ESP_WakeupPinHighLevel;
+	gpio.awake_gpio = 3;
+	gpio.awake_level = ESP_AWPIN_LOW;
+	gpio.enable = ESP_WPIN_ENABLE;
+	gpio.trigger_gpio = 5;
+	gpio.trigger_level = ESP_AWPIN_LOW;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_ConfigWakeupGpio(&gpio, 2000);
+	result = esp_wgpio_cfg(&gpio, 2000);
 	assert_true(result);
 }
 
@@ -143,31 +143,33 @@ static void Test_SetupRfPower(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
-	result = ESP_SetupRfPower(55, 2000);
+	result = esp_rf_power(55, 2000);
 	assert_true(result);
 }
 
+#if 0
 static void Test_SetupSystemMessageCur(void **state)
 {
 	bool result = false;
 
-	result = ESP_Init();
+	result = esp_init();
 	assert_true(result);
 
 	result = ESP_SetupSystemMessageCur(3, 2000);
 	assert_true(result);
 }
+#endif
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________________________
 void Test_EspBasicStack(void)
 {
   const UnitTest tests[] =
   {
-//	  unit_test(Test_TestCmd),
+	  unit_test(Test_TestCmd),
 	  unit_test(Test_ResetCmd),
-//	  unit_test(Test_ReqVersionCmd),
+	  unit_test(Test_ReqVersionCmd),
 	  unit_test(Test_EnterDeepSleepCmd),
 	  unit_test(Test_EchoCmd),
 	  unit_test(Test_RestoreCmd),
@@ -175,7 +177,9 @@ void Test_EspBasicStack(void)
 	  unit_test(Test_SleepCmd),
 	  unit_test(Test_ConfigWakeupPinCmd),
 	  unit_test(Test_SetupRfPower),
+#if 0
 	  unit_test(Test_SetupSystemMessageCur),
+#endif
   };
 
   run_tests(tests);

@@ -4,21 +4,22 @@
 * @brief   		This file contains the prototypes functions and methods,
 * 				which use for...
 ********************************************************************************/
+#if defined(UNIT_TESTING)
 //_____ I N C L U D E S _______________________________________________________
+#include "fake_basic.h"
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include "qa_basic.h"
 #include "slre.h"
-#include "qa_port.h"
+// #include "qa_port.h"
 //_____ C O N F I G S  ________________________________________________________
 #define  BUFFER_LENGTH             200u
 //_____ D E F I N I T I O N ___________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
-extern char txBuffer[BUFFER_SIZE];
-
+extern char txBuffer[BUFFER_LENGTH];
 static char buffer[BUFFER_LENGTH] = {0};
 
 static char at_version[] = "\0";
@@ -75,7 +76,6 @@ static void transmit_ok(void)
 	strcpy(txBuffer, pattern_OK1);
 }
 
-
 static bool test_cmd(char msg[])
 {
 	strcpy(txBuffer, pattern_OK1);
@@ -123,8 +123,6 @@ static bool restore_cmd(char msg[])
 	strcpy(txBuffer, pattern_OK1);
     return true;
 }
-
-
 
 static bool uart_cur_setup(char msg[])
 {
@@ -265,73 +263,74 @@ bool esp_basic_handle(char msg[])
 	if(strstr(msg, pattern_RESTART_Cmd) != NULL)
 	{
 		restart_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_VERSION_Query) != NULL)
 	{
 		version_query(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_DEEP_SLEEP_Cmd) != NULL)
 	{
 		deep_sleep_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_ECHO_Cmd) != NULL)
 	{
 		echo_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_RESTORE_Cmd) != NULL)
 	{
 		restore_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_UART_CUR_Query) != NULL)
 	{
 		uart_cur_request(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_UART_CUR_Cmd) != NULL)
 	{
 		uart_cur_setup(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_UART_DEF_Query) != NULL)
 	{
 		uart_def_request(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_UART_DEF_Cmd) != NULL)
 	{
 		uart_def_setup(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_SLEEP_Query) != NULL)
 	{
 		sleep_request(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_SLEEP_Cmd) != NULL)
 	{
 		sleep_setup(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_WAKEUPGPIO_Cmd) != NULL)
 	{
 		wakeupgpio_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_RFPOWER_Cmd) != NULL)
 	{
 		rfpower_cmd(msg);
-        return true;  
+        return true;
 	}
 	if(strstr(msg, pattern_SYSMSG_CUR_Cmd) != NULL)
 	{
 		sysmsg_cmd(msg);
-        return true;  
+        return true;
 	}
-    
+
     return false;
-}
+ }
+#endif
