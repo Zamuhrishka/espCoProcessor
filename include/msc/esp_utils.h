@@ -197,6 +197,41 @@ bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t *payload);
 bool esp_cmd_transmit(uint8_t cmd, const char data[], size_t size);
 
 /**
+* @brief 	This function send raw data to chip.
+*
+* @warning  This is blocking function!
+*
+* @param[in] data data if needed.
+* @param[in] size size of data.
+* @param[in] timeout timeout in msec for waiting answer from chip.
+* @return 	true/false.
+*/
+bool esp_data_transmit(const char data[], size_t size, uint32_t timeout);
+
+/**
+* @brief 	This function receive response of command from chip.
+*
+* @warning  This is blocking function!
+*
+* @param[in] msg buffer for saved received answer.
+* @param[in] len size of received answer.
+* @param[in] timeout timeout in msec for waiting answer from chip.
+* @return 	true/false.
+*/
+esp_status_t esp_response_receive(char **msg, size_t *len, uint32_t timeout);
+
+/**
+* @brief 	This function receive data from chip.
+*
+* @note  This is not blocking function!
+*
+* @param[in] msg buffer for saved received answer.
+* @param[in] len size of received answer.
+* @return 	true/false.
+*/
+bool esp_data_receive(char **msg, size_t *len);
+
+/**
 * @brief 	This function send raw AT command to module.
 *
 * @param[in] cmd any of AT command.

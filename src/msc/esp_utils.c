@@ -281,13 +281,23 @@ bool esp_data_transmit(const char data[], size_t size, uint32_t timeout)
 }
 
 /**
-* This function send raw data to module.
+* This function receive response of command from chip.
 *
 * Public function defined in esp_utils.h
 */
 esp_status_t esp_response_receive(char **msg, size_t *len, uint32_t timeout)
 {
 	return esp_hardware_receive_block(msg, len, timeout);
+}
+
+/**
+* This function receive data from chip.
+*
+* Public function defined in esp_utils.h
+*/
+bool esp_data_receive(char **msg, size_t *len)
+{
+	return esp_hardware_receive(msg, len);
 }
 
 /**
