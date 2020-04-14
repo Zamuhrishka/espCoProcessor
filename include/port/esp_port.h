@@ -15,7 +15,7 @@
 //_____ C O N F I G S  ________________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ D E F I N I T I O N ___________________________________________________
-#define BUFFER_SIZE					ESP_PAYLOAD_LENGTH
+#define BUFFER_SIZE					200
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
@@ -75,8 +75,10 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size);
 *
 * @return 	none.
 */
-//esp_status_t esp_hardware_receive_block(char* data, uint16_t maxsize, uint32_t timeout);
 esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeout);
+
+
+bool esp_hardware_receive(char **msg, size_t *len);
 
 /**
 * @brief 	This function is interrupt handler for received
