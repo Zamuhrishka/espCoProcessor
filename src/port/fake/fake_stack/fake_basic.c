@@ -32,25 +32,25 @@ static const char pattern_WAKEUPGPIO_Cmd[] = "AT+WAKEUPGPIO=";
 static const char pattern_RFPOWER_Cmd[] = "AT+RFPOWER=";
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I С  F U N C T I O N   D E F I N I T I O N   __________________
-static bool fake_esp_test_cmd(char msg[])
+static bool fake_esp_test_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_reset_cmd(char msg[])
+static bool fake_esp_reset_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_version_request_cmd(char msg[])
+static bool fake_esp_version_request_cmd(const char msg[])
 {
 	strcpy(txBuffer, "AT version:1.1.0.0(May 11 2016 18:09:56)\r\nSDK version:1.5.4(baaeaebb)\r\ncompile time:May 20 2016 15:08:19\r\n\r\nOK\r\n");
     return true;
 }
 
-static bool fake_esp_enter_deep_sleep_cmd(char msg[])
+static bool fake_esp_enter_deep_sleep_cmd(const char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -68,19 +68,19 @@ static bool fake_esp_enter_deep_sleep_cmd(char msg[])
     return true;
 }
 
-static bool fake_esp_echo_cmd(char msg[])
+static bool fake_esp_echo_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_restore_cmd(char msg[])
+static bool fake_esp_restore_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_uart_cfg_cur_cmd(char msg[])
+static bool fake_esp_uart_cfg_cur_cmd(const char msg[])
 {
 	struct slre_cap caps[5];
 
@@ -92,7 +92,7 @@ static bool fake_esp_uart_cfg_cur_cmd(char msg[])
     return true;
 }
 
-static bool fake_esp_uart_cfg_def_cmd(char msg[])
+static bool fake_esp_uart_cfg_def_cmd(const char msg[])
 {
 	struct slre_cap caps[5];
 
@@ -104,7 +104,7 @@ static bool fake_esp_uart_cfg_def_cmd(char msg[])
     return true;
 }
 
-static bool fake_esp_sleep_cmd(char msg[])
+static bool fake_esp_sleep_cmd(const char msg[])
 {
 	struct slre_cap caps[15];
 
@@ -116,13 +116,13 @@ static bool fake_esp_sleep_cmd(char msg[])
     return true;
 }
 
-static bool fake_esp_config_wakeup_pins_cmd(char msg[])
+static bool fake_esp_config_wakeup_pins_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_setup_rf_power_cmd(char msg[])
+static bool fake_esp_setup_rf_power_cmd(const char msg[])
 {
 	strcpy(txBuffer, pattern_OK);
     return true;
@@ -136,7 +136,7 @@ static bool sysmsg_cmd(char msg[])
 }
 #endif
 //_____ F U N C T I O N   D E C L A R A T I O N S _____________________________
-bool fake_esp_basic_handle(char msg[])
+bool fake_esp_basic_handle(const char msg[])
 {
 	if(strstr(msg, pattern_RESTART_Cmd) != NULL)
 	{

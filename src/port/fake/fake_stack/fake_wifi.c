@@ -160,7 +160,7 @@ static char pattern_CIPAP_DEF_Resp[] = "+CIPAP_DEF:";
 #endif
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I С  F U N C T I O N   D E F I N I T I O N   __________________
-static bool fake_esp_wifi_mode_setup_cur(char msg[])
+static bool fake_esp_wifi_mode_setup_cur(const char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -174,7 +174,7 @@ static bool fake_esp_wifi_mode_setup_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_mode_request_cur(char msg[])
+static bool fake_esp_wifi_mode_request_cur(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CWMODE_CUR_Resp, strlen(pattern_CWMODE_CUR_Resp));
@@ -184,7 +184,7 @@ static bool fake_esp_wifi_mode_request_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_mode_setup_def(char msg[])
+static bool fake_esp_wifi_mode_setup_def(const char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -198,7 +198,7 @@ static bool fake_esp_wifi_mode_setup_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_mode_request_def(char msg[])
+static bool fake_esp_wifi_mode_request_def(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CWMODE_DEF_Resp, strlen(pattern_CWMODE_DEF_Resp));
@@ -208,7 +208,7 @@ static bool fake_esp_wifi_mode_request_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_ap_join_cur(char msg[])
+static bool fake_esp_wifi_ap_join_cur(const char msg[])
 {
 	static uint8_t state = 0;
 	struct slre_cap caps[2];
@@ -236,7 +236,7 @@ static bool fake_esp_wifi_ap_join_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_ap_ssid_request_cur(char msg[])
+static bool fake_esp_wifi_ap_ssid_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -266,7 +266,7 @@ static bool fake_esp_wifi_ap_ssid_request_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_ap_join_def(char msg[])
+static bool fake_esp_wifi_ap_join_def(const char msg[])
 {
 	static uint8_t state = 0;
 	struct slre_cap caps[2];
@@ -294,7 +294,7 @@ static bool fake_esp_wifi_ap_join_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_ap_ssid_request_def(char msg[])
+static bool fake_esp_wifi_ap_ssid_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -324,7 +324,7 @@ static bool fake_esp_wifi_ap_ssid_request_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_ap_unjoin(char msg[])
+static bool fake_esp_wifi_ap_unjoin(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -332,7 +332,7 @@ static bool fake_esp_wifi_ap_unjoin(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_setup_cur(char msg[])
+static bool fake_esp_wifi_softap_setup_cur(const char msg[])
 {
 	struct slre_cap caps[4];
 
@@ -346,7 +346,7 @@ static bool fake_esp_wifi_softap_setup_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_request_cur(char msg[])
+static bool fake_esp_wifi_softap_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -377,7 +377,7 @@ static bool fake_esp_wifi_softap_request_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_setup_def(char msg[])
+static bool fake_esp_wifi_softap_setup_def(const char msg[])
 {
 	struct slre_cap caps[4];
 
@@ -391,7 +391,7 @@ static bool fake_esp_wifi_softap_setup_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_request_def(char msg[])
+static bool fake_esp_wifi_softap_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -411,21 +411,21 @@ static bool fake_esp_wifi_softap_request_def(char msg[])
     return true;
 }
 
-static bool fake_esp_dhcp_mode_setup_cur(char msg[])
+static bool fake_esp_dhcp_mode_setup_cur(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_dhcp_mode_setup_def(char msg[])
+static bool fake_esp_dhcp_mode_setup_def(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_wifi_autoconnect(char msg[])
+static bool fake_esp_wifi_autoconnect(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -433,7 +433,7 @@ static bool fake_esp_wifi_autoconnect(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_station_ip_setup_cur(char msg[])
+static bool fake_esp_wifi_station_ip_setup_cur(const char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -446,7 +446,7 @@ static bool fake_esp_wifi_station_ip_setup_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_station_ip_request_cur(char msg[])
+static bool fake_esp_wifi_station_ip_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -469,7 +469,7 @@ static bool fake_esp_wifi_station_ip_request_cur(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_station_ip_setup_def(char msg[])
+static bool fake_esp_wifi_station_ip_setup_def(const char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -482,7 +482,7 @@ static bool fake_esp_wifi_station_ip_setup_def(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_station_ip_request_def(char msg[])
+static bool fake_esp_wifi_station_ip_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -505,7 +505,7 @@ static bool fake_esp_wifi_station_ip_request_def(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_ip_setup_cur(char msg[])
+static bool fake_esp_wifi_softap_ip_setup_cur(const char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -518,7 +518,7 @@ static bool fake_esp_wifi_softap_ip_setup_cur(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_ip_request_cur(char msg[])
+static bool fake_esp_wifi_softap_ip_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -541,7 +541,7 @@ static bool fake_esp_wifi_softap_ip_request_cur(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_ip_setup_def(char msg[])
+static bool fake_esp_wifi_softap_ip_setup_def(const char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -554,7 +554,7 @@ static bool fake_esp_wifi_softap_ip_setup_def(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_ip_request_def(char msg[])
+static bool fake_esp_wifi_softap_ip_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -577,7 +577,7 @@ static bool fake_esp_wifi_softap_ip_request_def(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_station_mac_setup_cur(char msg[])
+static bool fake_esp_wifi_station_mac_setup_cur(const char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -592,7 +592,7 @@ static bool fake_esp_wifi_station_mac_setup_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_station_mac_request_cur(char msg[])
+static bool fake_esp_wifi_station_mac_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -610,7 +610,7 @@ static bool fake_esp_wifi_station_mac_request_cur(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_station_mac_setup_def(char msg[])
+static bool fake_esp_wifi_station_mac_setup_def(const char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -625,7 +625,7 @@ static bool fake_esp_wifi_station_mac_setup_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_station_mac_request_def(char msg[])
+static bool fake_esp_wifi_station_mac_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -643,7 +643,7 @@ static bool fake_esp_wifi_station_mac_request_def(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_mac_setup_cur(char msg[])
+static bool fake_esp_wifi_softap_mac_setup_cur(const char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -658,7 +658,7 @@ static bool fake_esp_wifi_softap_mac_setup_cur(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_mac_request_cur(char msg[])
+static bool fake_esp_wifi_softap_mac_request_cur(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -676,7 +676,7 @@ static bool fake_esp_wifi_softap_mac_request_cur(char msg[])
 	return true;
 }
 
-static bool fake_esp_wifi_softap_mac_setup_def(char msg[])
+static bool fake_esp_wifi_softap_mac_setup_def(const char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -691,7 +691,7 @@ static bool fake_esp_wifi_softap_mac_setup_def(char msg[])
     return true;
 }
 
-static bool fake_esp_wifi_softap_mac_request_def(char msg[])
+static bool fake_esp_wifi_softap_mac_request_def(const char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -710,7 +710,7 @@ static bool fake_esp_wifi_softap_mac_request_def(char msg[])
 }
 
 #if 0
-static bool cwlif_request(char msg[])
+static bool cwlif_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -718,7 +718,7 @@ static bool cwlif_request(char msg[])
     return true;
 }
 
-static bool cwdhcp_cur_request(char msg[])
+static bool cwdhcp_cur_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -726,7 +726,7 @@ static bool cwdhcp_cur_request(char msg[])
     return true;
 }
 
-static bool cwdhcp_def_request(char msg[])
+static bool cwdhcp_def_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -736,7 +736,7 @@ static bool cwdhcp_def_request(char msg[])
 #endif
 
 //_____ F U N C T I O N   D E C L A R A T I O N S _____________________________
-bool fake_esp_wifi_handle(char msg[])
+bool fake_esp_wifi_handle(const char msg[])
 {  
 	if(strstr(msg, pattern_CWMODE_CUR_Query) != NULL)
 	{

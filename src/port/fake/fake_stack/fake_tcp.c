@@ -45,14 +45,14 @@ char pattern_CIPSTO_Cmd[] = "AT+CIPSTO=";
 char pattern_CIPSTO_Resp[] = "+CIPSTO:3200\r\n\r\nOK\r\n";
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I С  F U N C T I O N   D E F I N I T I O N   __________________
-static bool fake_esp_conn_status_request(char msg[])
+static bool fake_esp_conn_status_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CIPSTATUS_Resp, strlen(pattern_CIPSTATUS_Resp));
 	return true;
 }
 
-static bool fake_esp_tcp_connect(char msg[])
+static bool fake_esp_tcp_connect(const char msg[])
 {
 	struct slre_cap caps[4];
 
@@ -66,14 +66,14 @@ static bool fake_esp_tcp_connect(char msg[])
     return true;
 }
 
-static bool fake_esp_close_connection(char msg[])
+static bool fake_esp_close_connection(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_close_connection_m(char msg[])
+static bool fake_esp_close_connection_m(const char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -87,34 +87,34 @@ static bool fake_esp_close_connection_m(char msg[])
     return true;
 }
 
-static bool fake_esp_multiple_connection(char msg[])
+static bool fake_esp_multiple_connection(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_single_connection(char msg[])
+static bool fake_esp_single_connection(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_mux_cfg_request(char msg[])
+static bool fake_esp_mux_cfg_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CIPMUX_Resp, strlen(pattern_CIPMUX_Resp));
 	return true;
 }
 
-static bool fake_esp_transmit_mode_setup(char msg[])
+static bool fake_esp_transmit_mode_setup(const char msg[])
 {
 	struct slre_cap caps[1];
 
 	memset(txBuffer,0,sizeof(txBuffer));
 
-	if (slre_match((const char *)"\\S+CIPMODE=(\\d+)\\S+", msg, strlen(msg), caps, 1, 0) <= 0) {
+	if (slre_match((const char *)"AT\\+CIPMODE=(\\d)\r\n", msg, strlen(msg), caps, 1, 0) <= 0) {
 	   return false;
 	}
 
@@ -122,34 +122,34 @@ static bool fake_esp_transmit_mode_setup(char msg[])
     return true;
 }
 
-static bool fake_transmit_mode_request(char msg[])
+static bool fake_transmit_mode_request(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CIPMODE_Resp, strlen(pattern_CIPMODE_Resp));
 	return true;
 }
 
-static bool fake_esp_tcp_server_create(char msg[])
+static bool fake_esp_tcp_server_create(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_tcp_server_delete(char msg[])
+static bool fake_esp_tcp_server_delete(const char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool fake_esp_tcp_server_maxconn_setup(char msg[])
+static bool fake_esp_tcp_server_maxconn_setup(const char msg[])
 {
 	struct slre_cap caps[1];
 
 	memset(txBuffer,0,sizeof(txBuffer));
 
-	if (slre_match((const char *)"\\S+CIPSERVERMAXCONN=(\\d+)\\S+", msg, strlen(msg), caps, 1, 0) <= 0) {
+	if (slre_match((const char *)"AT\\+CIPSERVERMAXCONN=(\\d)\r\n", msg, strlen(msg), caps, 1, 0) <= 0) {
 	   return false;
 	}
 
@@ -157,7 +157,7 @@ static bool fake_esp_tcp_server_maxconn_setup(char msg[])
     return true;
 }
 
-static bool fake_esp_tcp_server_timeout_setup(char msg[])
+static bool fake_esp_tcp_server_timeout_setup(const char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -171,7 +171,7 @@ static bool fake_esp_tcp_server_timeout_setup(char msg[])
     return true;
 }
 //_____ F U N C T I O N   D E C L A R A T I O N S _____________________________
-bool fake_esp_tcp_handle(char msg[])
+bool fake_esp_tcp_handle(const char msg[])
 {  
     if(strstr(msg, pattern_CIPSTATUS_Cmd))
     {
