@@ -63,9 +63,13 @@ bool esp_hardware_power_off(void)
 */
 bool esp_hardware_transmit_block(const char data[], uint16_t size)
 {
-	esp_basic_handle(data);
-	esp_wifi_handle(data);
-	esp_tcp_handle(data);
+	extern bool fake_esp_basic_handle(char msg[]);
+	extern bool fake_esp_wifi_handle(char msg[]);
+	extern bool fake_esp_tcp_handle(char msg[]);
+
+	fake_esp_basic_handle(data);
+	fake_esp_wifi_handle(data);
+	fake_esp_tcp_handle(data);
 	return true;
 }
 

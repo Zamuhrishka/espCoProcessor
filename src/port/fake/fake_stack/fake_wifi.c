@@ -4,10 +4,8 @@
 * @brief   		This file contains the prototypes functions and methods,
 * 				which use for...
 ********************************************************************************/
-//_____ I N C L U D E S _______________________________________________________
 #if defined(UNIT_TESTING)
-#include "fake_wifi.h"
-
+//_____ I N C L U D E S _______________________________________________________
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -40,7 +38,6 @@ static char Station_gw[] = "192.168.6.1\0";
 static char Station_mask[] = "255.255.255.0\0";
 
 static char pattern_OK[] = "\r\nOK\r\n";
-static char pattern_ERROR[] = "\r\nERROR\r\n";
 
 static char pattern_CWMODE_CUR_Query[] = "AT+CWMODE_CUR?";
 static char pattern_CWMODE_CUR_Cmd[] = "AT+CWMODE_CUR=";
@@ -163,7 +160,7 @@ static char pattern_CIPAP_DEF_Resp[] = "+CIPAP_DEF:";
 #endif
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I С  F U N C T I O N   D E F I N I T I O N   __________________
-static bool cwmode_cur_setup(char msg[])
+static bool fake_esp_wifi_mode_setup_cur(char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -177,7 +174,7 @@ static bool cwmode_cur_setup(char msg[])
     return true;
 }
 
-static bool cwmode_cur_request(char msg[])
+static bool fake_esp_wifi_mode_request_cur(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CWMODE_CUR_Resp, strlen(pattern_CWMODE_CUR_Resp));
@@ -187,7 +184,7 @@ static bool cwmode_cur_request(char msg[])
     return true;
 }
 
-static bool cwmode_def_setup(char msg[])
+static bool fake_esp_wifi_mode_setup_def(char msg[])
 {
 	struct slre_cap caps[1];
 
@@ -201,7 +198,7 @@ static bool cwmode_def_setup(char msg[])
     return true;
 }
 
-static bool cwmode_def_request(char msg[])
+static bool fake_esp_wifi_mode_request_def(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	memcpy((void*)txBuffer, pattern_CWMODE_DEF_Resp, strlen(pattern_CWMODE_DEF_Resp));
@@ -211,7 +208,7 @@ static bool cwmode_def_request(char msg[])
     return true;
 }
 
-static bool cwjap_cur_setup(char msg[])
+static bool fake_esp_wifi_ap_join_cur(char msg[])
 {
 	static uint8_t state = 0;
 	struct slre_cap caps[2];
@@ -239,7 +236,7 @@ static bool cwjap_cur_setup(char msg[])
     return true;
 }
 
-static bool cwjap_cur_request(char msg[])
+static bool fake_esp_wifi_ap_ssid_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -269,7 +266,7 @@ static bool cwjap_cur_request(char msg[])
     return true;
 }
 
-static bool cwjap_def_setup(char msg[])
+static bool fake_esp_wifi_ap_join_def(char msg[])
 {
 	static uint8_t state = 0;
 	struct slre_cap caps[2];
@@ -283,10 +280,10 @@ static bool cwjap_def_setup(char msg[])
 	switch(state)
 	{
 		case 0:
-			strcpy(txBuffer, "\r\n+CWJAP_CUR:1\r\nFAIL\r\n");
+			strcpy(txBuffer, "\r\n+CWJAP_DEF:1\r\nFAIL\r\n");
 			state++;
 			break;
-		case 2:
+		case 1:
 			memcpy((void*)AP_sssid, (void*)caps[0].ptr, caps[0].len);
 			memcpy((void*)AP_pwd, (void*)caps[1].ptr, caps[1].len);
 			strcpy(txBuffer, "\r\nWIFI DISCONNECT\r\n\r\nWIFI CONNECTED\r\n\r\nWIFI GOT IP\r\n\r\n\r\nOK\r\n");
@@ -297,7 +294,7 @@ static bool cwjap_def_setup(char msg[])
     return true;
 }
 
-static bool cwjap_def_request(char msg[])
+static bool fake_esp_wifi_ap_ssid_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -327,7 +324,7 @@ static bool cwjap_def_request(char msg[])
     return true;
 }
 
-static bool cwqap_setup(char msg[])
+static bool fake_esp_wifi_ap_unjoin(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -335,7 +332,7 @@ static bool cwqap_setup(char msg[])
     return true;
 }
 
-static bool cwsap_cur_setup(char msg[])
+static bool fake_esp_wifi_softap_setup_cur(char msg[])
 {
 	struct slre_cap caps[4];
 
@@ -349,7 +346,7 @@ static bool cwsap_cur_setup(char msg[])
     return true;
 }
 
-static bool cwsap_cur_request(char msg[])
+static bool fake_esp_wifi_softap_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -380,7 +377,7 @@ static bool cwsap_cur_request(char msg[])
     return true;
 }
 
-static bool cwsap_def_setup(char msg[])
+static bool fake_esp_wifi_softap_setup_def(char msg[])
 {
 	struct slre_cap caps[4];
 
@@ -394,7 +391,7 @@ static bool cwsap_def_setup(char msg[])
     return true;
 }
 
-static bool cwsap_def_request(char msg[])
+static bool fake_esp_wifi_softap_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -414,21 +411,21 @@ static bool cwsap_def_request(char msg[])
     return true;
 }
 
-static bool cwdhcp_cur_setup(char msg[])
+static bool fake_esp_dhcp_mode_setup_cur(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool cwdhcp_def_setup(char msg[])
+static bool fake_esp_dhcp_mode_setup_def(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 	strcpy(txBuffer, pattern_OK);
     return true;
 }
 
-static bool cwautoconn_setup(char msg[])
+static bool fake_esp_wifi_autoconnect(char msg[])
 {
 	memset(txBuffer,0,sizeof(txBuffer));
 
@@ -436,7 +433,7 @@ static bool cwautoconn_setup(char msg[])
     return true;
 }
 
-static bool cipsta_cur_setup(char msg[])
+static bool fake_esp_wifi_station_ip_setup_cur(char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -449,7 +446,7 @@ static bool cipsta_cur_setup(char msg[])
     return true;
 }
 
-static bool cipsta_cur_request(char msg[])
+static bool fake_esp_wifi_station_ip_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -472,7 +469,7 @@ static bool cipsta_cur_request(char msg[])
 	return true;
 }
 
-static bool cipsta_def_setup(char msg[])
+static bool fake_esp_wifi_station_ip_setup_def(char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -485,7 +482,7 @@ static bool cipsta_def_setup(char msg[])
 	return true;
 }
 
-static bool cipsta_def_request(char msg[])
+static bool fake_esp_wifi_station_ip_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -508,7 +505,7 @@ static bool cipsta_def_request(char msg[])
 	return true;
 }
 
-static bool cipap_cur_setup(char msg[])
+static bool fake_esp_wifi_softap_ip_setup_cur(char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -521,7 +518,7 @@ static bool cipap_cur_setup(char msg[])
 	return true;
 }
 
-static bool cipap_cur_request(char msg[])
+static bool fake_esp_wifi_softap_ip_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -544,7 +541,7 @@ static bool cipap_cur_request(char msg[])
 	return true;
 }
 
-static bool cipap_def_setup(char msg[])
+static bool fake_esp_wifi_softap_ip_setup_def(char msg[])
 {
 	struct slre_cap caps[12];
 
@@ -557,7 +554,7 @@ static bool cipap_def_setup(char msg[])
 	return true;
 }
 
-static bool cipap_def_request(char msg[])
+static bool fake_esp_wifi_softap_ip_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -580,7 +577,7 @@ static bool cipap_def_request(char msg[])
 	return true;
 }
 
-static bool cipstamac_cur_setup(char msg[])
+static bool fake_esp_wifi_station_mac_setup_cur(char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -595,7 +592,7 @@ static bool cipstamac_cur_setup(char msg[])
     return true;
 }
 
-static bool cipstamac_cur_request(char msg[])
+static bool fake_esp_wifi_station_mac_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -613,7 +610,7 @@ static bool cipstamac_cur_request(char msg[])
 	return true;
 }
 
-static bool cipstamac_def_setup(char msg[])
+static bool fake_esp_wifi_station_mac_setup_def(char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -628,7 +625,7 @@ static bool cipstamac_def_setup(char msg[])
     return true;
 }
 
-static bool cipstamac_def_request(char msg[])
+static bool fake_esp_wifi_station_mac_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -646,7 +643,7 @@ static bool cipstamac_def_request(char msg[])
 	return true;
 }
 
-static bool cipapmac_cur_setup(char msg[])
+static bool fake_esp_wifi_softap_mac_setup_cur(char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -661,7 +658,7 @@ static bool cipapmac_cur_setup(char msg[])
     return true;
 }
 
-static bool cipapmac_cur_request(char msg[])
+static bool fake_esp_wifi_softap_mac_request_cur(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -679,7 +676,7 @@ static bool cipapmac_cur_request(char msg[])
 	return true;
 }
 
-static bool cipapmac_def_setup(char msg[])
+static bool fake_esp_wifi_softap_mac_setup_def(char msg[])
 {
 	struct slre_cap caps[6];
 
@@ -694,7 +691,7 @@ static bool cipapmac_def_setup(char msg[])
     return true;
 }
 
-static bool cipapmac_def_request(char msg[])
+static bool fake_esp_wifi_softap_mac_request_def(char msg[])
 {
 	uint32_t nbm = 0;
 
@@ -739,188 +736,185 @@ static bool cwdhcp_def_request(char msg[])
 #endif
 
 //_____ F U N C T I O N   D E C L A R A T I O N S _____________________________
-/**
- * @brief	Function handle of all at wi-fi commands.
- * @param   msg[in]	- Received at message.
- * @return  true/false.
-**/
-bool esp_wifi_handle(char msg[])
+bool fake_esp_wifi_handle(char msg[])
 {  
 	if(strstr(msg, pattern_CWMODE_CUR_Query) != NULL)
 	{
-		cwmode_cur_request(msg);
+		fake_esp_wifi_mode_request_cur(msg);
         return true;  
 	}
 	if(strstr(msg, pattern_CWMODE_CUR_Cmd) != NULL)
 	{
-		cwmode_cur_setup(msg);
+		fake_esp_wifi_mode_setup_cur(msg);
         return true;  
 	}
 
     if(strstr(msg, pattern_CWMODE_DEF_Query) != NULL)
     {
-        cwmode_def_request(msg);
+    	fake_esp_wifi_mode_request_def(msg);
         return true;  
     }
 
     if(strstr(msg, pattern_CWMODE_DEF_Cmd) != NULL)
     {
-        cwmode_def_setup(msg);
+    	fake_esp_wifi_mode_setup_def(msg);
         return true;  
     }
 
     if(strstr(msg, pattern_CWJAP_CUR_Cmd) != NULL)
     {
-        cwjap_cur_setup(msg);
+    	fake_esp_wifi_ap_join_cur(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CWJAP_CUR_Query) != NULL)
     {
-        cwjap_cur_request(msg);
+    	fake_esp_wifi_ap_ssid_request_cur(msg);
         return true;
     }
+
     if(strstr(msg, pattern_CWJAP_DEF_Cmd) != NULL)
     {
-        cwjap_def_setup(msg);
+    	fake_esp_wifi_ap_join_def(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CWJAP_DEF_Query) != NULL)
     {
-        cwjap_def_request(msg);
+    	fake_esp_wifi_ap_ssid_request_def(msg);
         return true;
     }
- 
+
     if(strstr(msg, pattern_CWQAP_Cmd) != NULL)
     {
-        cwqap_setup(msg);
+    	fake_esp_wifi_ap_unjoin(msg);
         return true;  
     }
 
     if(strstr(msg, pattern_CWSAP_CUR_Query) != NULL)
     {
-        cwsap_cur_request(msg);
+    	fake_esp_wifi_softap_request_cur(msg);
         return true;   
     }
+
     if(strstr(msg, pattern_CWSAP_CUR_Cmd) != NULL)
     {
-        cwsap_cur_setup(msg);
+    	fake_esp_wifi_softap_setup_cur(msg);
         return true;      
     }
 
     if(strstr(msg, pattern_CWSAP_DEF_Query) != NULL)
     {
-        cwsap_def_request(msg);
+    	fake_esp_wifi_softap_request_def(msg);
         return true;   
     }
 
     if(strstr(msg, pattern_CWSAP_DEF_Cmd) != NULL)
     {
-        cwsap_def_setup(msg);
+    	fake_esp_wifi_softap_setup_def(msg);
         return true;      
     }
 
     if(strstr(msg, pattern_CWDHCP_CUR_Cmd) != NULL)
     {
-        cwdhcp_cur_setup(msg);
+    	fake_esp_dhcp_mode_setup_cur(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CWDHCP_DEF_Cmd) != NULL)
     {
-        cwdhcp_def_setup(msg);
+    	fake_esp_dhcp_mode_setup_def(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CWAUTOCONN_Cmd) != NULL)
     {
-        cwautoconn_setup(msg);
+    	fake_esp_wifi_autoconnect(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CIPSTA_CUR_Query) != NULL)
     {
-        cipsta_cur_request(msg);
+    	fake_esp_wifi_station_ip_request_cur(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPSTA_CUR_Cmd) != NULL)
     {
-        cipsta_cur_setup(msg);
+    	fake_esp_wifi_station_ip_setup_cur(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPSTA_DEF_Query) != NULL)
     {
-        cipsta_def_request(msg);
+    	fake_esp_wifi_station_ip_request_def(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPSTA_DEF_Cmd) != NULL)
     {
-        cipsta_def_setup(msg);
+    	fake_esp_wifi_station_ip_setup_def(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CIPAP_CUR_Query) != NULL)
     {
-        cipap_cur_request(msg);
+    	fake_esp_wifi_softap_ip_request_cur(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPAP_CUR_Cmd) != NULL)
     {
-        cipap_cur_setup(msg);
+    	fake_esp_wifi_softap_ip_setup_cur(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPAP_DEF_Query) != NULL)
     {
-        cipap_def_request(msg);
+    	fake_esp_wifi_softap_ip_request_def(msg);
         return true;
     }
     if(strstr(msg, pattern_CIPAP_DEF_Cmd) != NULL)
     {
-        cipap_def_setup(msg);
+    	fake_esp_wifi_softap_ip_setup_def(msg);
         return true;
     }
 
     if(strstr(msg, pattern_CIPSTAMAC_CUR_Query) != NULL)
     {
-        cipstamac_cur_request(msg);
+    	fake_esp_wifi_station_mac_request_cur(msg);
         return true;   
     }
     if(strstr(msg, pattern_CIPSTAMAC_CUR_Cmd) != NULL)
     {
-        cipstamac_cur_setup(msg);
+    	fake_esp_wifi_station_mac_setup_cur(msg);
         return true;      
     }
 
     if(strstr(msg, pattern_CIPSTAMAC_DEF_Query) != NULL)
     {
-        cipstamac_def_request(msg);
+    	fake_esp_wifi_station_mac_request_def(msg);
         return true;   
     }
     if(strstr(msg, pattern_CIPSTAMAC_DEF_Cmd) != NULL)
     {
-        cipstamac_def_setup(msg);
+    	fake_esp_wifi_station_mac_setup_def(msg);
         return true;      
     }
 
     if(strstr(msg, pattern_CIPAPMAC_CUR_Query) != NULL)
     {
-        cipapmac_cur_request(msg);
+    	fake_esp_wifi_softap_mac_request_cur(msg);
         return true;   
     }
     if(strstr(msg, pattern_CIPAPMAC_CUR_Cmd) != NULL)
     {
-        cipapmac_cur_setup(msg);
+    	fake_esp_wifi_softap_mac_setup_cur(msg);
         return true;      
     }
     if(strstr(msg, pattern_CIPAPMAC_DEF_Query) != NULL)
     {
-        cipapmac_def_request(msg);
+    	fake_esp_wifi_softap_mac_request_def(msg);
         return true;   
     }
     if(strstr(msg, pattern_CIPAPMAC_DEF_Cmd) != NULL)
     {
-        cipapmac_def_setup(msg);
+    	fake_esp_wifi_softap_mac_setup_def(msg);
         return true;      
     }
 

@@ -9,12 +9,12 @@
 * @brief		Functions for testing dfifo library.
 ***********************************************************************************************/
 //_____ I N C L U D E S _______________________________________________________________________
-#include <esp_tcpip.h>
-#include "stdint.h"
-#include "stdbool.h"
-#include "stdlib.h"
-#include "cmockery.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
+#include "cmockery.h"
+#include "esp_tcpip.h"
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________________________
@@ -80,7 +80,6 @@ static void test_esp_close_connection(void **state)
 	assert_int_equal(result, ESP_PASS);
 }
 
-
 static void test_esp_multiple_connection(void **state)
 {
 	esp_status_t result = false;
@@ -111,7 +110,6 @@ static void test_esp_mux_cfg_request(void **state)
 
 	assert_int_equal(mode, ESP_MULTIPLE_CONNECT);
 }
-
 
 static void test_esp_transmit_mode_setup(void **state)
 {
@@ -191,7 +189,6 @@ void Test_EspTcpStack(void)
 	  unit_test(test_esp_tcp_server_delete),
 	  unit_test(test_esp_tcp_server_timeout_setup),
 	  unit_test(test_esp_tcp_server_maxconn_setup),
-
   };
 
   run_tests(tests);

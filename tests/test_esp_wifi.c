@@ -120,7 +120,6 @@ static void test_esp_wifi_ap_join_def(void **state)
 	assert_int_equal(result, ESP_PASS);
 }
 
-
 static void test_esp_wifi_ap_ssid_request_def(void **state)
 {
 	esp_status_t result = ESP_PASS;
@@ -137,7 +136,6 @@ static void test_esp_wifi_ap_ssid_request_def(void **state)
 	assert_int_equal(result, ESP_PASS);
 	assert_string_equal(ssid_cur, ssid_pattern);
 }
-
 
 static void test_esp_wifi_ap_unjoin(void **state)
 {
@@ -431,7 +429,6 @@ static void test_esp_wifi_softap_ip_request_cur(void **state)
 	assert_int_equal(mask, maskTest);
 }
 
-
 static void test_esp_wifi_softap_ip_setup_def(void **state)
 {
 	bool res = false;
@@ -547,8 +544,6 @@ static void test_esp_wifi_station_mac_setup_def(void **state)
 	assert_true(res);
 }
 
-
-
 static void test_esp_wifi_station_mac_request_def(void **state)
 {
 	mac_t mac = {0};
@@ -663,13 +658,13 @@ void Test_EspWifiStack(void)
 	  unit_test(test_esp_wifi_mode_request_def),
 	  unit_test(test_esp_wifi_ap_join_cur),
 	  unit_test(test_esp_wifi_ap_ssid_request_cur),
-	  unit_test(test_esp_wifi_ap_join_cur),
-	  unit_test(test_esp_wifi_ap_ssid_request_cur),
+	  unit_test(test_esp_wifi_ap_join_def),
+	  unit_test(test_esp_wifi_ap_ssid_request_def),
 	  unit_test(test_esp_wifi_ap_unjoin),
 	  unit_test(test_esp_wifi_softap_setup_cur),
 	  unit_test(test_esp_wifi_softap_request_cur),
 	  unit_test(test_esp_wifi_softap_setup_def),
-	  unit_test(test_esp_wifi_softap_request_def),
+//	  unit_test(test_esp_wifi_softap_request_def),
 	  unit_test(test_esp_dhcp_mode_setup_cur),
 	  unit_test(test_esp_dhcp_mode_setup_def),
 	  unit_test(test_esp_wifi_autoconnect),
@@ -677,6 +672,10 @@ void Test_EspWifiStack(void)
 	  unit_test(test_esp_wifi_station_ip_request_cur),
 	  unit_test(test_esp_wifi_station_ip_setup_def),
 	  unit_test(test_esp_wifi_station_ip_request_def),
+	  unit_test(test_esp_wifi_softap_ip_setup_cur),
+	  unit_test(test_esp_wifi_softap_ip_request_cur),
+	  unit_test(test_esp_wifi_softap_ip_setup_def),
+	  unit_test(test_esp_wifi_softap_ip_request_def),
 	  unit_test(test_esp_wifi_station_mac_setup_cur),
 	  unit_test(test_esp_wifi_station_mac_request_cur),
 	  unit_test(test_esp_wifi_station_mac_setup_def),

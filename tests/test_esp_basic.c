@@ -19,58 +19,58 @@
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________________________
 //_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   __________________________________
-static void Test_TestCmd(void **state)
+static void test_esp_test_cmd(void **state)
 {
 	bool result = false;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_test(2000);
 	assert_true(result);
 }
 
-static void Test_ResetCmd(void **state)
+static void test_esp_reset_cmd(void **state)
 {
 	bool result = false;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_reset(2000);
 	assert_true(result);
 }
 
-static void Test_ReqVersionCmd(void **state)
+static void test_esp_version_request_cmd(void **state)
 {
 	bool result = false;
+	esp_at_version_t at_pattern= {0};
+	esp_sdk_version_t sdk_pattern = {0};
 	esp_at_version_t at = {0};
 	esp_sdk_version_t sdk = {0};
 
-	result = esp_init();
-	assert_true(result);
+	at_pattern.major = 1;
+	at_pattern.minor = 1;
+	at_pattern.patch[0] = 0;
+	at_pattern.patch[1] = 0;
+
+	sdk_pattern.major = 1;
+	sdk_pattern.minor = 5;
+	sdk_pattern.patch = 4;
 
 	result = esp_get_version(&at, &sdk, 2000);
+
+	assert_memory_equal(&at, &at_pattern, sizeof(esp_at_version_t));
+	assert_memory_equal(&sdk, &sdk_pattern, sizeof(esp_sdk_version_t));
+
 	assert_true(result);
 }
 
-static void Test_EnterDeepSleepCmd(void **state)
+static void test_esp_enter_deep_sleep_cmd(void **state)
 {
 	bool result = false;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_deep_sleep(1000, 2000);
 	assert_true(result);
 }
 
-static void Test_EchoCmd(void **state)
+static void test_esp_echo_cmd(void **state)
 {
 	bool result = false;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_enable_echo(2000);
 	assert_true(result);
@@ -79,18 +79,15 @@ static void Test_EchoCmd(void **state)
 	assert_true(result);
 }
 
-static void Test_RestoreCmd(void **state)
+static void test_esp_restore_cmd(void **state)
 {
 	bool result = false;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_restore(2000);
 	assert_true(result);
 }
 
-static void Test_UartCurCmd(void **state)
+static void test_esp_uart_cfg_cur_cmd(void **state)
 {
 	bool result = false;
 	esp_uart_t param;
@@ -101,27 +98,36 @@ static void Test_UartCurCmd(void **state)
 	param.parity = ESP_PARITY_NONE;
 	param.stop_bits = ESP_STOPBITS_1;
 
-	result = esp_init();
-	assert_true(result);
-
 	result = esp_uart_cfg(&param, false, 2000);
 	assert_true(result);
 }
 
-static void Test_SleepCmd(void **state)
+static void test_esp_uart_cfg_def_cmd(void **state)
+{
+	bool result = false;
+	esp_uart_t param;
+
+	param.baud_rate = 115200;
+	param.data_bits = ESP_DATABITS_8;
+	param.flow_control = ESP_FLOW_CNTRL_OFF;
+	param.parity = ESP_PARITY_NONE;
+	param.stop_bits = ESP_STOPBITS_1;
+
+	result = esp_uart_cfg(&param, true, 2000);
+	assert_true(result);
+}
+
+static void test_esp_sleep_cmd(void **state)
 {
 	bool result = false;
 	esp_sleep_mode_t mode = ESP_SLEEP_MODE_LIGHT;
-
-	result = esp_init();
-	assert_true(result);
 
 	result = esp_sleep(mode, 2000);
 	assert_true(result);
 }
 
 
-static void Test_ConfigWakeupPinCmd(void **state)
+static void test_esp_config_wakeup_pins_cmd(void **state)
 {
 	bool result = false;
 	esp_wgpio_t gpio;
@@ -139,7 +145,7 @@ static void Test_ConfigWakeupPinCmd(void **state)
 	assert_true(result);
 }
 
-static void Test_SetupRfPower(void **state)
+static void test_esp_setup_rf_power_cmd(void **state)
 {
 	bool result = false;
 
@@ -167,16 +173,17 @@ void Test_EspBasicStack(void)
 {
   const UnitTest tests[] =
   {
-	  unit_test(Test_TestCmd),
-	  unit_test(Test_ResetCmd),
-	  unit_test(Test_ReqVersionCmd),
-	  unit_test(Test_EnterDeepSleepCmd),
-	  unit_test(Test_EchoCmd),
-	  unit_test(Test_RestoreCmd),
-	  unit_test(Test_UartCurCmd),
-	  unit_test(Test_SleepCmd),
-	  unit_test(Test_ConfigWakeupPinCmd),
-	  unit_test(Test_SetupRfPower),
+	  unit_test(test_esp_test_cmd),
+	  unit_test(test_esp_reset_cmd),
+	  unit_test(test_esp_version_request_cmd),
+	  unit_test(test_esp_enter_deep_sleep_cmd),
+	  unit_test(test_esp_echo_cmd),
+	  unit_test(test_esp_restore_cmd),
+	  unit_test(test_esp_uart_cfg_cur_cmd),
+	  unit_test(test_esp_uart_cfg_def_cmd),
+	  unit_test(test_esp_sleep_cmd),
+	  unit_test(test_esp_config_wakeup_pins_cmd),
+	  unit_test(test_esp_setup_rf_power_cmd),
 #if 0
 	  unit_test(Test_SetupSystemMessageCur),
 #endif
