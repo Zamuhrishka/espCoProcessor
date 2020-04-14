@@ -360,6 +360,7 @@ esocket_t* esp_tcp_server_open(uint16_t port, uint8_t maxconn, uint16_t timeout)
 		}
 	}
 
+#if 0
 	if(esp_tcp_server_maxconn_setup(maxconn, 500) != ESP_PASS)
 	{
 		esp_socket_free(_socket);
@@ -372,6 +373,7 @@ esocket_t* esp_tcp_server_open(uint16_t port, uint8_t maxconn, uint16_t timeout)
 		esp_socket_free(_socket);
 		return NULL;
 	}
+#endif
 
 	if(esp_tcp_server_create(port, 1000) != ESP_PASS)
 	{

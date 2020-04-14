@@ -55,12 +55,14 @@ static void test_esp_tcp_connect(void **state)
 	assert_int_equal(result, ESP_PASS);
 }
 
+#if 0
 static void test_esp_udp_transmission(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
 	assert_true(false);
 }
+#endif
 
 static void test_esp_close_connection_m(void **state)
 {
@@ -115,7 +117,6 @@ static void test_esp_transmit_mode_setup(void **state)
 {
 	esp_status_t result = false;
 	esp_tx_mode_t mode = ESP_NORMAL_MODE;
-
 
 	assert_true(esp_init());
 	result = esp_transmit_mode_setup(mode, 1000);
@@ -177,7 +178,9 @@ void Test_EspTcpStack(void)
   {
 	  unit_test(test_esp_conn_status_request),
 	  unit_test(test_esp_tcp_connect),
-//	  unit_test(test_esp_udp_transmission),
+#if 0
+	  unit_test(test_esp_udp_transmission),
+#endif
 	  unit_test(test_esp_close_connection_m),
 	  unit_test(test_esp_close_connection),
 	  unit_test(test_esp_multiple_connection),

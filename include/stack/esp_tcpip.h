@@ -40,8 +40,8 @@ typedef enum
 //! @{
 typedef enum
 {
-	ESP_CLIENT        		=       1,											///< Create the TCP client
-	ESP_SERVER       		=       2,											///< Create the TCP server
+	ESP_CLIENT        		=       '0',											///< Create the TCP client
+	ESP_SERVER       		=       '1',											///< Create the TCP server
 }	esp_conn_tetype_t;
 //! @}
 

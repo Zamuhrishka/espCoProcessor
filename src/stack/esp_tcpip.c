@@ -491,7 +491,7 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 	   return ESP_INNER_ERR;
 	}
 
-	if (slre_match((const char*)"STATUS:(\\d)\r\n\\S+CIPSTATUS:(\\d),\"(\\S+)\",\"(\\S+)\",(\\d+),(\\d+),\\S+", pAnswer, /*strlen(pAnswer)*/len, caps, 6, 0) <= 0) {
+	if (slre_match((const char*)"STATUS:(\\d)\r\n\\S+CIPSTATUS:(\\d),\"(\\S+)\",\"(\\S+)\",(\\d+),(\\d+)\\S+", pAnswer, /*strlen(pAnswer)*/len, caps, 6, 0) <= 0) {
 	   return ESP_PATTERN_ERR;
 	}
 
@@ -516,6 +516,10 @@ esp_status_t esp_conn_status_request(esp_conn_status_t *status, uint32_t timeout
 
 	(*status).remotePort = convert_string_to_uint16(caps[4].ptr);
 	(*status).localPort = convert_string_to_uint16(caps[5].ptr);
+
+#if 0
+	(*status).tetype = *caps[6].ptr;
+#endif
 
 	return ESP_PASS;
 }
