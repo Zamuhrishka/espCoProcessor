@@ -12,7 +12,7 @@
 ********************************************************************************/
 #if defined(UNIT_TESTING)
 //_____ I N C L U D E S _______________________________________________________
-#include "fake_esp_port.h"
+#include "esp_port.h"
 
 #include <string.h>
 #include <stdio.h>
