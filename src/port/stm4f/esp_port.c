@@ -8,6 +8,7 @@
 * @brief
 *
 ********************************************************************************/
+#if !defined(UNIT_TESTING)
 //_____ C O N F I G S  __________________________________________________________
 //! Max size of queue buffer
 #define ESP_RX_QUEUE_SIZE                 				(10U)
@@ -371,3 +372,4 @@ void esp_hardware_receive_irq(void)
 		esp_uart_dma_receive_cfg((uint8_t*)esp_hardware_buffer, sizeof(esp_hardware_buffer));
 	}
 }
+#endif
