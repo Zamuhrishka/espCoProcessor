@@ -74,17 +74,17 @@
 		<link>
 			<name>Drivers/zlib/esp8266/include</name>
 			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/include</location>
+			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/include</location>
 		</link>
 		<link>
 			<name>Drivers/zlib/esp8266/src</name>
 			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/src</location>
+			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/src</location>
 		</link>
 		<link>
 			<name>Drivers/zlib/esp8266/tests</name>
 			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/tests</location>
+			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/tests</location>
 		</link>
 	</linkedResources>
 </projectDescription>

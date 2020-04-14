@@ -51,7 +51,7 @@
 #include <stack/esp_tcpip.h>
 #include "debug.h"
 #include "slre.h"
-#include "esp_drv.h"
+#include "esp_comm.h"
 #include "esp_port.h"
 #include "assert.h"
 
@@ -79,7 +79,10 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static char message[] = "Hello\r\n";
+static uint8_t message[] = "Hello\r\n";
+static uint8_t message1[] = "Hello1\r\n";
+static uint8_t buffer[50];
+static uint8_t buffer1[50];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,40 +93,6 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static bool receice_handlle(esp_conn_id_t id, const char data[], size_t size)
-{
-	if(data == NULL || size == 0)
-	{
-		debug_error("[TCP]: Received from id: %c...FAULT\r\n", id);
-		return false;
-	}
-
-	debug_info("[TCP]: Received from id: %c\r\n", id);
-	debug_info("\r\n");
-	debug_dump((const void*)data, (unsigned long)&data[0], size, 1);
-	debug_info("\r\n");
-	debug_info("\r\n");
-
-	esp_tcp_transmit(id, message, sizeof(message));
-	return true;
-}
-
-static bool disconnect_handlle(esp_conn_id_t id)
-{
-	debug_info("[TCP]: Connection %c close\r\n", id);
-	return true;
-}
-
-static bool connect_handlle(esp_conn_id_t id)
-{
-	debug_info("[TCP]: Connection %c open\r\n", id);
-	return true;
-}
-
-static void transmit_pass_handle(void)
-{
-	debug_info("[TCP]: Transmit Pass\r\n");
-}
 /* USER CODE END 0 */
 
 /**
@@ -133,6 +102,12 @@ static void transmit_pass_handle(void)
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	esocket_t* socket = NULL;
+	esocket_t* socket1 = NULL;
+	esocket_t* socket2 = NULL;
+	esocket_t* socket3 = NULL;
+	esocket_t* socket4 = NULL;
+	esocket_t* socket5 = NULL;
 	const char ssid[] = SSID;
 	const char password[] = PASS;
 	char ssid_cur[35] = {0};
@@ -144,16 +119,11 @@ int main(void)
 	char _ip[] = "000.000.000.000\0";
 	char _gw[] = "000.000.000.000\0";
 	char _msk[] = "000.000.000.000\0";
-
 	esp_at_version_t at_version = {0};
 	esp_sdk_version_t sdk_version = {0};
-
-	esp_conn_status_t status;
-	esp_tx_mode_t transfer;
-	esp_conn_mode_t mux;
 	uint32_t count = 3;
 	esp_status_t res = ESP_INNER_ERR;
-
+	size_t counter = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -180,11 +150,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   debug_init();
-
-  esp_register_receive_cb(&receice_handlle);
-  esp_register_close_conn_cb(&disconnect_handlle);
-  esp_register_open_conn_cb(&connect_handlle);
-  esp_register_transmit_cb(&transmit_pass_handle);
   esp_init();
 
   convert_string_to_ip4addr(&connParam.remoteIp, ipStr);
@@ -196,20 +161,18 @@ int main(void)
   debug_info("\t- WiFi in station mode\r\n");
   debug_info("\t- TCP client\r\n");
   debug_info("\t- Single connection mode\r\n");
-  debug_info("\t- Normal transmit mode\r\n");
+  debug_info("\t- Transparent transmit mode\r\n");
   debug_info("\r\n");
   debug_info("\r\n");
-
 
   esp_get_version(&at_version, &sdk_version, 2000);
-
 
   debug_info("Setup WiFi station mode...");
   if(esp_wifi_mode_setup(ESP_WIFI_STATION, false, 5000u))
   {
 	  debug_info(" PASS\r\n");
 
-	  debug_info("Check connection to AP status: \r\n");
+	  debug_info("Check connection to Wifi AP: \r\n");
 	  if(esp_wifi_ap_ssid_request(ssid_cur, false, 5000u) == ESP_PASS)
 	  {
 		  if(strlen(ssid_cur) != 0)
@@ -256,124 +219,42 @@ int main(void)
 			  debug_info("\tIP: %s\r\n", _ip);
 			  debug_info("\tGW: %s\r\n", _gw);
 			  debug_info("\tMASK: %s\r\n", _msk);
-		  }
-		  else
-		  {
-			  debug_error(" FAULT\r\n");
-		  }
 
-		  debug_info("Request multiplexor mode...");
-		  res = ESP_INNER_ERR;
-		  count = 0;
+			  debug_info("Initialize the esp communication layer...");
+		  	  if(esp_comm_init(ESP_MULTIPLE_CONNECT))
+		  	  {
+		  		  debug_info(" PASS\r\n");
 
-		  while(res != ESP_PASS)
-		  {
-			  res = esp_mux_cfg_request(&mux, 5000u);
-			  count++;
-		  }
-		  if(res == ESP_PASS)
-		  {
-			  debug_info(" PASS\r\n");
-			  if(mux != ESP_SINGLE_CONNECT)
-			  {
-				  debug_info("Setup single mode...");
-				  if(esp_single_connection_enable(5000u) == ESP_SERVER_ON)
-				  {
-					  debug_info(" FAULT\r\n");
-					  debug_info("\t Need disable TCP Server...");
-					  if(esp_tcp_server_close(0, 5000u))
-					  {
-						  debug_info(" PASS\r\n");
+		  		  debug_info("Opening tcp socket...");
+		  		  socket = esp_tcp_server_open(1001, 2, 0);
+#if 0
+				  socket = esp_tcp_open(connParam.remoteIp, connParam.remotePort);
+				  socket1 = esp_tcp_open(connParam.remoteIp, 9010);
+#endif
 
-						  debug_info("Setup single mode...");
-						  if(esp_single_connection_enable(5000u))
-						  {
-							  debug_info(" PASS\r\n");
-						  }
-						  else
-						  {
-							  debug_error(" FAULT\r\n");
-						  }
-					  }
-					  else
-					  {
-						  debug_error(" FAULT\r\n");
-					  }
-				  }
-				  else
+				  if(socket != NULL)
 				  {
 					  debug_info(" PASS\r\n");
 				  }
-			  }
-			  else
-			  {
-				  debug_info("\tAlready in single mode...\r\n");
-			  }
-
-			  debug_info("Request transfer mode...");
-			  res = ESP_INNER_ERR;
-			  count = 0;
-			  while(res != ESP_PASS)
-			  {
-				  res = esp_transmit_mode_request(&transfer, 5000u);
-				  count++;
-			  }
-			  if(res == ESP_PASS)
-			  {
-				  debug_info(" PASS\r\n");
-				  if(transfer != ESP_NORMAL_MODE)
-				  {
-					  debug_info("Setup normal transfer mode...");
-					  if(esp_transmit_mode_setup(ESP_NORMAL_MODE, 5000u) == ESP_PASS)
-					  {
-						  debug_info(" PASS\r\n");
-					  }
-					  else
-					  {
-						  debug_error(" FAULT\r\n");
-					  }
-				  }
-				  else
-				  {
-					  debug_info("\tAlready in normal transfer mode...\r\n");
-				  }
-			  }
-			  else if(res == ESP_PASS)
-			  {
-				  debug_error(" TIMEOUT\r\n");
-			  }
-			  else
-			  {
-				  debug_error(" FAULT\r\n");
-			  }
-
-			  debug_info("Establish TCP connection...");
-			  if(esp_tcp_connect(&connParam, 5000u) == ESP_PASS)
-			  {
-				  debug_info(" PASS\r\n");
-				  if(esp_conn_status_request(&status, 5000u) == ESP_PASS)
-				  {
-					  debug_info("\tID: %c\r\n", status.id);
-					  debug_info("\tlocalPort: %d\r\n", status.localPort);
-					  convert_ip4addr_to_string(status.remoteIp, _ip);
-					  debug_info("\tremoteIp: %s\r\n", _ip);
-					  debug_info("\tremotePort: %d\r\n", status.remotePort);
-					  debug_info("\tstat: %c\r\n", status.stat);
-					  debug_info("\ttype: %x\r\n", status.type);
-				  }
-			  }
-			  else
-			  {
-				  debug_error(" FAULT\r\n");
-			  }
-
-			  esp_hardware_switch_mode(UNBLOCK);
-			  esp_tcp_transmit(ESP_ID_NONE, message, sizeof(message));
+			  	  else
+			  	  {
+			  		  debug_error(" FAULT\r\n");
+			  	  }
+#if 0
+				  esp_tcp_transmit(socket, message, sizeof(message));
+				  esp_tcp_transmit(socket1, message1, sizeof(message));
+#endif
+		  	  }
+		  	  else
+		  	  {
+		  		  debug_error(" FAULT\r\n");
+		  	  }
 		  }
 		  else
 		  {
 			  debug_error(" FAULT\r\n");
 		  }
+
 	  }
 	  else
 	  {
@@ -390,8 +271,27 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	esp_message_handle();
-	esp_tcp_transmit_handle();
+
+	esp_receive_handle();
+	esp_transmit_handle();
+
+	if(esp_tcp_is_data_ready(socket))
+	{
+		size_t len = esp_tcp_get_receive_data_number(socket);
+		esp_tcp_receive(socket, buffer, len);
+		esp_tcp_transmit(socket, buffer, len);
+	}
+
+#if 0
+	if(esp_tcp_is_data_ready(socket1))
+	{
+		size_t len = esp_tcp_get_receive_data_number(socket1);
+		esp_tcp_receive(socket1, buffer1, len);
+		esp_tcp_transmit(socket1, buffer1, len);
+	}
+#endif
+
+
   }
   /* USER CODE END 3 */
 }
