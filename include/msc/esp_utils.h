@@ -310,3 +310,29 @@ int8_t esp_at_version_compare(const esp_at_version_t *at1, const esp_at_version_
 * </ul>
 */
 int8_t esp_sdk_version_compare(const esp_sdk_version_t *sdk1, const esp_sdk_version_t *sdk2);
+
+/**
+* @brief 	This function convert AT version to string.
+*
+* @param[in] at AT commands set version.
+* @param[out] str AT commands set version string.
+*
+* @note str param must ending with '/0'.
+* 		Size of str must be at least 16 bytes.
+*
+* @return true/false
+*/
+bool esp_at_version_to_string(const esp_at_version_t *at, char *str);
+
+/**
+* @brief 	This function convert SDK versions to string.
+*
+* @param[in] sdk SDK version.
+* @param[out] str SDK version string.
+*
+* @note str param must ending with '/0'.
+* 		Size of str must be at least 16 bytes.
+*
+* @return true/false
+*/
+bool esp_sdk_version_to_string(const esp_sdk_version_t *sdk, char *str);
