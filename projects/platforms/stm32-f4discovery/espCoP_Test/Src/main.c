@@ -50,9 +50,9 @@
 #include <stack/esp_wifi.h>
 #include "debug.h"
 #include "slre.h"
-#include "esp_drv.h"
+#include "esp.h"
 #include "assert.h"
-#include "qa_basic.h"
+//#include "qa_basic.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

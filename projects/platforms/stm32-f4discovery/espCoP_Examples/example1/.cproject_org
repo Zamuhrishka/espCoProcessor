@@ -19,7 +19,7 @@
 							<option id="com.atollic.truestudio.toolchain_options.mcu.845832308" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu" useByScannerDiscovery="false" value="STM32F407VG" valueType="string"/>
 							<option id="com.atollic.truestudio.toolchain_options.vendor.384233906" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor" useByScannerDiscovery="false" value="STMicroelectronics" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform.2054752829" isAbstract="false" name="Debug platform" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
-							<builder buildPath="${workspace_loc:/espCoP_Test}/Debug" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.2.0\\ARMTools\\bin|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.atollic.truestudio.mbs.builder1">
+							<builder buildPath="${workspace_loc:/espCoP}/Debug" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.2.0\\ARMTools\\bin|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="com.atollic.truestudio.mbs.builder1">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
 								</outputEntries>
@@ -39,10 +39,8 @@
 							<tool command="arm-atollic-eabi-gcc -c " commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX} ${OUTPUT} ${INPUTS}" id="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc">
 								<option id="com.atollic.truestudio.gcc.directories.select.330946435" name="Include path" superClass="com.atollic.truestudio.gcc.directories.select" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="../Inc"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/espCoP_Example1/Drivers/zlib/esp8266/include/port}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/src/port/fake/fake_stack}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/espCoP_Example1/Drivers/zlib/esp8266/src/port/fake}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/tests/qa_port}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/include/port}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/include/port/qa}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/3rd_party/cmockery}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/tests}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/Drivers/zlib/esp8266/examples}&quot;"/>
@@ -61,7 +59,6 @@
 								</option>
 								<option id="com.atollic.truestudio.gcc.symbols.defined.1670122205" name="Defined symbols" superClass="com.atollic.truestudio.gcc.symbols.defined" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__weak=__attribute__((weak))"/>
-									<listOptionValue builtIn="false" value="UNIT_TESTING"/>
 									<listOptionValue builtIn="false" value="ESP_PORT=1"/>
 									<listOptionValue builtIn="false" value="SLRE_DEBUG"/>
 									<listOptionValue builtIn="false" value="DEBUG"/>
@@ -87,8 +84,12 @@
 								<option id="com.atollic.truestudio.common_options.target.instr_set.566688004" name="Instruction set" superClass="com.atollic.truestudio.common_options.target.instr_set" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.instr_set.thumb2" valueType="enumerated"/>
 								<option id="com.atollic.truestudio.ld.general.scriptfile.1350476438" name="Linker script" superClass="com.atollic.truestudio.ld.general.scriptfile" useByScannerDiscovery="false" value="../STM32F407VG_FLASH.ld" valueType="string"/>
 								<option id="com.atollic.truestudio.ld.optimization.do_garbage.1816004776" name="Dead code removal " superClass="com.atollic.truestudio.ld.optimization.do_garbage" useByScannerDiscovery="false" value="true" valueType="boolean"/>
-								<option id="com.atollic.truestudio.ld.libraries.list.848669414" name="Libraries" superClass="com.atollic.truestudio.ld.libraries.list" useByScannerDiscovery="false"/>
-								<option id="com.atollic.truestudio.ld.libraries.searchpath.1273009461" name="Library search path" superClass="com.atollic.truestudio.ld.libraries.searchpath" useByScannerDiscovery="false"/>
+								<option id="com.atollic.truestudio.ld.libraries.list.848669414" name="Libraries" superClass="com.atollic.truestudio.ld.libraries.list" useByScannerDiscovery="false" valueType="libs">
+									<listOptionValue builtIn="false" value="queue"/>
+								</option>
+								<option id="com.atollic.truestudio.ld.libraries.searchpath.1273009461" name="Library search path" superClass="com.atollic.truestudio.ld.libraries.searchpath" useByScannerDiscovery="false" valueType="libPaths">
+									<listOptionValue builtIn="false" value="&quot;D:\sasha\study\stm32\develop\esp8266\espCoProcessor\lib&quot;"/>
+								</option>
 								<option id="com.atollic.truestudio.ld.misc.linkerflags.1948405714" name="Other options" superClass="com.atollic.truestudio.ld.misc.linkerflags" useByScannerDiscovery="false" value="" valueType="string"/>
 								<option id="com.atollic.truestudio.common_options.target.fpu.829683864" name="Floating point" superClass="com.atollic.truestudio.common_options.target.fpu" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.fpu.hard" valueType="enumerated"/>
 								<option id="com.atollic.truestudio.common_options.target.fpucore.1297069055" name="FPU" superClass="com.atollic.truestudio.common_options.target.fpucore" useByScannerDiscovery="false" value="com.atollic.truestudio.common_options.target.fpucore.fpv4-sp-d16" valueType="enumerated"/>
@@ -124,23 +125,23 @@
 							<tool id="com.atollic.truestudio.ar.base.895416757" name="Archiver" superClass="com.atollic.truestudio.ar.base"/>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="com.atollic.truestudio.exe.debug.1518366166.1957613269" name="/" resourcePath="Drivers/zlib/esp8266/examples">
-						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.151520258" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
-							<option id="com.atollic.truestudio.general.runtimelib.647570994.872783628" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.647570994"/>
-							<option id="com.atollic.truestudio.toolchain_options.mcu.845832308.471867453" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.845832308"/>
-							<option id="com.atollic.truestudio.toolchain_options.vendor.384233906.813983112" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.384233906"/>
+					<folderInfo id="com.atollic.truestudio.exe.debug.1518366166.2113372334" name="/" resourcePath="Drivers/zlib/esp8266/tests">
+						<toolChain id="com.atollic.truestudio.exe.debug.toolchain.454887361" name="Atollic ARM Tools" superClass="com.atollic.truestudio.exe.debug.toolchain" unusedChildren="">
+							<option id="com.atollic.truestudio.general.runtimelib.647570994.626935529" name="Runtime Library" superClass="com.atollic.truestudio.general.runtimelib.647570994"/>
+							<option id="com.atollic.truestudio.toolchain_options.mcu.845832308.687040570" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu.845832308"/>
+							<option id="com.atollic.truestudio.toolchain_options.vendor.384233906.1742210965" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor.384233906"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.debug.toolchain.platform" isAbstract="false" name="Debug platform" osList="all" superClass="com.atollic.truestudio.exe.debug.toolchain.platform"/>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.1770173759" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1545899283">
-								<inputType id="com.atollic.truestudio.as.input.212915831" name="Input" superClass="com.atollic.truestudio.as.input"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.as.1953437622" name="Assembler" superClass="com.atollic.truestudio.exe.debug.toolchain.as.1545899283">
+								<inputType id="com.atollic.truestudio.as.input.488135566" name="Input" superClass="com.atollic.truestudio.as.input"/>
 							</tool>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.1288440384" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447">
-								<inputType id="com.atollic.truestudio.gcc.input.1726713917" superClass="com.atollic.truestudio.gcc.input"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gcc.380400522" name="C Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447">
+								<inputType id="com.atollic.truestudio.gcc.input.1605883756" superClass="com.atollic.truestudio.gcc.input"/>
 							</tool>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.ld.2146650037" name="C Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ld.1444973427"/>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.gpp.605056825" name="C++ Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gpp.981298185"/>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.2009830179" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.428260"/>
-							<tool id="com.atollic.truestudio.ar.base.1967193401" name="Archiver" superClass="com.atollic.truestudio.ar.base.895416757"/>
-							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.602726430" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.839033486"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ld.1511904261" name="C Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ld.1444973427"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.gpp.34178778" name="C++ Compiler" superClass="com.atollic.truestudio.exe.debug.toolchain.gpp.981298185"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.ldcc.28155460" name="C++ Linker" superClass="com.atollic.truestudio.exe.debug.toolchain.ldcc.428260"/>
+							<tool id="com.atollic.truestudio.ar.base.5669754" name="Archiver" superClass="com.atollic.truestudio.ar.base.895416757"/>
+							<tool id="com.atollic.truestudio.exe.debug.toolchain.secoutput.1325228485" name="Other" superClass="com.atollic.truestudio.exe.debug.toolchain.secoutput.839033486"/>
 						</toolChain>
 					</folderInfo>
 					<fileInfo id="com.atollic.truestudio.exe.debug.311825581.983937533" name="" rcbsApplicability="disable" resourcePath="nofile" toolsToInvoke="com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447.1976695455">
@@ -150,7 +151,7 @@
 					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="3rd_party"/>
-						<entry excluding="zlib/esp8266/tests/port|zlib/esp8266/examples" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middleware"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
@@ -180,7 +181,7 @@
 							<option id="com.atollic.truestudio.toolchain_options.mcu.1089369559" name="Microcontroller" superClass="com.atollic.truestudio.toolchain_options.mcu" value="STM32F407VG" valueType="string"/>
 							<option id="com.atollic.truestudio.toolchain_options.vendor.1997228151" name="Vendor name" superClass="com.atollic.truestudio.toolchain_options.vendor" value="STMicroelectronics" valueType="string"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="com.atollic.truestudio.exe.release.toolchain.platform.2054752829" isAbstract="false" name="Release platform" superClass="com.atollic.truestudio.exe.release.toolchain.platform"/>
-							<builder buildPath="${workspace_loc:/espCoP_Test}/Release" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.2.0\\ARMTools\\bin|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.atollic.truestudio.mbs.builder1">
+							<builder buildPath="${workspace_loc:/espCoP_Example1}/Release" customBuilderProperties="toolChainpathType=1|toolChainpathString=C:\\Program Files (x86)\\Atollic\\TrueSTUDIO for STM32 9.2.0\\ARMTools\\bin|" id="com.atollic.truestudio.mbs.builder1.1222194476" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="CDT Internal Builder" superClass="com.atollic.truestudio.mbs.builder1">
 								<outputEntries>
 									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
 								</outputEntries>
@@ -296,15 +297,14 @@
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
-		<project id="espCoP_Test.com.atollic.truestudio.exe.1549124020" name="Executable" projectType="com.atollic.truestudio.exe"/>
+		<project id="espCoP_Example1.com.atollic.truestudio.exe.1549124020" name="Executable" projectType="com.atollic.truestudio.exe"/>
 	</storageModule>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="Qa"/>
 		<configuration configurationName="Debug">
-			<resource resourceType="PROJECT" workspacePath="/espCoP_Test"/>
+			<resource resourceType="PROJECT" workspacePath="espCoP_Example1"/>
 		</configuration>
 		<configuration configurationName="Release">
-			<resource resourceType="PROJECT" workspacePath="/espCoP_Test"/>
+			<resource resourceType="PROJECT" workspacePath="/espCoP_Example1"/>
 		</configuration>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
@@ -321,8 +321,8 @@
 				<parser enabled="true"/>
 			</scannerInfoProvider>
 		</profile>
-		<scannerConfigBuildInfo instanceId="com.atollic.truestudio.exe.debug.1518366166;com.atollic.truestudio.exe.debug.1518366166.303277065;com.atollic.truestudio.exe.debug.toolchain.gcc.393815702;com.atollic.truestudio.gcc.input.1088835115">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="com.atollic.truestudio.exe.debug.1518366166;com.atollic.truestudio.exe.debug.1518366166.2031504340;com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447;com.atollic.truestudio.gcc.input.850396938">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.atollic.truestudio.mbs.ARMToolsPerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
 				<buildOutputProvider>
 					<openAction enabled="true" filePath=""/>
@@ -347,8 +347,8 @@
 				</scannerInfoProvider>
 			</profile>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="com.atollic.truestudio.exe.debug.1518366166;com.atollic.truestudio.exe.debug.1518366166.2031504340;com.atollic.truestudio.exe.debug.toolchain.gcc.1836874447;com.atollic.truestudio.gcc.input.850396938">
-			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="com.atollic.truestudio.mbs.ARMToolsPerProjectProfileC"/>
+		<scannerConfigBuildInfo instanceId="com.atollic.truestudio.exe.debug.1518366166;com.atollic.truestudio.exe.debug.1518366166.303277065;com.atollic.truestudio.exe.debug.toolchain.gcc.393815702;com.atollic.truestudio.gcc.input.1088835115">
+			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 			<profile id="org.eclipse.cdt.make.core.GCCStandardMakePerFileProfile">
 				<buildOutputProvider>
 					<openAction enabled="true" filePath=""/>
