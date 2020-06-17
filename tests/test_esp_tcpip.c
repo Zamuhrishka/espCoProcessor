@@ -171,6 +171,43 @@ static void test_esp_tcp_server_maxconn_setup(void **state)
 	result = esp_tcp_server_maxconn_setup(3, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
+
+static void test_esp_sntp_timezone_setup(void **state)
+{
+	esp_status_t result = ESP_INNER_ERR;
+
+	assert_true(esp_init());
+	result = esp_sntp_timezone_setup(3, 1000);
+	assert_int_equal(result, ESP_PASS);
+
+	result = esp_sntp_timezone_setup(-10, 1000);
+	assert_int_equal(result, ESP_PASS);
+
+	result = esp_sntp_timezone_setup(0, 1000);
+	assert_int_equal(result, ESP_PASS);
+}
+
+static void test_esp_get_time(void **state)
+{
+	esp_status_t result = ESP_INNER_ERR;
+	esp_datetime_t dt = {0};
+	esp_datetime_t dt_pattern = {0};
+
+	assert_true(esp_init());
+
+	dt_pattern.day = 4;
+	dt_pattern.day_of_week = 5;
+	dt_pattern.hour = 14;
+	dt_pattern.min = 48;
+	dt_pattern.month = 8;
+	dt_pattern.sec = 5;
+	dt_pattern.year = 2016;
+
+	result = esp_get_time(&dt, 1000);
+	assert_int_equal(result, ESP_PASS);
+	assert_memory_equal(&dt, &dt_pattern, sizeof(esp_datetime_t));
+}
+
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________________________
 void Test_EspTcpStack(void)
 {
@@ -192,6 +229,8 @@ void Test_EspTcpStack(void)
 	  unit_test(test_esp_tcp_server_delete),
 	  unit_test(test_esp_tcp_server_timeout_setup),
 	  unit_test(test_esp_tcp_server_maxconn_setup),
+	  unit_test(test_esp_sntp_timezone_setup),
+	  unit_test(test_esp_get_time),
   };
 
   run_tests(tests);

@@ -66,37 +66,20 @@
 		</buildCommand>
 	</buildSpec>
 	<natures>
-		<nature>com.st.stm32cube.ide.mcu.MCUProjectNature</nature>
 		<nature>org.eclipse.cdt.core.cnature</nature>
-		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 		<nature>org.eclipse.cdt.managedbuilder.core.managedBuildNature</nature>
-		<nature>com.st.stm32cube.ide.mcu.MCUTSConvertedProjectNature</nature>
+		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Drivers/zlib/esp8266/3rd_party</name>
+			<name>Drivers/zlib/esp8266/include</name>
 			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/source/3rd_party</location>
+			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/include</location>
 		</link>
 		<link>
-			<name>Drivers/zlib/esp8266/driver</name>
+			<name>Drivers/zlib/esp8266/src</name>
 			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/source/driver</location>
-		</link>
-		<link>
-			<name>Drivers/zlib/esp8266/port</name>
-			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/source/port</location>
-		</link>
-		<link>
-			<name>Drivers/zlib/esp8266/sockets</name>
-			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/source/sockets</location>
-		</link>
-		<link>
-			<name>Drivers/zlib/esp8266/utils</name>
-			<type>2</type>
-			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/source/utils</location>
+			<location>D:/sasha/study/stm32/develop/esp8266/espCoProcessor/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>

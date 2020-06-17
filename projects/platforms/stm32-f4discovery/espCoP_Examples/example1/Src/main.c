@@ -51,7 +51,7 @@
 #include <stack/esp_tcpip.h>
 #include "debug.h"
 #include "slre.h"
-#include "esp_comm.h"
+#include "esp_sockets.h"
 #include "esp_port.h"
 #include "assert.h"
 
@@ -80,9 +80,9 @@
 
 /* USER CODE BEGIN PV */
 static uint8_t message[] = "Hello\r\n";
-static uint8_t message1[] = "Hello1\r\n";
+//static uint8_t message1[] = "Hello1\r\n";
 static uint8_t buffer[50];
-static uint8_t buffer1[50];
+//static uint8_t buffer1[50];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -103,11 +103,6 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 	esocket_t* socket = NULL;
-	esocket_t* socket1 = NULL;
-	esocket_t* socket2 = NULL;
-	esocket_t* socket3 = NULL;
-	esocket_t* socket4 = NULL;
-	esocket_t* socket5 = NULL;
 	const char ssid[] = SSID;
 	const char password[] = PASS;
 	char ssid_cur[35] = {0};
@@ -115,15 +110,17 @@ int main(void)
 	ip4addr_t gw = 0;
 	ip4addr_t mask = 0;
 	esp_tcp_cfg_t connParam;
-	char ipStr[] = "192.168.100.7\0";
+	char ipStr[] = "192.168.100.57\0";
 	char _ip[] = "000.000.000.000\0";
 	char _gw[] = "000.000.000.000\0";
 	char _msk[] = "000.000.000.000\0";
 	esp_at_version_t at_version = {0};
 	esp_sdk_version_t sdk_version = {0};
+	char at_string[10] = {0};
+	char sdk_string[10] = {0};
 	uint32_t count = 3;
 	esp_status_t res = ESP_INNER_ERR;
-	size_t counter = 0;
+	int32_t len = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -150,7 +147,7 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   debug_init();
-  esp_init();
+  esp_drv_init();
 
   convert_string_to_ip4addr(&connParam.remoteIp, ipStr);
   connParam.remotePort = 9000;
@@ -166,6 +163,11 @@ int main(void)
   debug_info("\r\n");
 
   esp_get_version(&at_version, &sdk_version, 2000);
+  esp_at_version_to_string(&at_version, at_string);
+  esp_sdk_version_to_string(&sdk_version, sdk_string);
+
+  debug_info("AT command version: %s\r\n", at_string);
+  debug_info("SDK version: %s\r\n", sdk_string);
 
   debug_info("Setup WiFi station mode...");
   if(esp_wifi_mode_setup(ESP_WIFI_STATION, false, 5000u))
@@ -220,18 +222,13 @@ int main(void)
 			  debug_info("\tGW: %s\r\n", _gw);
 			  debug_info("\tMASK: %s\r\n", _msk);
 
+
 			  debug_info("Initialize the esp communication layer...");
-		  	  if(esp_comm_init(ESP_MULTIPLE_CONNECT))
+		  	  if(esp_socket_init(ESP_SOCKET_CLIENT))
 		  	  {
 		  		  debug_info(" PASS\r\n");
-
 		  		  debug_info("Opening tcp socket...");
-		  		  socket = esp_tcp_server_open(1001, 2, 0);
-#if 0
-				  socket = esp_tcp_open(connParam.remoteIp, connParam.remotePort);
-				  socket1 = esp_tcp_open(connParam.remoteIp, 9010);
-#endif
-
+				  socket = esp_socket_open(connParam.remoteIp, connParam.remotePort);
 				  if(socket != NULL)
 				  {
 					  debug_info(" PASS\r\n");
@@ -240,10 +237,7 @@ int main(void)
 			  	  {
 			  		  debug_error(" FAULT\r\n");
 			  	  }
-#if 0
-				  esp_tcp_transmit(socket, message, sizeof(message));
-				  esp_tcp_transmit(socket1, message1, sizeof(message));
-#endif
+				  esp_socket_transmit(socket, message, sizeof(message));
 		  	  }
 		  	  else
 		  	  {
@@ -254,7 +248,6 @@ int main(void)
 		  {
 			  debug_error(" FAULT\r\n");
 		  }
-
 	  }
 	  else
 	  {
@@ -269,29 +262,14 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
     /* USER CODE BEGIN 3 */
+	esp_drv_receive_handle();
+	esp_drv_transmit_handle();
 
-	esp_receive_handle();
-	esp_transmit_handle();
-
-	if(esp_tcp_is_data_ready(socket))
-	{
-		size_t len = esp_tcp_get_receive_data_number(socket);
-		esp_tcp_receive(socket, buffer, len);
-		esp_tcp_transmit(socket, buffer, len);
+	len = esp_socket_receive(socket, buffer, sizeof(buffer));
+	if(len > 0) {
+		esp_socket_transmit(socket, buffer, len);
 	}
-
-#if 0
-	if(esp_tcp_is_data_ready(socket1))
-	{
-		size_t len = esp_tcp_get_receive_data_number(socket1);
-		esp_tcp_receive(socket1, buffer1, len);
-		esp_tcp_transmit(socket1, buffer1, len);
-	}
-#endif
-
-
   }
   /* USER CODE END 3 */
 }
