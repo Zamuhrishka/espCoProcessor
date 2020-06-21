@@ -55,6 +55,7 @@
 #include "esp_port.h"
 #include "assert.h"
 
+#include "esp_client.h"
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -224,11 +225,11 @@ int main(void)
 
 
 			  debug_info("Initialize the esp communication layer...");
-		  	  if(esp_socket_init(ESP_SOCKET_CLIENT))
+		  	  if(esp_client_init(/*ESP_SOCKET_CLIENT*/))
 		  	  {
 		  		  debug_info(" PASS\r\n");
 		  		  debug_info("Opening tcp socket...");
-				  socket = esp_socket_open(connParam.remoteIp, connParam.remotePort);
+				  socket = esp_connection_open(connParam.remoteIp, connParam.remotePort);
 				  if(socket != NULL)
 				  {
 					  debug_info(" PASS\r\n");
@@ -237,7 +238,7 @@ int main(void)
 			  	  {
 			  		  debug_error(" FAULT\r\n");
 			  	  }
-				  esp_socket_transmit(socket, message, sizeof(message));
+				  esp_client_transmit(socket, message, sizeof(message));
 		  	  }
 		  	  else
 		  	  {
@@ -266,9 +267,10 @@ int main(void)
 	esp_drv_receive_handle();
 	esp_drv_transmit_handle();
 
-	len = esp_socket_receive(socket, buffer, sizeof(buffer));
+	len = esp_client_receive(socket, buffer, sizeof(buffer));
 	if(len > 0) {
-		esp_socket_transmit(socket, buffer, len);
+		esp_client_transmit(socket, buffer, len);
+//		esp_connection_close(socket);
 	}
   }
   /* USER CODE END 3 */
