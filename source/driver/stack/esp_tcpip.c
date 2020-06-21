@@ -937,8 +937,8 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 */
 esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 {
-//	if(esp_data_send("+++", strlen("+++")) == false) {
-	if(esp_data_transmit(buffer, size, 0) == false) {
+	if(esp_data_transmit("+++", strlen("+++"), 0) == false) {
+//	if(esp_data_transmit(buffer, size, 0) == false) {
 	   return ESP_TRANSMIT_ERR;
 	}
 
