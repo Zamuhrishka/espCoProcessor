@@ -18,7 +18,22 @@
 #include "usart.h"
 #include "stm32f4xx_hal_dma.h"
 #include "queue.h"
+
+#if defined(ESP_PORT_DEBUG)
+#include "debug.h"
+#endif
 //_____ D E F I N I T I O N ___________________________________________________
+#if defined(ESP_PORT_DEBUG)
+	#define ESP_PORT_DEBUG_PARAM(fmt, ...)       debug_info(fmt, __VA_ARGS__)
+	#define ESP_PORT_DEBUG(fmt)                  debug_info(fmt)
+	#define ESP_PORT_ERROR_PARAM(fmt, ...)       debug_error(fmt, __VA_ARGS__)
+	#define ESP_PORT_ERROR(fmt)                  debug_error(fmt)
+#else
+	#define ESP_PORT_DEBUG_PARAM(fmt, ...)
+	#define ESP_PORT_DEBUG(fmt, ...)
+	#define ESP_PORT_ERROR_PARAM(fmt, ...)
+	#define ESP_PORT_ERROR(fmt)
+#endif
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
 //!UART receive buffer
@@ -313,7 +328,20 @@ bool esp_hardware_power_off(void)
 */
 bool esp_hardware_transmit_block(const char data[], uint16_t size)
 {
-	return HAL_UART_Transmit_DMA(&huart3, (uint8_t*)data, size) == HAL_OK ? true : false;
+//	ESP_PORT_DEBUG_PARAM("[ESP_PORT]: ---> %d, %s\r\n", size, data);
+//	return HAL_UART_Transmit_DMA(&huart3, (uint8_t*)data, size) == HAL_OK ? true : false;
+
+	if(HAL_UART_Transmit_DMA(&huart3, (uint8_t*)data, size) == HAL_OK)
+	{
+		ESP_PORT_DEBUG_PARAM("[ESP_PORT]: ---> %d, %s\r\n", size, data);
+		return true;
+	}
+	else
+	{
+		ESP_PORT_ERROR("[ESP_PORT]: Transmit error!\r\n");
+		return false;
+	}
+
 }
 
 /**
@@ -336,20 +364,29 @@ int32_t esp_hardware_receive(char *msg, size_t len, uint32_t timeout)
 		is_recv_message = false;
 		critical_section_end(irq_state);
 
-		 if(HAL_GetTick() > _timeout) {
-			 return /*ESP_TIMEOUT*/-100;
+		 if(HAL_GetTick() > _timeout)
+		 {
+			 if(timeout != 0)
+			 {
+				 ESP_PORT_ERROR("[ESP_PORT]: Timeout error!\r\n");
+				 return /*ESP_TIMEOUT*/-100;
+			 }
 		 }
 	}
 
 	size_t size = queue_size(esp_hwrx_queue);
 
-	if(size > len) {
+	if(size > len)
+	{
+		ESP_PORT_ERROR("[ESP_PORT]: Rx buffer size error!\r\n");
 		return ESP_BUF_SIZE_ERR;
 	}
 
 	for(size_t i = 0; i < size; i++) {
 		queue_denqueue(esp_hwrx_queue, &msg[i]);
 	}
+
+	ESP_PORT_DEBUG_PARAM("[ESP_PORT]: <--- %d, %s\r\n", size, msg);
 
 	return /*ESP_PASS*/size;
 }
