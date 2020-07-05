@@ -26,6 +26,7 @@
 struct esp_socket_t
 {
 	queue_t*			rx_buffer;												///< Receive data buffer
+	queue_t*			tx_buffer;												///< Transmit data buffer
 	esp_conn_state_t 	status;													///< Connection status
 	esp_conn_id_t 		lid;													///< Connection ID
 	esp_conn_type_t 	type;													///< Connection type
@@ -34,30 +35,52 @@ struct esp_socket_t
 	uint16_t 			remotePort;												///< Remote port
 	uint16_t 			localPort;												///< Local port
 	bool 				available;												///< Available flag
+	size_t 				nsize;
 };
 //! @}
 //_____ M A C R O S ____________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  _________________________________
-static esocket_t sockets_pool[ESOCKET_POOL_MAX] = {0};
-static esp_conn_mode_t conn_mode = ESP_SINGLE_CONNECT;
-static esp_tx_mode_t transmit_mode = ESP_NORMAL_MODE;
+static esocket_t sockets_pool[ESP_MAX_CONNECTIONS] = {0};
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   __________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   ___________________
-static esocket_t* esp_socket_alloc(void)
+//_____ F U N C T I O N   D E F I N I T I O N   ________________________________
+/**
+* This initializations function of sockets pool.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_init(void)
 {
-	for(size_t i = 0; i < sizeof(sockets_pool); i++)
+	for(size_t i = 0; i < sizeof(sockets_pool)/sizeof(sockets_pool[0]); i++)
 	{
-		if(sockets_pool[i].available)
-		{
-			sockets_pool[i].available = false;
-			return &sockets_pool[i];
+		sockets_pool[i].rx_buffer = queue_create(ESP_TCP_DATA_LENGTH, sizeof(char));
+		if(NULL == sockets_pool[0].rx_buffer) {
+			return false;
 		}
+
+		sockets_pool[i].tx_buffer = queue_create(ESP_TCP_DATA_LENGTH, sizeof(char));
+		if(NULL == sockets_pool[0].tx_buffer) {
+			return false;
+		}
+
+		sockets_pool[i].available = true;
+		sockets_pool[i].ip = 0;
+		sockets_pool[i].localPort = 0;
+		sockets_pool[i].mode = ESP_CLIENT;
+		sockets_pool[i].remotePort = 0;
+		sockets_pool[i].status = ESP_NOT_CONNECTED;
+		sockets_pool[i].type = ESP_TCP;
+		sockets_pool[i].lid = (esp_conn_id_t)CONVER_TO_CHAR(i);
 	}
 
-	return NULL;
+	return true;
 }
 
-static void esp_socket_free(esocket_t* socket)
+/* This function configure socket as default.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_default(esocket_t* socket)
 {
 	socket->available = true;
 	socket->ip = 0;
@@ -67,252 +90,216 @@ static void esp_socket_free(esocket_t* socket)
 	queue_flush(socket->rx_buffer);
 }
 
-static bool receice_handle(esp_conn_id_t id, const char data[], size_t size)
-{
-	queue_t* pQueue = NULL;
-
-	assert(NULL != data);
-
-	pQueue = sockets_pool[(uint8_t)CONVER_TO_NUMBER(id)].rx_buffer;
-	if(NULL == pQueue) {
-		return false;
-	}
-
-	if(size > queue_free_space(pQueue)) {
-		return false;
-	}
-
-	for(size_t i = 0; i < size; i++)
-	{
-		queue_enqueue(pQueue, &data[i]);
-	}
-
-	return true;
-}
-
-static bool connect_handle(esp_conn_id_t id)
-{
-	esocket_t* socket = NULL;
-
-	socket = &sockets_pool[(uint8_t)CONVER_TO_NUMBER(id)];
-	if(NULL == socket) {
-		return false;
-	}
-
-	socket->status = ESP_CONNECTED;
-
-	return true;
-}
-
-static bool disconnect_handle(esp_conn_id_t id)
-{
-	esocket_t* socket = NULL;
-
-	socket = &sockets_pool[(uint8_t)CONVER_TO_NUMBER(id)];
-	if(NULL == socket) {
-		return false;
-	}
-
-	socket->status = ESP_DISCONNECTED;
-
-	return true;
-}
-
-static void transmit_pass_handle(void)
-{
-
-}
-//_____ F U N C T I O N   D E F I N I T I O N   ________________________________
-/**
-* This initializations function of socket sub-system.
+/* This initializations function find socket by connection id.
 *
 * Public function defined in esp_sockets.h
 */
-bool esp_socket_init(esp_socket_type_t mode)
+esocket_t* esp_socket_find_by_id(esp_conn_id_t id)
 {
-	if(mode == ESP_SOCKET_CLIENT)
-	{
-		conn_mode = ESP_SINGLE_CONNECT;
+	uint8_t _id = (uint8_t)CONVER_TO_NUMBER(id);
 
-		sockets_pool[0].available = true;
-		sockets_pool[0].lid = ESP_ID_NONE;
-		sockets_pool[0].rx_buffer = queue_create(ESP_TCP_DATA_LENGTH, sizeof(char));
-		if(NULL == sockets_pool[0].rx_buffer) {
-			return false;
-		}
-
-		if(esp_single_connection_enable(5000u) != ESP_PASS) {
-			return false;
-		}
-	}
-	else if(mode == ESP_SOCKET_SERVER)
-	{
-		conn_mode = ESP_MULTIPLE_CONNECT;
-
-		for(size_t i = 0; i < sizeof(sockets_pool)/sizeof(sockets_pool[0]); i++)
-		{
-			sockets_pool[i].available = true;
-			sockets_pool[i].lid = (esp_conn_id_t)CONVER_TO_CHAR(i);
-			sockets_pool[i].rx_buffer = queue_create(ESP_TCP_DATA_LENGTH, sizeof(char));
-			if(NULL == sockets_pool[0].rx_buffer) {
-				return false;
-			}
-		}
-
-		if(esp_multiple_connection_enable(5000u) != ESP_PASS) {
-			return false;
-		}
-	}
-
-	transmit_mode = ESP_NORMAL_MODE;
-
-	esp_register_receive_cb(&receice_handle);
-	esp_register_close_conn_cb(&disconnect_handle);
-	esp_register_open_conn_cb(&connect_handle);
-	esp_register_transmit_cb(&transmit_pass_handle);
-
-	return true;
-
-}
-
-/**
-* This function create and open new socket.
-*
-* Public function defined in esp_sockets.h
-*/
-esocket_t* esp_socket_open(ip4addr_t ip, uint16_t port)
-{
-	esocket_t* _socket = NULL;
-	esp_tcp_cfg_t connParam;
-	esp_conn_status_t status;
-	esp_status_t res = ESP_INNER_ERR;
-	size_t count = 3;
-
-	_socket = esp_socket_alloc();
-	if(_socket == NULL) {
+	if(_id > ESP_MAX_CONNECTIONS) {
 		return NULL;
 	}
 
-	connParam.remoteIp = ip;
-	connParam.remotePort = port;
-	connParam.id = _socket->lid;
-	connParam.keepAlive = 0;
-	queue_flush(_socket->rx_buffer);
-
-	if(esp_tcp_connect(&connParam, 5000u) != ESP_PASS)
-	{
-		esp_socket_free(_socket);
-		return NULL;
-	}
-
-	while(res != ESP_PASS && count != 0)
-	{
-	  res = esp_conn_status_request(&status, 5000u);
-	  count--;
-	}
-
-	if(res != ESP_PASS || count == 0)
-	{
-		esp_socket_free(_socket);
-		return NULL;
-	}
-
-	if(conn_mode == ESP_SINGLE_CONNECT)
-	{
-		transmit_mode = ESP_TRANSPARENT_MODE;
-		_socket->lid = ESP_ID0;
-
-		if(esp_transmit_mode_setup(ESP_TRANSPARENT_MODE, 5000u) != ESP_PASS) {
-			return false;
-		}
-	}
-
-	_socket->ip = ip;
-	_socket->remotePort = port;
-	_socket->mode = ESP_CLIENT;
-	_socket->type = ESP_TCP;
-	_socket->localPort = status.localPort;
-	_socket->status = status.stat;
-
-	return _socket;
+	return &sockets_pool[_id];
 }
 
-/**
-* This function close and delete socket.
+/* This function return connection id.
 *
 * Public function defined in esp_sockets.h
 */
-bool esp_socket_close(esocket_t* socket)
+esp_conn_id_t esp_socket_get_connection_id(const esocket_t* socket)
 {
-	assert(NULL != socket);
-
-	if(ESP_NORMAL_MODE == transmit_mode)
-	{
-		if(esp_close_connection_m(socket->lid, 500) != ESP_PASS) {
-			return false;
-		}
-	}
-	else
-	{
-		if(esp_transparent_mode_disable(500) != ESP_PASS) {
-			return false;
-		}
-
-		if(esp_close_connection(500) != ESP_PASS) {
-			return false;
-		}
-	}
-
-	esp_socket_free(socket);
-
-	return true;
+	return socket->lid;
 }
 
-/**
-* This function transmit data throw socket.
+/* This function set connection id.
 *
 * Public function defined in esp_sockets.h
 */
-bool esp_socket_transmit(const esocket_t* socket, const uint8_t data[], size_t size)
+void esp_socket_set_connection_id(esocket_t* socket, esp_conn_id_t id)
 {
-	assert(NULL != socket);
-	assert(NULL != data);
-
-	if(socket->status != ESP_CONNECTED) {
-		return false;
-	}
-
-	return esp_tcp_send(socket->lid, data, size);
+	socket->lid = id;
 }
 
-/**
-* This function receive data from socket.
+/* This function return connection status.
 *
 * Public function defined in esp_sockets.h
 */
-int32_t esp_socket_receive(const esocket_t* socket, uint8_t data[], size_t size)
+esp_conn_state_t esp_socket_get_status(const esocket_t* socket)
 {
-	int32_t _size = 0;
+	return socket->status;
+}
 
-	assert(NULL != socket);
-	assert(NULL != data);
+/* This function set connection status.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_set_status(esocket_t* socket, esp_conn_state_t status)
+{
+	socket->status = status;
+}
 
-	if(socket->status != ESP_CONNECTED) {
-		return false;
-	}
+/* This function return connection type.
+*
+* Public function defined in esp_sockets.h
+*/
+esp_conn_type_t esp_socket_get_type(const esocket_t* socket)
+{
+	return socket->type;
+}
 
-	_size = queue_size(socket->rx_buffer);
+/* This function set connection type.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_set_type(esocket_t* socket, esp_conn_type_t type)
+{
+	socket->type = type;
+}
 
-	if(_size > 0)
-	{
-		_size = _size < size ? _size : size;
-		for(size_t i = 0; i < _size; i++)
-		{
-			if(!queue_denqueue(socket->rx_buffer, &data[i])) {
-				return i;
-			}
-		}
-	}
+/* This function return connection mode.
+*
+* Public function defined in esp_sockets.h
+*/
+esp_conn_tetype_t esp_socket_get_mode(const esocket_t* socket)
+{
+	return socket->mode;
+}
 
-	return _size;
+/* This function set connection mode.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_set_mode(esocket_t* socket, esp_conn_tetype_t mode)
+{
+	socket->mode = mode;
+}
+
+/* This function return connection ip.
+*
+* Public function defined in esp_sockets.h
+*/
+ip4addr_t esp_socket_get_remote_ip(const esocket_t* socket)
+{
+	return socket->ip;
+}
+
+/* This function set connection ip.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_set_remote_ip(esocket_t* socket, ip4addr_t ip)
+{
+	socket->ip = ip;
+}
+
+/* This function return connection remote port.
+*
+* Public function defined in esp_sockets.h
+*/
+uint16_t esp_socket_get_remote_port(const esocket_t* socket)
+{
+	return socket->remotePort;
+}
+
+/* This function set connection remote port.
+*
+* Public function defined in esp_sockets.h
+*/
+void esp_socket_set_remote_port(esocket_t* socket, uint16_t port)
+{
+	socket->remotePort = port;
+}
+
+
+
+
+size_t esp_socket_get_remote_size(const esocket_t* socket)
+{
+	return socket->nsize;
+}
+
+void esp_socket_set_remote_size(esocket_t* socket, size_t size)
+{
+	socket->nsize = size;
+}
+
+
+
+/* This function return count of received data.
+*
+* Public function defined in esp_sockets.h
+*/
+size_t esp_socket_get_rx_data_num(const esocket_t* socket)
+{
+	return queue_size(socket->rx_buffer);
+}
+
+/* This function return free space in socket rx buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+size_t esp_socket_rxbuf_free_space(const esocket_t* socket)
+{
+	return queue_free_space(socket->rx_buffer);
+}
+
+/* This function add new data to receive buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_rx_data_enqueue(esocket_t* socket, const uint8_t* data)
+{
+	return queue_enqueue(socket->rx_buffer, data);
+}
+
+/* This function return data from receive buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_rx_data_denqueue(esocket_t* socket, uint8_t* data)
+{
+	return queue_denqueue(socket->rx_buffer, data);
+}
+
+
+
+/* This function return count of received data.
+*
+* Public function defined in esp_sockets.h
+*/
+size_t esp_socket_get_tx_data_num(const esocket_t* socket)
+{
+	return queue_size(socket->tx_buffer);
+}
+
+
+/* This function return free space in socket tx buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+size_t esp_socket_txbuf_free_space(const esocket_t* socket)
+{
+	return queue_free_space(socket->tx_buffer);
+}
+
+
+/* This function add new data to transmit buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_txbuf_enqueue(esocket_t* socket, const uint8_t* data)
+{
+	return queue_enqueue(socket->tx_buffer, data);
+}
+
+/* This function return data from receive buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_tx_data_denqueue(esocket_t* socket, uint8_t* data)
+{
+	return queue_denqueue(socket->tx_buffer, data);
 }

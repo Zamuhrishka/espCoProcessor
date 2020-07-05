@@ -100,6 +100,13 @@ static esp_tcpip_connect_fn_t esp_tcpip_open_connect = NULL;
 //!Pointer of callback function for transmit available handle
 static esp_tcpip_transmit_fn_t esp_tcpip_transmit_cb = NULL;
 
+//!Pointer of callback function for tcp passive receive data handle.
+static esp_tcpip_passive_receive_fn_t esp_tcpip_passive_receive_cb = NULL;
+
+
+static esp_tcpip_received_data_num_fn_t esp_tcpip_received_data_num_cb = NULL;
+
+
 //!Pointer of callback function for transmit available handle
 #if 0
 static esp_message_garbage_fn_t esp_msg_garbage_cb = NULL;
@@ -387,6 +394,23 @@ static void esp_normal_receive(char msg[], size_t len)
 				esp_tcpip_receive_cb(*caps_m[0].ptr, caps_m[2].ptr, CONVER_TO_NUMBER(*caps_m[1].ptr));
 			}
 		}
+
+		else if (slre_match((const char*)"\\S*IPD,(\\d),(\\d+)", msg, strlen(msg), caps_s, 2, 0) > 0)
+		{
+			if(esp_tcpip_received_data_num_cb != NULL) {
+				esp_tcpip_received_data_num_cb(*caps_s[0].ptr, CONVER_TO_NUMBER(*caps_s[1].ptr));
+			}
+		}
+	}
+
+	if(esp_pattern_check(msg, PATTERN_PASSIVE_RECEIVE))
+	{
+		if (slre_match((const char*)"\\S*CIPRECVDATA,(\\d+):(\\S+)", msg, strlen(msg), caps_s, 2, 0) > 0)
+		{
+			if(esp_tcpip_passive_receive_cb != NULL) {
+				esp_tcpip_passive_receive_cb(caps_s[1].ptr,  CONVER_TO_NUMBER(*caps_s[0].ptr));
+			}
+		}
 	}
 }
 
@@ -463,6 +487,27 @@ void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb)
 		esp_tcpip_transmit_cb = cb;
 	}
 }
+
+
+
+void esp_register_passive_receive_cb(const esp_tcpip_passive_receive_fn_t cb)
+{
+	if(NULL != cb)
+	{
+		esp_tcpip_passive_receive_cb = cb;
+	}
+}
+
+
+
+void esp_register_received_data_num_cb(const esp_tcpip_received_data_num_fn_t cb)
+{
+	if(NULL != cb)
+	{
+		esp_tcpip_received_data_num_cb = cb;
+	}
+}
+
 
 /**
 * This function read the connection status.
@@ -937,8 +982,8 @@ esp_status_t esp_transmit_mode_request(esp_tx_mode_t *mode, uint32_t timeout)
 */
 esp_status_t esp_transparent_mode_disable(uint32_t timeout)
 {
-//	if(esp_data_send("+++", strlen("+++")) == false) {
-	if(esp_data_transmit(buffer, size, 0) == false) {
+	if(esp_data_transmit("+++", strlen("+++"), 0) == false) {
+//	if(esp_data_transmit(buffer, size, 0) == false) {
 	   return ESP_TRANSMIT_ERR;
 	}
 
@@ -974,7 +1019,7 @@ esp_status_t esp_tcp_server_create(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 			return ESP_RECEIVE_ERR;
 		}
 
@@ -1193,6 +1238,155 @@ uint32_t esp_ping(ip4addr_t ip, uint32_t timeout)
 
 	return convert_string_to_uint32(caps[0].ptr);
 }
+
+
+
+
+
+
+
+
+/**
+* This function sets the TCP Receive Mode.
+*
+* Public function defined in esp_tcpip.h
+*/
+esp_status_t esp_tcp_receive_mode_setup(esp_tcp_rx_mode_t mode, uint32_t timeout)
+{
+	size_t len = ESP_ANSWER_BUFF_SIZE;
+	char* pAnswer = esp_alloc_answer_buffer();
+
+	if(NULL == pAnswer) {
+		return ESP_MEM_ALLOC_ERR;
+	}
+
+	if(esp_cmd_transmit(CIPRECVMODE, (char*)&mode, (size_t)1ul) == false) {
+		return ESP_TRANSMIT_ERR;
+	}
+
+	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		return ESP_RECEIVE_ERR;
+	}
+
+	if(esp_is_busy(pAnswer)) {
+		return ESP_BUSY;
+	}
+
+	if(!esp_pattern_check(pAnswer, PATTERN_OK)) {
+		return ESP_INNER_ERR;
+	}
+
+	return ESP_PASS;
+}
+
+/**
+* This function request TCP Receive Mode.
+*
+* Public function defined in esp_tcpip.h
+*/
+esp_status_t esp_tcp_receive_mode_request(esp_tcp_rx_mode_t *mode, uint32_t timeout)
+{
+	size_t len = ESP_ANSWER_BUFF_SIZE;
+	struct slre_cap caps[1] = {0};
+	char* pAnswer = NULL;
+
+	assert(NULL != mode);
+
+	pAnswer = esp_alloc_answer_buffer();
+
+	if(NULL == pAnswer) {
+		return ESP_MEM_ALLOC_ERR;
+	}
+
+	if(esp_cmd_transmit(REQCIPRECVMODE, NULL, 0ul) == false) {
+		return ESP_TRANSMIT_ERR;
+	}
+
+	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		return ESP_RECEIVE_ERR;
+	}
+
+	if(esp_is_busy(pAnswer)) {
+		return ESP_PASS;
+	}
+
+	if(!esp_pattern_check(pAnswer, PATTERN_OK)) {
+	   return ESP_INNER_ERR;
+	}
+
+	if (slre_match("\\S*CIPRECVMODE:(\\d+)\\S*", pAnswer, len, caps, 1, 0) <= 0) {
+	   return false;
+	}
+
+	*mode = (esp_tcp_rx_mode_t)(*caps[0].ptr);
+
+	return ESP_PASS;
+}
+
+
+/**
+* This function get TCP Data in Passive Receive Mode.
+*
+* Public function defined in esp_tcpip.h
+*/
+int32_t esp_tcp_receive_passive_data(esp_conn_id_t id, uint32_t nbm, uint8_t data[], uint32_t timeout)
+{
+	struct slre_cap caps[2] = {0};
+	size_t len = ESP_ANSWER_BUFF_SIZE;
+	int32_t actual_len = 0;
+
+	char* pParam = esp_alloc_param_buffer();
+	char* pAnswer = esp_alloc_answer_buffer();
+
+	if(NULL == pAnswer || NULL == pParam) {
+		return (-1);
+	}
+
+	pParam[0] = (char)id;
+	pParam[1] = ',';
+
+	convert_uint32_to_string(&pParam[2], nbm);
+
+	len = strlen((char*)pParam);
+
+	if(esp_cmd_transmit(CIPRECVDATA, pParam, len) == false) {
+		return (-2);
+	}
+
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
+		return (-3);
+	}
+
+	if(!esp_pattern_check(pAnswer, PATTERN_OK)) {
+		return (-4);
+	}
+
+	if (slre_match("\\S*CIPRECVDATA,(\\d+):(\\S+)\\S*", pAnswer, strlen((char*)pAnswer), caps, 2, 0) <= 0) {
+	   return false;
+	}
+
+	actual_len = convert_string_to_uint32(caps[0].ptr);
+
+	for(size_t i = 0; i < actual_len; i++)
+	{
+		data[i] = (caps[1].ptr)[i];
+	}
+
+	return actual_len;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 esp_status_t esp_sntp_timezone_setup(int8_t timezone, uint32_t timeout)

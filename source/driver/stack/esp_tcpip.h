@@ -87,6 +87,15 @@ typedef enum
 }	esp_conn_id_t;
 //! @}
 
+//! @brief List of TCP receive modes
+//! @{
+typedef enum
+{
+	ESP_ACTIVE_RX_MODE      =       '0',										///< TCP active receive mode
+	ESP_PASSIVE_RX_MODE     =       '1',										///< TCP passice receive mode
+}	esp_tcp_rx_mode_t;
+//! @}
+
 //! @brief  structure of TCP/IP connection status
 //! @{
 typedef struct
@@ -145,11 +154,19 @@ typedef struct
 //!Prototype of callback function for receive data handle.
 typedef bool (*esp_tcpip_receive_fn_t)(esp_conn_id_t id, const char data[], size_t size);
 
+//!Prototype of callback function for receive data handle.
+typedef bool (*esp_tcpip_passive_receive_fn_t)(const char data[], size_t size);
+
 //!Prototype of callback function for connection open/close.
 typedef bool (*esp_tcpip_connect_fn_t)(esp_conn_id_t id);
 
 //!Prototype of callback function for transmit available handle
 typedef void (*esp_tcpip_transmit_fn_t)(void);
+
+
+
+typedef bool (*esp_tcpip_received_data_num_fn_t)(esp_conn_id_t id, size_t size);
+
 //_____ V A R I A B L E   D E C L A R A T I O N S _____________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
@@ -189,6 +206,11 @@ void esp_register_open_conn_cb(const esp_tcpip_connect_fn_t cb);
 * @return 	none.
 */
 void esp_register_transmit_cb(const esp_tcpip_transmit_fn_t cb);
+
+void esp_register_passive_receive_cb(const esp_tcpip_passive_receive_fn_t cb);
+
+
+void esp_register_received_data_num_cb(const esp_tcpip_received_data_num_fn_t cb);
 
 /**
 * @brief 	This function read the connection status.
@@ -522,6 +544,13 @@ esp_status_t esp_domain_name_setup(const char domain[], uint32_t timeout);
 * @return	the response time of ping.
 */
 uint32_t esp_ping(ip4addr_t ip, uint32_t timeout);
+
+
+
+
+esp_status_t esp_tcp_receive_mode_setup(esp_tcp_rx_mode_t mode, uint32_t timeout);
+esp_status_t esp_tcp_receive_mode_request(esp_tcp_rx_mode_t *mode, uint32_t timeout);
+int32_t esp_tcp_receive_passive_data(esp_conn_id_t id, uint32_t nbm, uint8_t data[], uint32_t timeout);
 
 
 

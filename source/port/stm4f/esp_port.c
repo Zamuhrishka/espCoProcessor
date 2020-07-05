@@ -10,7 +10,6 @@
 ********************************************************************************/
 #if !defined(UNIT_TESTING)
 //_____ C O N F I G S  __________________________________________________________
-#define BUFFER_SIZE							200
 //_____ I N C L U D E S _______________________________________________________
 #include "esp_port.h"
 
@@ -23,7 +22,7 @@
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
 //!UART receive buffer
-static char esp_hardware_buffer[BUFFER_SIZE] = {0};
+static char esp_hardware_buffer[ESP_DRV_BUFFER_SIZE] = {0};
 
 //!Receive Queue
 queue_t* esp_hwrx_queue = NULL;
@@ -365,7 +364,7 @@ void esp_hardware_receive_irq(void)
 {
 	if(esp_uart_test_irq())
 	{
-		size_t size = BUFFER_SIZE - esp_uart_dma_get_nbm();
+		size_t size = ESP_DRV_BUFFER_SIZE - esp_uart_dma_get_nbm();
 
 		for(size_t i = 0; i < size; i++)
 		{

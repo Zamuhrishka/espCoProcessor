@@ -20,10 +20,10 @@
 #define ESP_PARAM_BUFF_SIZE								200
 //_____ M A C R O S ___________________________________________________________
 //! Convert num into char
-#define CONVER_TO_CHAR(_num_)                          (((_num_) + 0x30))
+#define CONVER_TO_CHAR(_num_)                          ((char)((_num_) + 0x30))
 
 //! Convert char into num
-#define CONVER_TO_NUMBER(_char_)                       (((_char_) - 0x30))
+#define CONVER_TO_NUMBER(_char_)                       ((uint8_t)((_char_) - 0x30))
 //_____ D E F I N I T I O N ___________________________________________________
 //!@brief ESP8266 AT command version struct
 //! @{
@@ -141,6 +141,9 @@ enum esp_at_cmd_list_t
 	PING,																		///< Function PING.
 	CIPDOMAIN,																	///< DNS Function.
 	CIPSERVERMAXCONN,															///< Set the Maximum Connections Allowed by Server
+	CIPRECVMODE,																///< Set TCP Receive Mode
+	REQCIPRECVMODE,																///< Query TCP Receive Mode
+	CIPRECVDATA,																///< Get TCP Data in Passive Receive Mode
 	SNTPCFG_SETUP,																///< Sets the configuration of SNTP
 	SNTPCFG_REQUEST,															///< Request of the configuration of SNTP
 	SNTPTIME,																	///< Checks the SNTP Time
@@ -169,6 +172,9 @@ typedef enum
 	PATTERN_CONNECT,
 	PATTERN_SEND_ACK,
 	PATTERN_TRANSPARENT_DISABLE,
+	PATTERN_PASSIVE_RECEIVE,
+
+
 	PATTERN_UNDEF,
 } 	esp_pattern_list_t;
 //! @}
