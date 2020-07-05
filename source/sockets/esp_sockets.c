@@ -20,8 +20,6 @@
 #include "queue.h"
 #include "esp_port.h"
 //_____ C O N F I G S  _________________________________________________________
-//! Number of available sockets in pool
-#define ESP_MAX_CONNECTIONS						5
 //_____ D E F I N I T I O N ____________________________________________________
 //!@brief esp socket structure
 //! @{
@@ -37,6 +35,7 @@ struct esp_socket_t
 	uint16_t 			remotePort;												///< Remote port
 	uint16_t 			localPort;												///< Local port
 	bool 				available;												///< Available flag
+	size_t 				nsize;
 };
 //! @}
 //_____ M A C R O S ____________________________________________________________
@@ -214,6 +213,21 @@ void esp_socket_set_remote_port(esocket_t* socket, uint16_t port)
 	socket->remotePort = port;
 }
 
+
+
+
+size_t esp_socket_get_remote_size(const esocket_t* socket)
+{
+	return socket->nsize;
+}
+
+void esp_socket_set_remote_size(esocket_t* socket, size_t size)
+{
+	socket->nsize = size;
+}
+
+
+
 /* This function return count of received data.
 *
 * Public function defined in esp_sockets.h
@@ -250,6 +264,18 @@ bool esp_socket_rx_data_denqueue(esocket_t* socket, uint8_t* data)
 	return queue_denqueue(socket->rx_buffer, data);
 }
 
+
+
+/* This function return count of received data.
+*
+* Public function defined in esp_sockets.h
+*/
+size_t esp_socket_get_tx_data_num(const esocket_t* socket)
+{
+	return queue_size(socket->tx_buffer);
+}
+
+
 /* This function return free space in socket tx buffer.
 *
 * Public function defined in esp_sockets.h
@@ -259,6 +285,7 @@ size_t esp_socket_txbuf_free_space(const esocket_t* socket)
 	return queue_free_space(socket->tx_buffer);
 }
 
+
 /* This function add new data to transmit buffer.
 *
 * Public function defined in esp_sockets.h
@@ -266,4 +293,13 @@ size_t esp_socket_txbuf_free_space(const esocket_t* socket)
 bool esp_socket_txbuf_enqueue(esocket_t* socket, const uint8_t* data)
 {
 	return queue_enqueue(socket->tx_buffer, data);
+}
+
+/* This function return data from receive buffer.
+*
+* Public function defined in esp_sockets.h
+*/
+bool esp_socket_tx_data_denqueue(esocket_t* socket, uint8_t* data)
+{
+	return queue_denqueue(socket->tx_buffer, data);
 }

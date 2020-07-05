@@ -14,11 +14,17 @@
 #include "stack/esp_tcpip.h"
 #include "queue.h"
 //_____ C O N F I G S __________________________________________________________
+//! Number of available sockets in pool
+#define ESP_MAX_CONNECTIONS						5
+#if ESP_MAX_CONNECTIONS > 5
+	#error "The value of ESP_MAX_CONNECTIONS must be less then 5"
+#endif
+
 //! Max size of receive data buffer in each socket
 #define ESP_TCP_DATA_LENGTH						50
 //_____ M A C R O S ____________________________________________________________
 //_____ D E F I N I T I O N ____________________________________________________
-struct esocket_t;
+struct esp_socket_t;
 typedef struct esp_socket_t esocket_t;
 //_____ V A R I A B L E   D E C L A R A T I O N S _______________________________
 //_____ F U N C T I O N   D E C L A R A T I O N S _______________________________
@@ -163,6 +169,17 @@ uint16_t esp_socket_get_remote_port(const esocket_t* socket);
 */
 void esp_socket_set_remote_port(esocket_t* socket, uint16_t port);
 
+
+
+size_t esp_socket_get_remote_size(const esocket_t* socket);
+void esp_socket_set_remote_size(esocket_t* socket, size_t size);
+
+
+
+
+
+
+
 /**
 * @brief 	This function return count of received data.
 *
@@ -201,6 +218,9 @@ bool esp_socket_rx_data_enqueue(esocket_t* socket, const uint8_t* data);
 */
 bool esp_socket_rx_data_denqueue(esocket_t* socket, uint8_t* data);
 
+
+size_t esp_socket_get_tx_data_num(const esocket_t* socket);
+
 /**
 * @brief 	This function return free space in socket tx buffer.
 *
@@ -219,3 +239,5 @@ size_t esp_socket_txbuf_free_space(const esocket_t* socket);
 * @return 	true/false.
 */
 bool esp_socket_txbuf_enqueue(esocket_t* socket, const uint8_t* data);
+
+bool esp_socket_tx_data_denqueue(esocket_t* socket, uint8_t* data);
