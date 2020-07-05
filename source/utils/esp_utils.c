@@ -116,6 +116,9 @@ static char* AT_CMD[] =
 	"+PING=\0",																	//!Function PING.
 	"+CIPDOMAIN=\0",															//!DNS Function.
 	"+CIPSERVERMAXCONN=\0",														//!Set the Maximum Connections Allowed by Server
+	"+CIPRECVMODE=\0",															//!Set TCP Receive Mode
+	"+CIPRECVMODE?\0",															//!Query TCP Receive Mode
+	"+CIPRECVDATA=\0",															//!Get TCP Data in Passive Receive Mode
 	"+CIPSNTPCFG=\0",															//!Sets the configuration of SNTP
 	"+CIPSNTPCFG?\0",															///< Request of the configuration of SNTP
 	"+CIPSNTPTIME?\0",															///< Checks the SNTP Time
@@ -144,6 +147,7 @@ char* ESP_Patterns[] =
 	"CONNECT\r\n\0",
 	"SEND OK\0",
 	"+++",
+	"+CIPRECVDATA"
 };
 //! @}
 
