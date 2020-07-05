@@ -13,7 +13,7 @@
 
 #include <string.h>
 #include <assert.h>
-#include <esp_drv.h>
+#include "esp_drv.h"
 #include "slre.h"
 #include "convert.h"
 #include "esp_utils.h"
@@ -43,7 +43,9 @@ bool esp_test(uint32_t timeout)
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -51,7 +53,6 @@ bool esp_test(uint32_t timeout)
 		return false;
 	}
 
-//	if(esp_data_receive(pAnswer, len, timeout) != ESP_PASS) {
 	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
 		return false;
 	}
@@ -69,7 +70,9 @@ bool esp_reset(uint32_t timeout)
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -77,7 +80,6 @@ bool esp_reset(uint32_t timeout)
 		return false;
 	}
 
-	//	if(esp_data_receive(pAnswer, len, timeout) != ESP_PASS) {
 	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
 		return false;
 	}
@@ -101,7 +103,9 @@ bool esp_get_version(esp_at_version_t *at, esp_sdk_version_t *sdk, uint32_t time
 
 	pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -145,7 +149,9 @@ bool esp_deep_sleep(uint32_t time, uint32_t timeout)
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -174,7 +180,9 @@ bool esp_enable_echo(uint32_t timeout)
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -200,7 +208,9 @@ bool esp_disable_echo(uint32_t timeout)
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char esp_disable = '0';
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -225,7 +235,9 @@ bool esp_restore(uint32_t timeout)
 	char* pAnswer = esp_alloc_answer_buffer();
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -257,7 +269,9 @@ bool esp_uart_cfg(const ESP_UartParam_t *cfg, uint32_t timeout)
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -305,7 +319,9 @@ bool esp_uart_cfg(const esp_uart_t *cfg, bool save, uint32_t timeout)
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -349,7 +365,9 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer) {
+	if(NULL == pAnswer)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -380,7 +398,9 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 	pParam = esp_alloc_param_buffer();
 	pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -427,7 +447,9 @@ bool esp_rf_power(uint8_t power, uint32_t timeout)
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -457,7 +479,9 @@ bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer || NULL == pParam) {
+	if(NULL == pAnswer || NULL == pParam)
+	{
+		assert(false);
 		return false;
 	}
 
@@ -475,9 +499,6 @@ bool esp_setup_sys_message(uint8_t msg, bool save, uint32_t timeout)
 
 	return esp_pattern_check(pAnswer, PATTERN_OK);
 }
-
-
-
 
 bool esp_basic_receive_handle(char *msg, size_t size)
 {
