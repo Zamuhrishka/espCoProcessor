@@ -51,11 +51,13 @@
 #include <stack/esp_tcpip.h>
 #include "debug.h"
 #include "slre.h"
+#include "queue.h"
 #include "esp_sockets.h"
 #include "esp_port.h"
 #include "assert.h"
-
 #include "esp_client.h"
+#include "esp_server.h"
+
 #include <string.h>
 /* USER CODE END Includes */
 
@@ -94,6 +96,33 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//static void server_data_handle(esocket_t* socket)
+//{
+//	uint8_t data[50] = {0};
+//
+//	assert(NULL != socket);
+//
+//	size_t size = esp_socket_get_rx_data_num(socket);
+//	esp_conn_id_t id = esp_socket_get_connection_id(socket);
+//
+//	debug_info("[Server RX]: len = %d, id = %d\r\n", size, CONVER_TO_NUMBER(id));
+//
+//	for(size_t i = 0; i < size; i++)
+//	{
+//		uint8_t ch = '\0';
+//
+//		if(esp_socket_rx_data_denqueue(socket, &ch))
+//		{
+//			data[i] = ch;
+//			debug_info("%c", ch);
+//		}
+//	}
+//
+//	debug_info("\r\n");
+//
+//	esp_server_transmit(socket, data, size);
+//
+//}
 /* USER CODE END 0 */
 
 /**
@@ -223,8 +252,6 @@ int main(void)
 			  debug_info("\tGW: %s\r\n", _gw);
 			  debug_info("\tMASK: %s\r\n", _msk);
 
-
-			  debug_info("Initialize the esp communication layer...");
 		  	  if(esp_client_init(/*ESP_SOCKET_CLIENT*/))
 		  	  {
 		  		  debug_info(" PASS\r\n");
@@ -244,6 +271,9 @@ int main(void)
 		  	  {
 		  		  debug_error(" FAULT\r\n");
 		  	  }
+
+//			  esp_server_init(333, 1, 0);
+//			  esp_register_server_receive_cb(server_data_handle);
 		  }
 		  else
 		  {
@@ -266,6 +296,9 @@ int main(void)
     /* USER CODE BEGIN 3 */
 	esp_drv_receive_handle();
 	esp_drv_transmit_handle();
+
+//	esp_server_receive_handle();
+//	esp_server_transmit_handle();
 
 	len = esp_client_receive(socket, buffer, sizeof(buffer));
 	if(len > 0) {
@@ -347,6 +380,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	debug_critical("Wrong parameters value: file %s on line %d\r\n", file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */

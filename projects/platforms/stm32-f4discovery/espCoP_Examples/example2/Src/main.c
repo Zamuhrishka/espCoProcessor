@@ -51,11 +51,12 @@
 #include <stack/esp_tcpip.h>
 #include "debug.h"
 #include "slre.h"
-#include "esp_drv.h"
+#include "esp_sockets.h"
 #include "esp_port.h"
 #include "assert.h"
 
 #include <string.h>
+#include "esp_server.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -79,7 +80,9 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-static char message[] = "Hello\r\n";
+static uint8_t message[] = "Hello\r\n";
+//static uint8_t message1[] = "Hello1\r\n";
+static uint8_t buffer[50];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -90,42 +93,32 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-static bool receice_handlle(ESP_ConnectionId_t id, const char data[], size_t size)
+static void server_data_handle(esocket_t* socket)
 {
-	if(data == NULL || size == 0)
-	{
-		debug_error("[TCP]: Received from id: %c...FAULT\r\n", id);
-		return false;
-	}
+	uint8_t data[50] = {0};
 
-	if(size == 1 && data[0] == 0xAA)
+	assert(NULL != socket);
+
+	size_t size = esp_socket_get_rx_data_num(socket);
+	esp_conn_id_t id = esp_socket_get_connection_id(socket);
+
+	debug_info("[Server RX]: len = %d, id = %d\r\n", size, CONVER_TO_NUMBER(id));
+
+	for(size_t i = 0; i < size; i++)
 	{
-		debug_info("[TCP]: Switch off the transparent mode...");
-		debug_info("\r\n");
-		ESPStatus_t res = ESP_TransparentModeDisable(5000u);
-		if(res == ESP_PASS)
+		uint8_t ch = '\0';
+
+		if(esp_socket_rx_data_denqueue(socket, &ch))
 		{
-			debug_info("PASS\r\n");
+			data[i] = ch;
+			debug_info("%c", ch);
 		}
-		else
-		{
-			debug_error("FAULT\r\n");
-		}
-		ESP_HardWareSwitchMode(UNBLOCK);
-	}
-	else
-	{
-		debug_info("[TCP]: Received from id: %c\r\n", id);
-		debug_info("\r\n");
-		debug_dump((const void*)data, (unsigned long)&data[0], size, 1);
-		debug_info("\r\n");
-		debug_info("\r\n");
-
-		ESP_TransmitData(id, message, sizeof(message));
 	}
 
+	debug_info("\r\n");
 
-	return true;
+	esp_server_transmit(socket, data, size);
+
 }
 /* USER CODE END 0 */
 
@@ -136,23 +129,25 @@ static bool receice_handlle(ESP_ConnectionId_t id, const char data[], size_t siz
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	esocket_t* socket = NULL;
 	const char ssid[] = SSID;
 	const char password[] = PASS;
 	char ssid_cur[35] = {0};
-	Ipv4Addr_t ip = 0;
-	Ipv4Addr_t gw = 0;
-	Ipv4Addr_t mask = 0;
-	TCP_ConnectonParam_t connParam;
-	char ipStr[] = "192.168.100.7\0";
+	ip4addr_t ip = 0;
+	ip4addr_t gw = 0;
+	ip4addr_t mask = 0;
+	esp_tcp_cfg_t connParam;
+	char ipStr[] = "192.168.100.57\0";
 	char _ip[] = "000.000.000.000\0";
 	char _gw[] = "000.000.000.000\0";
 	char _msk[] = "000.000.000.000\0";
-	ESP_ConnectonStatus_t status;
-	ESP_TransferMode_t transfer;
-	ESP_ConnectionMode_t mux;
+	esp_at_version_t at_version = {0};
+	esp_sdk_version_t sdk_version = {0};
+	char at_string[10] = {0};
+	char sdk_string[10] = {0};
 	uint32_t count = 3;
-	ESPStatus_t res = ESP_INNER_ERR;
-
+	esp_status_t res = ESP_INNER_ERR;
+	int32_t len = 0;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -179,204 +174,115 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
   debug_init();
+  esp_drv_init();
 
-  ESP_RegisterReceiceCB(&receice_handlle);
-  ESP_Init();
+  convert_string_to_ip4addr(&connParam.remoteIp, ipStr);
+    connParam.remotePort = 9000;
+    connParam.keepAlive = 0;
+    connParam.id = ESP_ID_NONE;
 
-	Convert_StringToIpv4addr(&connParam.remoteIp, ipStr);
-	connParam.remotePort = 9000;
-	connParam.id = ID_NONE;
+    debug_info("Example #1\r\n");
+    debug_info("\t- WiFi in station mode\r\n");
+    debug_info("\t- TCP server\r\n");
+    debug_info("\t- Multi connection mode\r\n");
+    debug_info("\t- Normal transmit mode\r\n");
+    debug_info("\r\n");
+    debug_info("\r\n");
 
-	debug_info("Example #2\r\n");
-	debug_info("- WiFi in station mode\r\n");
-	debug_info("- TCP client\r\n");
-	debug_info("- Single connection mode\r\n");
-	debug_info("- Transparent transmit mode\r\n");
-	debug_info("\r\n");
-	debug_info("\r\n");
+    esp_get_version(&at_version, &sdk_version, 2000);
+    esp_at_version_to_string(&at_version, at_string);
+    esp_sdk_version_to_string(&sdk_version, sdk_string);
 
-	debug_info("Setup WiFi station mode...");
-		if(ESP_SetupWifiModeCur(WIFI_CLIENT, 5000u))
-		{
-			debug_info(" PASS\r\n");
+    debug_info("AT command version: %s\r\n", at_string);
+    debug_info("SDK version: %s\r\n", sdk_string);
 
-			debug_info("Check connection to AP status: \r\n");
-			if(ESP_RequestNameConnectedApCur(ssid_cur, 5000u) == ESP_PASS)
-			{
-				if(strlen(ssid_cur) != 0)
-				{
-					debug_info("\tjoin to %s\r\n", ssid_cur);
-					if(ESP_UnJoinFromWifiAp(5000u))
-					{
-						debug_info("\tunjoin from %s\r\n", ssid_cur);
-					}
-				}
-				else
-				{
-					debug_info("\tdo not join\r\n");
-				}
-			}
+    debug_info("Setup WiFi station mode...");
+    if(esp_wifi_mode_setup(ESP_WIFI_STATION, false, 5000u))
+    {
+  	  debug_info(" PASS\r\n");
 
-			debug_info("Join to SSID: %s...", ssid);
-			while(res != ESP_PASS && count > 0)
-			{
-				res = ESP_JoinToWifiApCur(ssid, password, 5000u);
-				count--;
-			}
+  	  debug_info("Check connection to Wifi AP: \r\n");
+  	  if(esp_wifi_ap_ssid_request(ssid_cur, false, 5000u) == ESP_PASS)
+  	  {
+  		  if(strlen(ssid_cur) != 0)
+  		  {
+  			  debug_info("\tjoin to %s\r\n", ssid_cur);
+  			  if(esp_wifi_ap_unjoin(5000u))
+  			  {
+  				  debug_info("\tunjoin from %s\r\n", ssid_cur);
+  			  }
+  		  }
+  		  else
+  		  {
+  			  debug_info("\tdo not join\r\n");
+  		  }
+  	  }
 
-			if(res == ESP_PASS)
-			{
-				debug_info(" PASS\r\n");
-				debug_info("Request station IP...");
+  	  debug_info("Join to SSID: %s...", ssid);
+  	  while(res != ESP_PASS && count > 0)
+  	  {
+  		  res = esp_wifi_ap_join(ssid, password, false, 5000u);
+  		  count--;
+  	  }
 
-				res = ESP_INNER_ERR;
-				count = 1;
-				while(res != ESP_PASS && count != 0)
-				{
-					res = ESP_RequestWifiStationIpAddrCur(&ip, &gw, &mask, 5000u);
-					count++;
-				}
-				if(res == ESP_PASS)
-				{
-					debug_info(" PASS\r\n");
+  	  if(res == ESP_PASS)
+  	  {
+  		  debug_info(" PASS\r\n");
+  		  debug_info("Request station IP...");
 
-					Convert_Ipv4addrToString(ip, _ip);
-					Convert_Ipv4addrToString(gw, _gw);
-					Convert_Ipv4addrToString(mask, _msk);
+  		  res = ESP_INNER_ERR;
+  		  count = 1;
+  		  while(res != ESP_PASS && count != 0)
+  		  {
+  			  res = esp_wifi_station_ip_request(&ip, &gw, &mask, false, 5000u);
+  			  count++;
+  		  }
+  		  if(res == ESP_PASS)
+  		  {
+  			  debug_info(" PASS\r\n");
 
-					debug_info("\tIP: %s\r\n", _ip);
-					debug_info("\tGW: %s\r\n", _gw);
-					debug_info("\tMASK: %s\r\n", _msk);
-				}
-				else
-				{
-					debug_error(" FAULT\r\n");
-				}
+  			  convert_ip4addr_to_string(ip, _ip);
+  			  convert_ip4addr_to_string(gw, _gw);
+  			  convert_ip4addr_to_string(mask, _msk);
 
-				debug_info("Request multiplexor mode...");
-				res = ESP_INNER_ERR;
-				count = 0;
+  			  debug_info("\tIP: %s\r\n", _ip);
+  			  debug_info("\tGW: %s\r\n", _gw);
+  			  debug_info("\tMASK: %s\r\n", _msk);
 
-				while(res != ESP_PASS)
-				{
-					res = ESP_RequestConfigMux(&mux, 5000u);
-					count++;
-				}
-				if(res == ESP_PASS)
-				{
-					debug_info(" PASS\r\n");
-					if(mux != SINGLE_CONNECT)
-					{
-						debug_info("Setup single mode...");
-						if(ESP_SingleConnectionEnable(5000u) == ESP_SERVER_ON)
-						{
-							debug_info(" FAULT\r\n");
-							debug_info("\t Need disable TCP Server...");
-							if(ESP_CloseServerTCP(0, 5000u))
-							{
-								debug_info(" PASS\r\n");
+			  esp_server_init(333, 1, 0);
+			  esp_register_server_receive_cb(server_data_handle);
 
-								debug_info("Setup single mode...");
-								if(ESP_SingleConnectionEnable(5000u))
-								{
-									debug_info(" PASS\r\n");
-								}
-								else
-								{
-									debug_error(" FAULT\r\n");
-								}
-							}
-							else
-							{
-								debug_error(" FAULT\r\n");
-							}
-						}
-						else
-						{
-							debug_info(" PASS\r\n");
-						}
-					}
-					else
-					{
-						debug_info("\tAlready in single mode...\r\n");
-					}
-
-					debug_info("Request transfer mode...");
-
-					res = ESP_INNER_ERR;
-					count = 0;
-					while(res != ESP_PASS)
-					{
-						res = ESP_RequestTransferMode(&transfer, 5000u);
-						count++;
-					}
-					if(res == ESP_PASS)
-					{
-						debug_info(" PASS\r\n");
-						if(transfer != TRANSPARENT_MODE)
-						{
-							debug_info("Setup transparent transfer mode...");
-							if(ESP_SetupTransferMode(TRANSPARENT_MODE, 5000u) == ESP_PASS)
-							{
-								debug_info(" PASS\r\n");
-							}
-							else
-							{
-								debug_error(" FAULT\r\n");
-							}
-						}
-						else
-						{
-							debug_info("\tAlready in transparent transfer mode...\r\n");
-						}
-					}
-					else if(res == ESP_PASS)
-					{
-						debug_error(" TIMEOUT\r\n");
-					}
-					else
-					{
-						debug_error(" FAULT\r\n");
-					}
-
-
-
-					debug_info("Establish TCP connection...");
-					if(ESP_EstablishConnectTCP(&connParam, 5000u) == ESP_PASS)
-					{
-						debug_info(" PASS\r\n");
-						if(ESP_RequestConnectionStatus(&status, 5000u))
-						{
-							debug_info("\tID: %c\r\n", status.id);
-							debug_info("\tlocalPort: %x\r\n", status.localPort);
-							Convert_Ipv4addrToString(status.remoteIp, _ip);
-							debug_info("\tremoteIp: %s\r\n", _ip);
-							debug_info("\tremotePort: %x\r\n", status.remotePort);
-							debug_info("\tstat: %c\r\n", status.stat);
-							debug_info("\ttype: %x\r\n", status.type);
-						}
-					}
-					else
-					{
-						debug_error(" FAULT\r\n");
-					}
-
-					ESP_HardWareSwitchMode(UNBLOCK);
-					ESP_TransmitData(ID_NONE, message, sizeof(message));
-				}
-				else
-				{
-					debug_error(" FAULT\r\n");
-				}
-			}
-			else
-			{
-				debug_error(" FAULT\r\n");
-			}
-		}
-
-
-  /* USER CODE END 2 */
+//  		  	  if(esp_socket_init())
+//  		  	  {
+//  		  		  debug_info(" PASS\r\n");
+//  		  		  debug_info("Opening tcp socket...");
+//  				  socket = esp_socket_open(connParam.remoteIp, connParam.remotePort);
+//  				  if(socket != NULL)
+//  				  {
+//  					  debug_info(" PASS\r\n");
+//  				  }
+//  			  	  else
+//  			  	  {
+//  			  		  debug_error(" FAULT\r\n");
+//  			  	  }
+//  				  esp_socket_transmit(socket, message, sizeof(message));
+//  		  	  }
+//  		  	  else
+//  		  	  {
+//  		  		  debug_error(" FAULT\r\n");
+//  		  	  }
+  		  }
+  		  else
+  		  {
+  			  debug_error(" FAULT\r\n");
+  		  }
+  	  }
+  	  else
+  	  {
+  		  debug_error(" FAULT\r\n");
+  	  }
+    }
+    /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -385,8 +291,17 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	ESP_MsgHandlCallBack();
-	ESP_TransmitDataHandle();
+	esp_drv_receive_handle();
+	esp_drv_transmit_handle();
+
+	esp_server_receive_handle();
+	esp_server_transmit_handle();
+
+//	len = esp_socket_receive(socket, buffer, sizeof(buffer));
+//	if(len > 0) {
+//		esp_socket_transmit(socket, buffer, len);
+//	}
+
   }
   /* USER CODE END 3 */
 }
@@ -462,6 +377,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE BEGIN 6 */
   /* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+	debug_critical("Wrong parameters value: file %s on line %d\r\n", file, line);
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
