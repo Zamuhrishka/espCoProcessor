@@ -236,8 +236,8 @@ bool esp_cmd_transmit(uint8_t cmd, const char data[], size_t size)
 	}
 	transmitAT[i++] = '\r';
 	transmitAT[i++] = '\n';
-	esp_hardware_transmit_block(transmitAT, i);
-	return true;
+	return esp_hardware_transmit_block(transmitAT, i);
+//	return true;
 }
 
 /**
