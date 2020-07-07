@@ -259,7 +259,7 @@ bool esp_data_transmit(const char data[], size_t size, uint32_t timeout)
 int32_t esp_data_receive(char *msg, size_t len, uint32_t timeout)
 {
 //	return esp_hardware_receive(msg, len, timeout) == ESP_PASS ? true : false;
-	return esp_hardware_receive(msg, len, timeout);
+	return esp_hardware_receive_block(msg, len, timeout);
 }
 
 /**

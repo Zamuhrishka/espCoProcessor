@@ -260,12 +260,12 @@ int main(void)
 				  if(socket != NULL)
 				  {
 					  debug_info(" PASS\r\n");
+					  esp_client_transmit(socket, message, sizeof(message));
 				  }
 			  	  else
 			  	  {
 			  		  debug_error(" FAULT\r\n");
 			  	  }
-				  esp_client_transmit(socket, message, sizeof(message));
 		  	  }
 		  	  else
 		  	  {
@@ -297,12 +297,10 @@ int main(void)
 	esp_drv_receive_handle();
 	esp_drv_transmit_handle();
 
-//	esp_server_receive_handle();
-//	esp_server_transmit_handle();
-
 	len = esp_client_receive(socket, buffer, sizeof(buffer));
 	if(len > 0) {
 		esp_client_transmit(socket, buffer, len);
+		memset(buffer, 0, sizeof(buffer));
 //		esp_connection_close(socket);
 	}
   }
