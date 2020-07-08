@@ -19,8 +19,8 @@
 //_____ D E F I N I T I O N ___________________________________________________
 //_____ M A C R O S ___________________________________________________________
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________
-char rxBuffer[BUFFER_SIZE] = {0};
-char txBuffer[BUFFER_SIZE] = {0};
+char rxBuffer[ESP_DRV_BUFFER_SIZE] = {0};
+char txBuffer[ESP_DRV_BUFFER_SIZE] = {0};
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
@@ -29,9 +29,9 @@ char txBuffer[BUFFER_SIZE] = {0};
 *
 * Public function defined in esp_port.h
 */
-void esp_harware_init(void)
+bool esp_harware_init(void)
 {
-
+	return true;
 }
 
 /**
@@ -79,12 +79,14 @@ bool esp_hardware_transmit_block(const char data[], uint16_t size)
 *
 * Public function defined in esp_port.h
 */
-esp_status_t esp_hardware_receive_block(char **msg, size_t *len, uint32_t timeout)
+int32_t esp_hardware_receive_block(char *msg, size_t len, uint32_t timeout)
 {
-	*msg = txBuffer;
-	*len = strlen(txBuffer);
+	for(size_t i = 0; i < len; i++)
+	{
+		msg[i] = txBuffer[i];
+	}
 
-	return ESP_PASS;
+	return strlen(txBuffer);
 }
 
 bool esp_hardware_receive(char **msg, size_t *len)
