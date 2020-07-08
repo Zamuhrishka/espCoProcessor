@@ -23,7 +23,7 @@ static void test_esp_conn_status_request(void **state)
 	esp_status_t result = ESP_INNER_ERR;
 	esp_conn_status_t status;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 
 	result = esp_conn_status_request(&status, 5000u);
 	assert_int_equal(result, ESP_PASS);
@@ -44,7 +44,7 @@ static void test_esp_tcp_connect(void **state)
 	esp_status_t result = ESP_INNER_ERR;
 	esp_tcp_cfg_t cfg;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 
 	cfg.id = ESP_ID0;
 	cfg.keepAlive = 0;
@@ -68,7 +68,7 @@ static void test_esp_close_connection_m(void **state)
 {
 	esp_status_t result = false;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_close_connection_m(ESP_ID0, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -77,7 +77,7 @@ static void test_esp_close_connection(void **state)
 {
 	esp_status_t result = false;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_close_connection(1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -86,7 +86,7 @@ static void test_esp_multiple_connection(void **state)
 {
 	esp_status_t result = false;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_multiple_connection_enable(1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -95,7 +95,7 @@ static void test_esp_single_connection(void **state)
 {
 	esp_status_t result = false;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_single_connection_enable(1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -105,7 +105,7 @@ static void test_esp_mux_cfg_request(void **state)
 	esp_status_t result = ESP_INNER_ERR;
 	esp_conn_mode_t mode;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 
 	result = esp_mux_cfg_request(&mode, 500);
 	assert_int_equal(result, ESP_PASS);
@@ -118,7 +118,7 @@ static void test_esp_transmit_mode_setup(void **state)
 	esp_status_t result = false;
 	esp_tx_mode_t mode = ESP_NORMAL_MODE;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_transmit_mode_setup(mode, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -128,7 +128,7 @@ static void test_transmit_mode_request(void **state)
 	esp_status_t result = ESP_INNER_ERR;
 	esp_tx_mode_t mode;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 
 	result = esp_transmit_mode_request(&mode, 500);
 	assert_int_equal(result, ESP_PASS);
@@ -140,7 +140,7 @@ static void test_esp_tcp_server_create(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_tcp_server_create(9988, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -149,7 +149,7 @@ static void test_esp_tcp_server_delete(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_tcp_server_delete(9988, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -158,7 +158,7 @@ static void test_esp_tcp_server_timeout_setup(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_tcp_server_timeout_setup(5000, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -167,7 +167,7 @@ static void test_esp_tcp_server_maxconn_setup(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_tcp_server_maxconn_setup(3, 1000);
 	assert_int_equal(result, ESP_PASS);
 }
@@ -176,7 +176,7 @@ static void test_esp_sntp_timezone_setup(void **state)
 {
 	esp_status_t result = ESP_INNER_ERR;
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 	result = esp_sntp_timezone_setup(3, 1000);
 	assert_int_equal(result, ESP_PASS);
 
@@ -193,7 +193,7 @@ static void test_esp_get_time(void **state)
 	esp_datetime_t dt = {0};
 	esp_datetime_t dt_pattern = {0};
 
-	assert_true(esp_init());
+	assert_true(esp_drv_init());
 
 	dt_pattern.day = 4;
 	dt_pattern.day_of_week = 5;

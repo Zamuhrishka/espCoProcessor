@@ -13,12 +13,11 @@
 #include "stdbool.h"
 #include "stdlib.h"
 #include "cmockery.h"
-#include "esp.h"
 #include "esp_basic.h"
 #include <string.h>
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________________________
-//_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   __________________________________
+//_____ S T A T I ï¿½  F U N C T I O N   D E F I N I T I O N   __________________________________
 static void test_esp_test_cmd(void **state)
 {
 	bool result = false;
@@ -138,7 +137,7 @@ static void test_esp_config_wakeup_pins_cmd(void **state)
 	gpio.trigger_gpio = 5;
 	gpio.trigger_level = ESP_AWPIN_LOW;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_wgpio_cfg(&gpio, 2000);
@@ -149,7 +148,7 @@ static void test_esp_setup_rf_power_cmd(void **state)
 {
 	bool result = false;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_rf_power(55, 2000);

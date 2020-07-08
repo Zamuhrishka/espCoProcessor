@@ -13,17 +13,16 @@
 #include "stdbool.h"
 #include "stdlib.h"
 #include "cmockery.h"
-#include "esp.h"
 #include "esp_wifi.h"
 #include <string.h>
 //_____ V A R I A B L E   D E F I N I T I O N  ________________________________________________
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________________________
-//_____ S T A T I Ñ  F U N C T I O N   D E F I N I T I O N   __________________________________
+//_____ S T A T I ï¿½  F U N C T I O N   D E F I N I T I O N   __________________________________
 static void test_esp_wifi_mode_setup_cur(void **state)
 {
 	bool result = false;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_wifi_mode_setup(ESP_WIFI_STATION, false, 5000u);
@@ -35,7 +34,7 @@ static void test_esp_wifi_mode_request_cur(void **state)
 	bool result = false;
 	esp_wifi_mode_t mode;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_wifi_mode_request(&mode, false, 5000u);
@@ -48,7 +47,7 @@ static void test_esp_wifi_mode_setup_def(void **state)
 {
 	bool result = false;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_wifi_mode_setup(ESP_WIFI_SOFTAP, true, 5000u);
@@ -60,7 +59,7 @@ static void test_esp_wifi_mode_request_def(void **state)
 	bool result = false;
 	esp_wifi_mode_t mode;
 
-	result = esp_init();
+	result = esp_drv_init();
 	assert_true(result);
 
 	result = esp_wifi_mode_request(&mode, true, 5000u);
@@ -76,7 +75,7 @@ static void test_esp_wifi_ap_join_cur(void **state)
 	char ssid_cur[35] = "ESPTestAtCommand\0";
 	char pass_cur[65] = "123456789ABCDEF\0";
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	result = esp_wifi_ap_join(ssid_cur, pass_cur, false, 5000u);
@@ -93,7 +92,7 @@ static void test_esp_wifi_ap_ssid_request_cur(void **state)
 	char ssid_cur[35] = "ESPTestAtCommand\0";
 	char ssid_pattern[35] = "ESPTestAtCommand\0";
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	memset(ssid_cur, '\0', sizeof(ssid_cur));
@@ -110,7 +109,7 @@ static void test_esp_wifi_ap_join_def(void **state)
 	char ssid_cur[35] = "ESPTestAtCommand\0";
 	char pass_cur[65] = "123456789ABCDEF\0";
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	result = esp_wifi_ap_join(ssid_cur, pass_cur, true, 5000u);
@@ -127,7 +126,7 @@ static void test_esp_wifi_ap_ssid_request_def(void **state)
 	char ssid_cur[35] = "ESPTestAtCommand\0";
 	char ssid_pattern[35] = "ESPTestAtCommand\0";
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	memset(ssid_cur, '\0', sizeof(ssid_cur));
@@ -154,7 +153,7 @@ static void test_esp_wifi_softap_setup_cur(void **state)
 	char channel = '1';
 	esp_encription_t enc = ESP_OPEN;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	result = esp_wifi_softap_setup(ssid, pass, channel, enc, false, 5000u);
@@ -170,7 +169,7 @@ static void test_esp_wifi_softap_request_cur(void **state)
 	char passReq[65] = "";
 	esp_ap_config_t param;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res =  esp_wifi_softap_request(ssidReq, passReq, &param, 5000u);
@@ -191,7 +190,7 @@ static void test_esp_wifi_softap_setup_def(void **state)
 	char channel = '1';
 	esp_encription_t enc = ESP_OPEN;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	result = esp_wifi_softap_setup(ssid, pass, channel, enc, true, 5000u);
@@ -207,7 +206,7 @@ static void test_esp_wifi_softap_request_def(void **state)
 	char passReq[65] = "";
 	esp_ap_config_t param;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res =  esp_wifi_softap_request(ssidReq, passReq, &param, 5000u);
@@ -224,7 +223,7 @@ static void test_esp_dhcp_mode_setup_cur(void **state)
 {
 	bool res = false;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_dhcp_mode_setup(ESP_WIFI_STATION, ESP_DHCP_OFF, false, 5000u);
@@ -238,7 +237,7 @@ static void test_esp_dhcp_mode_setup_def(void **state)
 {
 	bool res = false;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_dhcp_mode_setup(ESP_WIFI_STATION, ESP_DHCP_OFF, true, 5000u);
@@ -252,7 +251,7 @@ static void test_esp_wifi_autoconnect(void **state)
 {
 	bool res = false;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_autoconnect_enable(5000u);
@@ -272,7 +271,7 @@ static void test_esp_wifi_station_ip_setup_cur(void **state)
 	ip4addr_t gw = 0;
 	ip4addr_t mask = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -300,7 +299,7 @@ static void test_esp_wifi_station_ip_request_cur(void **state)
 	ip4addr_t gwTest = 0;
 	ip4addr_t maskTest = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -328,7 +327,7 @@ static void test_esp_wifi_station_ip_setup_def(void **state)
 	ip4addr_t gw = 0;
 	ip4addr_t mask = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -356,7 +355,7 @@ static void test_esp_wifi_station_ip_request_def(void **state)
 	ip4addr_t gwTest = 0;
 	ip4addr_t maskTest = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -384,7 +383,7 @@ static void test_esp_wifi_softap_ip_setup_cur(void **state)
 	ip4addr_t gw = 0;
 	ip4addr_t mask = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -411,7 +410,7 @@ static void test_esp_wifi_softap_ip_request_cur(void **state)
 	ip4addr_t gwTest = 0;
 	ip4addr_t maskTest = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -439,7 +438,7 @@ static void test_esp_wifi_softap_ip_setup_def(void **state)
 	ip4addr_t gw = 0;
 	ip4addr_t mask = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -466,7 +465,7 @@ static void test_esp_wifi_softap_ip_request_def(void **state)
 	ip4addr_t gwTest = 0;
 	ip4addr_t maskTest = 0;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = convert_string_to_ip4addr(&ipv4, ipStr);
@@ -496,7 +495,7 @@ static void test_esp_wifi_station_mac_setup_cur(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_station_mac_setup(mac, false, 5000u);
@@ -516,7 +515,7 @@ static void test_esp_wifi_station_mac_request_cur(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_station_mac_request(&_mac, false, 5000u);
@@ -537,7 +536,7 @@ static void test_esp_wifi_station_mac_setup_def(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_station_mac_setup(mac, true, 5000u);
@@ -557,7 +556,7 @@ static void test_esp_wifi_station_mac_request_def(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_station_mac_request(&_mac, true, 5000u);
@@ -578,7 +577,7 @@ static void test_esp_wifi_softap_mac_setup_cur(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_softap_mac_setup(mac, false, 5000u);
@@ -598,7 +597,7 @@ static void test_esp_wifi_softap_mac_request_cur(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_softap_mac_request(&_mac, false, 5000u);
@@ -619,7 +618,7 @@ static void test_esp_wifi_softap_mac_setup_def(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_softap_mac_setup(mac, true, 5000u);
@@ -639,7 +638,7 @@ static void test_esp_wifi_softap_mac_request_def(void **state)
 	mac.value[4] = 0xd3;
 	mac.value[5] = 0x2b;
 
-	res = esp_init();
+	res = esp_drv_init();
 	assert_true(res);
 
 	res = esp_wifi_softap_mac_request(&_mac, true, 5000u);
