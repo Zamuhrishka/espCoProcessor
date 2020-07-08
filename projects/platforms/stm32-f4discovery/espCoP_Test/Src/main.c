@@ -46,11 +46,10 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <stack/esp_basic.h>
-#include <stack/esp_wifi.h>
+#include <esp_basic.h>
+#include <esp_wifi.h>
 #include "debug.h"
 #include "slre.h"
-#include "esp.h"
 #include "assert.h"
 //#include "qa_basic.h"
 /* USER CODE END Includes */
