@@ -350,7 +350,7 @@ esp_status_t esp_wifi_ap_join(const char ssid[], const char pass[], bool save, u
 
 	do
 	{
-		if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 			return ESP_INNER_ERR;
 		}
 
@@ -681,7 +681,7 @@ bool esp_wifi_softap_request(char ssid[], char pass[], esp_ap_config_t *pParam, 
 }
 
 /**
-* This function get station’s IP which is connected to ESP8266 softAP.
+* This function get stationï¿½s IP which is connected to ESP8266 softAP.
 *
 * Public function defined in esp_wifi.h
 */
@@ -788,7 +788,7 @@ bool esp_dhcp_mode_setup(esp_wifi_mode_t mode, esp_dhcp_mode_t dhcp, bool save, 
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 		return false;
 	}
 

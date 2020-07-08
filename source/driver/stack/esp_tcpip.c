@@ -1040,7 +1040,6 @@ esp_status_t esp_tcp_server_create(uint16_t port, uint32_t timeout)
 */
 esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout)
 {
-	char* strPort = NULL;
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
@@ -1052,15 +1051,11 @@ esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout)
 	pParam[0] = '0';
 	if(port != 0)
 	{
-		convert_uint32_to_string(strPort, port);
-
-		if(strcat ((char*)pParam, (char*)",\0") == NULL) {
+		if(strcat (&pParam[1], ",") == NULL) {
 			return ESP_INNER_ERR;
 		}
 
-		if(strcat ((char*)pParam, strPort) == NULL) {
-			return ESP_INNER_ERR;
-		}
+		convert_uint32_to_string(&pParam[2], port);
 	}
 
 	len = strlen((char*)pParam);
@@ -1070,7 +1065,7 @@ esp_status_t esp_tcp_server_delete(uint16_t port, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 			return ESP_RECEIVE_ERR;
 		}
 
@@ -1126,17 +1121,13 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 {
 	size_t len = ESP_ANSWER_BUFF_SIZE;
 
-	assert(5 > conn);
+	assert(ESP_SERVER_MAX_CONN > conn);
 
 	char* pParam = esp_alloc_param_buffer();
 	char* pAnswer = esp_alloc_answer_buffer();
 
 	if(NULL == pAnswer || NULL == pParam) {
 		return ESP_MEM_ALLOC_ERR;
-	}
-
-	if(conn > ESP_SERVER_MAX_CONN) {
-		return ESP_PARAM_ERR;
 	}
 
 	convert_uint8_to_string(pParam, conn);
@@ -1147,7 +1138,7 @@ esp_status_t esp_tcp_server_maxconn_setup(uint8_t conn, uint32_t timeout)
 		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 		return ESP_RECEIVE_ERR;
 	}
 
@@ -1426,7 +1417,7 @@ esp_status_t esp_sntp_timezone_setup(int8_t timezone, uint32_t timeout)
 
 	while(true)
 	{
-		if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+		if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 			return ESP_RECEIVE_ERR;
 		}
 

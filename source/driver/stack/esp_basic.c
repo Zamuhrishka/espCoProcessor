@@ -389,7 +389,7 @@ bool esp_sleep(esp_sleep_mode_t mode, uint32_t timeout)
 */
 bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 {
-	size_t len = ESP_ANSWER_BUFF_SIZE;
+	size_t len = 0;
 	char* pParam = NULL;
 	char* pAnswer = NULL;
 
@@ -429,7 +429,7 @@ bool esp_wgpio_cfg(const esp_wgpio_t *gpio, uint32_t timeout)
 		return false;
 	}
 
-	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
+	if(esp_data_receive(pAnswer, ESP_ANSWER_BUFF_SIZE, timeout) <= 0) {
 		return false;
 	}
 
