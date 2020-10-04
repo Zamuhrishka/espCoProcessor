@@ -154,11 +154,12 @@ char* ESP_Patterns[] =
 //!Buffer for store AT commands ready for transmit
 static char transmitAT[200] = {0};
 
-//!Buffer for receive answer from esp8266
-static char answer[ESP_ANSWER_BUFF_SIZE] = {0};
+// //!Buffer for receive answer from esp8266
+// static char answer[ESP_ANSWER_BUFF_SIZE] = {0};
 
-//!Buffer for store params for AT commands
-static char param[ESP_PARAM_BUFF_SIZE] = {0};
+// //!Buffer for store params for AT commands
+// static char param[ESP_PARAM_BUFF_SIZE] = {0};
+
 //_____ I N L I N E   F U N C T I O N   D E F I N I T I O N   _________________
 //_____ S T A T I C  F U N C T I O N   D E F I N I T I O N   __________________
 //_____ F U N C T I O N   D E F I N I T I O N   _______________________________
@@ -262,6 +263,36 @@ int32_t esp_data_receive(char *msg, size_t len, uint32_t timeout)
 	return esp_hardware_receive_block(msg, len, timeout);
 }
 
+
+
+
+
+
+/**
+* This function send raw data to module.
+*
+* Public function defined in esp_utils.h
+*/
+bool esp_msg_transmit(const char data[], size_t size, uint32_t timeout)
+{
+	return esp_hardware_transmit_block(data, size);
+}
+
+/**
+* This function receive data from chip.
+*
+* Public function defined in esp_utils.h
+*/
+int32_t esp_msg_receive(char *msg, size_t* size, uint32_t timeout)
+{
+	return esp_hardware_receive(msg, size, timeout);
+}
+
+
+
+
+
+
 /**
 * This function check available selected pattern
 * in message.
@@ -273,27 +304,27 @@ bool esp_pattern_check(const char msg[], esp_pattern_list_t pattern)
 	return (strstr(msg, ESP_Patterns[pattern]) != NULL) ? true : false;
 }
 
-/**
-* This function return pointer to answer buffer.
-*
-* Public function defined in esp_utils.h
-*/
-char* esp_alloc_answer_buffer(void)
-{
-	memset(answer,0,sizeof(answer));
-	return answer;
-}
+// /**
+// * This function return pointer to answer buffer.
+// *
+// * Public function defined in esp_utils.h
+// */
+// char* esp_alloc_answer_buffer(void)
+// {
+// 	memset(answer,0,sizeof(answer));
+// 	return answer;
+// }
 
-/**
-* This function return pointer to param buffer.
-*
-* Public function defined in esp_utils.h
-*/
-char* esp_alloc_param_buffer(void)
-{
-	memset(param,0,sizeof(param));
-	return param;
-}
+// /**
+// * This function return pointer to param buffer.
+// *
+// * Public function defined in esp_utils.h
+// */
+// char* esp_alloc_param_buffer(void)
+// {
+// 	memset(param,0,sizeof(param));
+// 	return param;
+// }
 
 /**
 * This function compare AT versions.

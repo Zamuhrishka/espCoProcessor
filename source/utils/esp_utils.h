@@ -13,11 +13,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 //_____ C O N F I G S  ________________________________________________________
-//! Max size of buffer for answer store
-#define ESP_ANSWER_BUFF_SIZE							200
+// //! Max size of buffer for answer store
+// #define ESP_ANSWER_BUFF_SIZE							200
 
-//! Max size of buffer for param for AT command store
-#define ESP_PARAM_BUFF_SIZE								200
+// //! Max size of buffer for param for AT command store
+// #define ESP_PARAM_BUFF_SIZE								200
 //_____ M A C R O S ___________________________________________________________
 //! Convert num into char
 #define CONVER_TO_CHAR(_num_)                          ((char)((_num_) + 0x30))
@@ -239,23 +239,23 @@ int32_t esp_data_receive(char *msg, size_t len, uint32_t timeout);
 */
 bool esp_pattern_check(const char msg[], esp_pattern_list_t pattern);
 
-/**
-* @brief 	This function return pointer to answer buffer.
-*
-* @param	none.
-*
-* @return 	pointer to answer buffer.
-*/
-char* esp_alloc_answer_buffer(void);
+// /**
+// * @brief 	This function return pointer to answer buffer.
+// *
+// * @param	none.
+// *
+// * @return 	pointer to answer buffer.
+// */
+// char* esp_alloc_answer_buffer(void);
 
-/**
-* @brief 	This function return pointer to param buffer.
-*
-* @param	none.
-*
-* @return 	pointer to param buffer.
-*/
-char* esp_alloc_param_buffer(void);
+// /**
+// * @brief 	This function return pointer to param buffer.
+// *
+// * @param	none.
+// *
+// * @return 	pointer to param buffer.
+// */
+// char* esp_alloc_param_buffer(void);
 
 /**
 * @brief 	This function compare two AT commands sets versions.

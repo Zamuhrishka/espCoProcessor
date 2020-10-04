@@ -112,7 +112,7 @@ typedef struct
 	esp_wpin_t enable;															///< Enable/disable wake up pin
 	uint8_t trigger_gpio;														///< Sets the GPIO to wake ESP8266 up; range of value: [0, 15].
 	esp_wlevel_t trigger_level;													///< Trigger level for wake up pin
-	uint8_t awake_gpio;															///< Set a GPIO as a flag of ESP8266’s being awoken form Light-sleep
+	uint8_t awake_gpio;															///< Set a GPIO as a flag of ESP8266ï¿½s being awoken form Light-sleep
 	esp_awlevel_t awake_level;													///< Level of pin after the wake up process
 }	esp_wgpio_t;
 //! @}
@@ -129,7 +129,7 @@ typedef struct
 *
 * @return 	true/false.
 */
-bool esp_test(uint32_t timeout);
+esp_status_t esp_test(uint32_t timeout);
 
 /**
 * @brief 	This function used used to restart the module.

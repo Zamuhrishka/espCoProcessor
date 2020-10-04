@@ -20,7 +20,7 @@
 //! @{
 typedef enum
 {
-	ESP_PORT_NO_ERR			=		(0),
+	ESP_PORT_PASS			=		(0),
 	ESP_PORT_TIMEOUT_ERR	=		(-1),
 	ESP_PORT_SIZE_ERR		=		(-2),
 } 	esp_port_status_t;

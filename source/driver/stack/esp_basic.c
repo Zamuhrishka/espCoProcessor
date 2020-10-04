@@ -17,6 +17,7 @@
 #include "slre.h"
 #include "convert.h"
 #include "esp_utils.h"
+#include "esp_mm.h"
 //_____ C O N F I G S  ________________________________________________________
 // If unit testing is enabled override assert with mock_assert().
 #if defined(UNIT_TESTING)
@@ -37,27 +38,25 @@ extern void mock_assert(const int result, const char* const expression,
 *
 * Public function defined in esp_basic.h
 */
-bool esp_test(uint32_t timeout)
+esp_status_t esp_test(uint32_t timeout)
 {
 	char cmd[] = "AT\r\n";
-	size_t len = ESP_ANSWER_BUFF_SIZE;
+	size_t len = 0;
 	char* pAnswer = esp_alloc_answer_buffer();
 
-	if(NULL == pAnswer)
-	{
-		assert(false);
-		return false;
+	if(NULL == pAnswer)	{
+		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_data_transmit(cmd, sizeof(cmd), 0) == false) {
-		return false;
+	if(esp_msg_transmit(cmd, sizeof(cmd), 0) == false) {
+		return ESP_TRANSMIT_ERR;
 	}
 
-	if(esp_data_receive(pAnswer, len, timeout) <= 0) {
-		return false;
+	if(esp_msg_receive(pAnswer, &len, timeout) <= 0) {
+		return ESP_RECEIVE_ERR;
 	}
 
-	return esp_pattern_check(pAnswer, PATTERN_OK);
+	return (esp_pattern_check(pAnswer, PATTERN_OK) ? ESP_PASS : ESP_PATTERN_ERR);
 }
 
 /**
@@ -504,5 +503,3 @@ bool esp_basic_receive_handle(char *msg, size_t size)
 {
 	return false;
 }
-
-

@@ -288,7 +288,7 @@ bool esp_harware_init(void)
 	queue_reg_mem_alloc_cb(malloc);
 	queue_reg_mem_free_cb(free);
 
-	esp_hwrx_queue = queue_create(200, sizeof(char));
+	esp_hwrx_queue = queue_create(ESP_DRV_BUFFER_SIZE, sizeof(char));
 	if(esp_hwrx_queue == NULL) {
 		return false;
 	}
@@ -369,7 +369,7 @@ int32_t esp_hardware_receive_block(char *msg, size_t len, uint32_t timeout)
 			 }
 			 else
 			 {
-				 return (int32_t)ESP_PORT_NO_ERR;
+				 return (int32_t)ESP_PORT_PASS;
 			 }
 		 }
 	}
@@ -394,6 +394,56 @@ int32_t esp_hardware_receive_block(char *msg, size_t len, uint32_t timeout)
 	return size;
 }
 
+//\warning Potential error situation when size of msg buffer is less then count of
+// received message
+esp_port_status_t esp_hardware_receive(char *msg, size_t* len, uint32_t timeout)
+{
+	bool _is_recv_message = false;
+	uint32_t irq_state = 0;
+	uint32_t _timeout = HAL_GetTick() + timeout;
+
+	while(!_is_recv_message)
+	{
+		irq_state = critical_section_start();
+		_is_recv_message = is_recv_message;
+		critical_section_end(irq_state);
+
+		if(HAL_GetTick() > _timeout)
+		{
+			if(timeout != 0)
+			{
+				ESP_PORT_ERROR("[ESP_PORT]: Timeout error!\r\n");
+				return ESP_PORT_TIMEOUT_ERR;
+			}
+			else
+			{
+				return ESP_PORT_PASS;
+			}
+		}
+	}
+
+	irq_state = critical_section_start();
+	is_recv_message = false;
+	critical_section_end(irq_state);
+
+	size_t size = queue_size(esp_hwrx_queue);
+
+	for(size_t i = 0; i < size; i++)
+	{
+		if(queue_denqueue(esp_hwrx_queue, &msg[i])) {
+			*len++;
+		}
+	}
+
+	ESP_PORT_DEBUG_PARAM("[ESP_PORT]: <--- %d, %s\r\n", size, msg);
+
+	return ESP_PORT_PASS;
+}
+
+
+
+
+
 /**
 * This function is interrupt handler for received
 * data throw UART
@@ -404,14 +454,16 @@ void esp_hardware_receive_irq(void)
 {
 	if(esp_uart_test_irq())
 	{
-		size_t size = ESP_DRV_BUFFER_SIZE - esp_uart_dma_get_nbm();
+		size_t len = esp_uart_dma_get_nbm();
+		size_t size = (len <= ESP_DRV_BUFFER_SIZE) ?
+					(ESP_DRV_BUFFER_SIZE - len) :
+					ESP_DRV_BUFFER_SIZE;
 
-		for(size_t i = 0; i < size; i++)
-		{
-			if(!queue_is_full(esp_hwrx_queue))
-			{
-				queue_enqueue(esp_hwrx_queue, &esp_hardware_buffer[i]);
-			}
+		len = queue_free_space(esp_hwrx_queue);
+		size = (size > len) ? len : size;
+
+		for(size_t i = 0; i < size; i++) {
+			queue_enqueue(esp_hwrx_queue, &esp_hardware_buffer[i]);
 		}
 
 		is_recv_message = true;
