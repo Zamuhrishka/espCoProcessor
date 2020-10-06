@@ -16,8 +16,7 @@
 #include "esp_drv.h"
 #include "slre.h"
 #include "convert.h"
-#include "esp_utils.h"
-#include "esp_mm.h"
+#include "esp_at.h"
 //_____ C O N F I G S  ________________________________________________________
 // If unit testing is enabled override assert with mock_assert().
 #if defined(UNIT_TESTING)
@@ -48,7 +47,7 @@ esp_status_t esp_test(uint32_t timeout)
 		return ESP_MEM_ALLOC_ERR;
 	}
 
-	if(esp_msg_transmit(cmd, sizeof(cmd), 0) == false) {
+	if(esp_cmd_transmit(cmd, sizeof(cmd), 0) == false) {
 		return ESP_TRANSMIT_ERR;
 	}
 
