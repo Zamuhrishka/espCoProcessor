@@ -1,50 +1,33 @@
 /********************************************************************************
 *
-* @file    		esp_utils.h
-* @author  		Kovalchuk Alexander
-* @email  		roux@yandex.ru
+* @file    		esp_at_cmd.h
+* @author  		Kovalchuk Alexander (roux@yandex.ru)
 * @brief		This file contains the some support function.
 *
 ********************************************************************************/
 #pragma once
 //_____ I N C L U D E S _______________________________________________________
-#include <esp_drv.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdint.h>
+
+#include "esp_port.h"
 //_____ C O N F I G S  ________________________________________________________
-// //! Max size of buffer for answer store
-// #define ESP_ANSWER_BUFF_SIZE							200
+//! Max size of buffer for answer store
+#define ESP_ANSWER_BUFF_SIZE                             200u
 
-// //! Max size of buffer for param for AT command store
-// #define ESP_PARAM_BUFF_SIZE								200
+#if ESP_ANSWER_BUFF_SIZE < ESP_DRV_BUFFER_SIZE
+	#warning "Value of ESP_ANSWER_BUFF_SIZE is less then ESP_DRV_BUFFER_SIZE!\
+			 This can be source of error. Please increase ESP_ANSWER_BUFF_SIZE."
+#endif
+
+//! Max size of buffer for param for AT command store
+#define ESP_PARAM_BUFF_SIZE                              200u
+
+//! Max size of transmit buffer for AT command
+#define ESP_AT_CMD_TXBUF_SIZE                            200u
 //_____ M A C R O S ___________________________________________________________
-//! Convert num into char
-#define CONVER_TO_CHAR(_num_)                          ((char)((_num_) + 0x30))
-
-//! Convert char into num
-#define CONVER_TO_NUMBER(_char_)                       ((uint8_t)((_char_) - 0x30))
 //_____ D E F I N I T I O N ___________________________________________________
-//!@brief ESP8266 AT command version struct
-//! @{
-typedef struct
-{
-	uint8_t major;
-	uint8_t minor;
-	uint8_t patch[2];
-}	esp_at_version_t;
-//! @}
-
-//!@brief ESP8266 SDK version struct
-//! @{
-typedef struct
-{
-	uint8_t major;
-	uint8_t minor;
-	uint8_t patch;
-}	esp_sdk_version_t;
-//! @}
-
 //!@brief ESP8266 AT commands ID`s list
 //! @{
 enum esp_at_cmd_list_t
@@ -173,8 +156,6 @@ typedef enum
 	PATTERN_SEND_ACK,
 	PATTERN_TRANSPARENT_DISABLE,
 	PATTERN_PASSIVE_RECEIVE,
-
-
 	PATTERN_UNDEF,
 } 	esp_pattern_list_t;
 //! @}
@@ -205,30 +186,6 @@ bool esp_get_at_payload(uint8_t cmd, char* src, uint8_t *payload);
 bool esp_cmd_transmit(uint8_t cmd, const char data[], size_t size);
 
 /**
-* @brief 	This function send raw data to chip.
-*
-* @warning  This is blocking function!
-*
-* @param[in] data data if needed.
-* @param[in] size size of data.
-* @param[in] timeout timeout in msec for waiting answer from chip.
-* @return 	true/false.
-*/
-bool esp_data_transmit(const char data[], size_t size, uint32_t timeout);
-
-/**
-* @brief 	This function receive data from chip.
-*
-* @note  This is not blocking function!
-*
-* @param[in] msg buffer for saved received answer.
-* @param[in] len size of received answer.
-* @return 	true/false.
-*/
-//bool esp_data_receive(char *msg, size_t len, uint32_t timeout);
-int32_t esp_data_receive(char *msg, size_t len, uint32_t timeout);
-
-/**
 * @brief 	This function check available selected pattern
 * 			in message.
 *
@@ -239,76 +196,6 @@ int32_t esp_data_receive(char *msg, size_t len, uint32_t timeout);
 */
 bool esp_pattern_check(const char msg[], esp_pattern_list_t pattern);
 
-// /**
-// * @brief 	This function return pointer to answer buffer.
-// *
-// * @param	none.
-// *
-// * @return 	pointer to answer buffer.
-// */
-// char* esp_alloc_answer_buffer(void);
+char* esp_alloc_answer_buffer(void);
 
-// /**
-// * @brief 	This function return pointer to param buffer.
-// *
-// * @param	none.
-// *
-// * @return 	pointer to param buffer.
-// */
-// char* esp_alloc_param_buffer(void);
-
-/**
-* @brief 	This function compare two AT commands sets versions.
-*
-* @param[in] at1 first AT commands set version.
-* @param[in] at2 second AT commands set version.
-*
-* @return
-* <ul>
-* <li> <b>1 - if at1 > at2</b>
-* <li> <b>-1 - if at1 < at2</b>
-* <li> <b>0 - if at1 = at2</b>
-* </ul>
-*/
-int8_t esp_at_version_compare(const esp_at_version_t *at1, const esp_at_version_t *at2);
-
-/**
-* @brief 	This function compare two SDK versions.
-*
-* @param[in] sdk1 first SDK version.
-* @param[in] sdk2 second SDK version.
-*
-* @return
-* <ul>
-* <li> <b>1 - if sdk1 > sdk2</b>
-* <li> <b>-1 - if sdk1 < sdk2</b>
-* <li> <b>0 - if sdk1 = sdk2</b>
-* </ul>
-*/
-int8_t esp_sdk_version_compare(const esp_sdk_version_t *sdk1, const esp_sdk_version_t *sdk2);
-
-/**
-* @brief 	This function convert AT version to string.
-*
-* @param[in] at AT commands set version.
-* @param[out] str AT commands set version string.
-*
-* @note str param must ending with '/0'.
-* 		Size of str must be at least 16 bytes.
-*
-* @return true/false
-*/
-bool esp_at_version_to_string(const esp_at_version_t *at, char *str);
-
-/**
-* @brief 	This function convert SDK versions to string.
-*
-* @param[in] sdk SDK version.
-* @param[out] str SDK version string.
-*
-* @note str param must ending with '/0'.
-* 		Size of str must be at least 16 bytes.
-*
-* @return true/false
-*/
-bool esp_sdk_version_to_string(const esp_sdk_version_t *sdk, char *str);
+char* esp_alloc_param_buffer(void);
