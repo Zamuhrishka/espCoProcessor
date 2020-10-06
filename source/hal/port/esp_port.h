@@ -88,4 +88,4 @@ int32_t esp_hardware_receive_block(char *msg, size_t len, uint32_t timeout);
 *
 * @return 	none.
 */
-void esp_hardware_receive_irq(void);
+// void esp_hardware_receive_irq(void);
